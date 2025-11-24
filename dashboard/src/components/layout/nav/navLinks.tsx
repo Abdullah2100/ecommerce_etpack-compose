@@ -1,18 +1,16 @@
-import { useState } from "react";
-import homIcon from "../../../../public/images/home.svg";
-import logo from "../../../../public/images/logo.svg";
-import myInfo from "../../../../public/images/user.svg";
-import varient from "../../../../public/images/products-major.svg";
-import users from "../../../../public/images/users.svg";
-import store from "../../../../public/images/store.svg";
-import category from "../../../../public/images/category.svg";
-import order from "../../../../public/images/order.svg";
+const homIcon = "/images/home.svg";
+const logo = "/images/logo.svg";
+const myInfo = "/images/user.svg";
+const users = "/images/users.svg";
+const store = "/images/store.svg";
+const category = "/images/category.svg";
+const order = "/images/order.svg";
+const product = "/images/product.svg";
+const varient = "/images/products-major.svg";
 
-import product from "../../../../public/images/product.svg";
 import Image from "next/image";
 import NavItem, { iNavItemProp } from "@/components/ui/nav/navItem";
 import useOrder from "@/stores/order";
-import { changeStoreStatus } from "@/lib/api/store";
 
 export interface iNavProp {
   selectedIndex: number;
@@ -20,87 +18,76 @@ export interface iNavProp {
   isNewOrder: boolean;
 }
 
-const NavLink = ({ selectedIndex, setSelectedIndex, isNewOrder }: iNavProp) => {
-  const { getOrdersAt,changeHasNewOrderStatus,getOrderStatus } = useOrder();
+export const useNavItems = ({ selectedIndex, setSelectedIndex, isNewOrder }: iNavProp) => {
+  const { getOrdersAt, changeHasNewOrderStatus, getOrderStatus } = useOrder();
 
   const navLinkItems: iNavItemProp[] = [
     {
-      name: "Home",
+      name: "Analytics",
       icon: homIcon,
       currentIndex: 0,
       selectedIndex: selectedIndex,
       isNewOrder: false,
-      chageSelectedIndex: setSelectedIndex,
+      chageSelectedIndex: setSelectedIndex
     },
     {
-      name: "My Info",
-      icon: myInfo,
+      name: "Products",
+      icon: product,
       currentIndex: 1,
       selectedIndex: selectedIndex,
       isNewOrder: false,
-      chageSelectedIndex: setSelectedIndex,
+      chageSelectedIndex: setSelectedIndex
     },
     {
-      name: "Variant",
-      icon: varient,
+      name: "Orders",
+      icon: order,
       currentIndex: 2,
       selectedIndex: selectedIndex,
-      isNewOrder: false,
-      chageSelectedIndex: setSelectedIndex,
+      isNewOrder: isNewOrder,
+      chageSelectedIndex: (index) => {
+        changeHasNewOrderStatus(false)
+        setSelectedIndex(index)
+      }
     },
-
-    {
-      name: "Category",
-      icon: category,
-      currentIndex: 3,
-      selectedIndex: selectedIndex,
-      isNewOrder: false,
-
-      chageSelectedIndex: setSelectedIndex,
-    },
-
     {
       name: "Users",
       icon: users,
-      currentIndex: 4,
+      currentIndex: 3,
       selectedIndex: selectedIndex,
       isNewOrder: false,
-
-      chageSelectedIndex: setSelectedIndex,
+      chageSelectedIndex: setSelectedIndex
     },
     {
       name: "Stores",
       icon: store,
+      currentIndex: 4,
+      selectedIndex: selectedIndex,
+      isNewOrder: false,
+      chageSelectedIndex: setSelectedIndex
+    },
+    {
+      name: "Category",
+      icon: category,
       currentIndex: 5,
       selectedIndex: selectedIndex,
       isNewOrder: false,
-      chageSelectedIndex: setSelectedIndex,
+      chageSelectedIndex: setSelectedIndex
     },
-
     {
-      name: "Product",
-      icon: product,
+      name: "My Info",
+      icon: myInfo,
       currentIndex: 6,
       selectedIndex: selectedIndex,
       isNewOrder: false,
-
-      chageSelectedIndex: setSelectedIndex,
-    },
-
-    {
-      name: "Orders",
-      icon: order,
-      currentIndex: 7,
-      isNewOrder: isNewOrder,
-      selectedIndex: selectedIndex,
-      chageSelectedIndex: (index) => {
-        setSelectedIndex(index);
-        getOrdersAt(1);
-        getOrderStatus();
-        changeHasNewOrderStatus(false)
-      },
+      chageSelectedIndex: setSelectedIndex
     },
   ];
+
+  return navLinkItems;
+}
+
+const NavLink = (props: iNavProp) => {
+  const navLinkItems = useNavItems(props);
 
   return (
     <div className="sticky top-0">

@@ -59,4 +59,15 @@ namespace api.Presentation.dto
         public Guid Id { get; set; }
         public string Status { get; set; } 
     }
+
+
+    public class AnalayesOrderDto
+    {
+        public decimal? totalFee { get; set; }
+        public long? totalOrders { get; set; }
+        public decimal? totalDeliveryDistance {get;set;}
+        public long? usersCount { get; set; }
+        public long? productCount { get; set; }
+    }
+    
 }

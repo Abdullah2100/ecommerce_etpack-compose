@@ -29,6 +29,7 @@ public class UnitOfWork : IUnitOfWork
         UserRepository = new UserRepository( _context );
         VarientRepository =  new VarientRepository( _context );
         OrderProductVariantRepository = new OrderProductVariantRepository(context);
+        AnalyseRepository = new AnalyseRepository( _context );
 
     }
     
@@ -68,4 +69,5 @@ public class UnitOfWork : IUnitOfWork
     public ISubCategoryRepository SubCategoryRepository { get; }
     public IUserRepository UserRepository { get; }
     public IVarientRepository VarientRepository { get; }
+    public IAnalyseRepository AnalyseRepository { get; }
 }

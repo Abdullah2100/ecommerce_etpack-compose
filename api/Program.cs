@@ -30,22 +30,7 @@ builder.Services.AddTransient<IAuthenticationService, AuthenticationServices>();
 
 
 
-//respoitory 
-builder.Services.AddTransient<IUserRepository, UserRepository>();
-builder.Services.AddTransient<IReseatePasswordRepository, ReseatPasswordRepository>();
-builder.Services.AddTransient<IAddressRepository, AddressRepository>();
-builder.Services.AddTransient<IStoreRepository, StoreRepository>();
-builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
-builder.Services.AddTransient<ISubCategoryRepository, SubCategoryRepository>();
-builder.Services.AddTransient<IVarientRepository, VarientRepository>();
-builder.Services.AddTransient<IBannerRepository, BannerRepository>();
-builder.Services.AddTransient<IGeneralSettingRepository, GeneralSettingRepository>();
-builder.Services.AddTransient<IDeliveryRepository, DeliveryRepository>();
-builder.Services.AddTransient<IProductRepository, ProductRepository>();
-builder.Services.AddTransient<IProductVariantRepository, ProductVariantRepository>();
-builder.Services.AddTransient<IProductImageRepository, ProductImageRepository>();
-builder.Services.AddTransient<IOrderRepository, OrderRepository>();
-builder.Services.AddTransient<IOrderItemRepository, OrderItemRepository>();
+
 
 
 //ifile serverice
@@ -69,6 +54,7 @@ builder.Services.AddTransient<IProductServices, ProductServices>();
 builder.Services.AddTransient<IOrderServices, OrderServices>();
 builder.Services.AddTransient<IOrderItemServices, OrderItemServices>();
 builder.Services.AddTransient<IRefreshTokenServices, RefreshTokenServices>();
+builder.Services.AddTransient<IAnalyseServices, AnalyseServices>();
 
 
  var fireBaseConfig = Path.Combine(

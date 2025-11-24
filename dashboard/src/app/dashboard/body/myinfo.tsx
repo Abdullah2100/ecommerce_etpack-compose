@@ -1,169 +1,132 @@
-import { Label } from "@/components/ui/label"
-import * as reactQuery from "@tanstack/react-query";
-import InputWithTitle from "@/components/ui/input/inputWithTitle";
+import { mockMyInfo } from "@/lib/mockData";
+import { useState, useRef } from "react";
 import Image from "next/image";
-import { useRef, useState } from "react";
-import { iUserUpdateInfoDto } from "../../../dto/response/iUserUpdateInfoDto";
-import edite from '../../../../public/images/edite.svg'
-import user from '../../../../public/images/user.svg'
 import { Button } from "@/components/ui/button";
-import { toast } from "react-toastify";
-import { replaceUrlWithNewUrl } from "@/util/globle";
-import { getMyInfo, updateUser } from "@/lib/api/user";
+import edite from '../../../../public/images/edite.svg';
 
 const MyInfoPage = () => {
-    const { data, refetch } = reactQuery.useQuery({
-        queryKey: ['myinfo'],
-        queryFn: () => getMyInfo()
-    })
-
-
-    const [userUpdate, setUserUpdate] = useState<iUserUpdateInfoDto>({
-        name:  "",
-        phone:  "",
-        newPassword: '',
+    const data = mockMyInfo;
+    const [userUpdate, setUserUpdate] = useState({
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
         password: '',
-        thumbnail: undefined,
-
-    })
+        newPassword: '',
+        thumbnail: undefined
+    });
+    const [previewImage, setPreviewImage] = useState(data.thumbnail);
     const inputRef = useRef<HTMLInputElement>(null);
 
-
-    const updateUserData = reactQuery.useMutation(
-        {
-            mutationFn: (userData: iUserUpdateInfoDto) => updateUser(userData),
-            onError: (e) => {
-                toast.error(e.message)
-            },
-            onSuccess: () => {
-                refetch();
-                toast.success("تم التعديل بنجاح");
-                setUserUpdate(prev => ({
-                    ...prev, 
-                    thumbnail: undefined,
-                    password: '',
-                    newPassword: ''
-                }));
-            }
-        }
-    )
     return (
-        <div className="flex flex-col w-[350px]">
-            <Label className="text-5xl">My Info</Label>
+        <div className="flex flex-col w-full h-full space-y-8 p-6 animate-in fade-in duration-500 max-w-2xl mx-auto">
+            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-teal-600 bg-clip-text text-transparent text-center">
+                My Profile
+            </h1>
 
-            <div className="h-10" />
-
-            <input type="file" hidden ref={inputRef}
-                onChange={(e) => {
-                    e.preventDefault()
-                    if (e.target.files && e.target.files.length > 0) {
-                        const file = e.target.files?.[0];
-                        if (file != undefined) {
-                            setUserUpdate((data) => ({ ...data, thumbnail: file }))
-                        }
-                    }
-                }}
-            />
-
-            <div className="w-45 relative overflow-hidden">
-
-                <div>
-                    <div
-                        className="h-40 w-40 rounded-[100px] border-2 flex justify-center items-center"
-                    >
-                        {data?.thumbnail != undefined && data?.thumbnail?.length > 0 ? <Image
-                            className="h-30 w-30  rounded-full"
-                            src={replaceUrlWithNewUrl(data.thumbnail)}
-                            alt="userimage"
-                            fill={true}
-                        />
-                            :
-                            <img
-                                className="h-30 w-30  rounded-full"
-                                src={userUpdate.thumbnail != undefined ? URL.createObjectURL(userUpdate.thumbnail) : replaceUrlWithNewUrl(user.src)}
-                                alt="userimage"
-                            />
-                        }
-                    </div>
-                    <Image
-                        onClick={() => {
-                            inputRef.current?.click();
+            <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-8 shadow-sm space-y-8">
+                {/* Profile Image Section */}
+                <div className="flex flex-col items-center space-y-4">
+                    <input
+                        type="file"
+                        hidden
+                        ref={inputRef}
+                        onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                                const file = e.target.files[0];
+                                setPreviewImage(URL.createObjectURL(file));
+                            }
                         }}
-                        className="h-10 w-10 absolute bottom-0 right-5 bg-white cursor-pointer"
-                        src={edite}
-                        alt="userimage"
-                        fill={false}
                     />
+
+                    <div className="relative group cursor-pointer" onClick={() => inputRef.current?.click()}>
+                        <div className="h-32 w-32 rounded-full border-4 border-background shadow-xl overflow-hidden ring-2 ring-border group-hover:ring-primary transition-all">
+                            <Image
+                                src={previewImage}
+                                alt="Profile"
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
+                        <div className="absolute bottom-0 right-0 p-2 bg-primary rounded-full shadow-lg transform translate-x-1/4 translate-y-1/4 border-4 border-background">
+                            <div className="relative h-4 w-4">
+                                <Image src={edite} alt="Edit" fill className="object-contain brightness-0 invert" />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="text-center">
+                        <h2 className="text-xl font-semibold">{data.name}</h2>
+                        <p className="text-sm text-muted-foreground">{data.email}</p>
+                    </div>
                 </div>
 
+                {/* Form Section */}
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Full Name</label>
+                            <input
+                                type="text"
+                                className="flex h-10 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                value={userUpdate.name}
+                                onChange={(e) => setUserUpdate({ ...userUpdate, name: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Phone Number</label>
+                            <input
+                                type="tel"
+                                className="flex h-10 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                value={userUpdate.phone}
+                                onChange={(e) => setUserUpdate({ ...userUpdate, phone: e.target.value })}
+                            />
+                        </div>
+                    </div>
 
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Email Address</label>
+                        <input
+                            type="email"
+                            disabled
+                            className="flex h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed"
+                            value={userUpdate.email}
+                        />
+                    </div>
 
+                    <div className="border-t border-border/50 pt-6 space-y-6">
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Security</h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Current Password</label>
+                                <input
+                                    type="password"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    placeholder="••••••••"
+                                    value={userUpdate.password}
+                                    onChange={(e) => setUserUpdate({ ...userUpdate, password: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">New Password</label>
+                                <input
+                                    type="password"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    placeholder="••••••••"
+                                    value={userUpdate.newPassword}
+                                    onChange={(e) => setUserUpdate({ ...userUpdate, newPassword: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="pt-4">
+                        <Button className="w-full shadow-lg shadow-primary/25 h-11 text-base">
+                            Save Changes
+                        </Button>
+                    </div>
+                </div>
             </div>
-            <div className="h-5" />
-            <InputWithTitle
-                title='Name'
-                name={userUpdate?.name ?? ""}
-                placeHolder={data?.name??'Enter Your Name'}
-                onchange={
-                    (value: string) => { setUserUpdate((data) => ({ ...data, name: value })) }
-                }
-            />
-            <div className="h-2" />
-
-
-            <InputWithTitle
-                title='Phone'
-                name={userUpdate?.phone ?? ""}
-                placeHolder={data?.phone??'Enter Your Phone'}
-                onchange={
-                    (value: string) => { setUserUpdate((data) => ({ ...data, phone: value ?? undefined })) }
-
-                }
-            />
-            <div className="h-2" />
-
-            <InputWithTitle
-                title='Email'
-                name={data?.email ?? ""}
-                placeHolder='Enter Your Email'
-            />
-            <div className="h-2" />
-
-            <InputWithTitle
-                title='Current Password'
-                name={userUpdate?.password ?? ""}
-                placeHolder='Enter   Current Password'
-                onchange={
-                    (value: string) => { setUserUpdate((data) => ({ ...data, password: value ?? undefined })) }
-                }
-            />
-            <div className="h-2" />
-
-            <InputWithTitle
-                title='New Password'
-                name={userUpdate?.newPassword}
-                placeHolder='Enter   New Password'
-                onchange={
-                    (value: string) => { setUserUpdate((data) => ({ ...data, newPassword: value ?? undefined })) }
-                }
-            />
-            <div className="h-5" />
-
-            <Button
-                disabled={updateUserData.isPending}
-                className='bg-[#452CE8]'
-                onClick={() => updateUserData.mutate({
-                    name: userUpdate.name !== data?.name ? userUpdate.name : data?.name ?? "",
-                    phone: userUpdate.phone !== data?.phone ? userUpdate.phone : data?.phone ?? "",
-                    password:  userUpdate.password ,
-                    newPassword: userUpdate.newPassword,
-                    thumbnail: userUpdate.thumbnail
-                })}
-            >
-                update info
-            </Button>
-
         </div>
-    )
+    );
 }
-export default MyInfoPage
+export default MyInfoPage;

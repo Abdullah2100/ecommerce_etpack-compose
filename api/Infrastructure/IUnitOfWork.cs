@@ -20,6 +20,8 @@ public interface IUnitOfWork:IDisposable
     public IUserRepository UserRepository { get; }
     public IVarientRepository VarientRepository { get; }
     public IOrderProductVariant OrderProductVariantRepository { get; } 
+    public IAnalyseRepository AnalyseRepository { get; }
+
 
     public Task<int> SaveChanges();
 }

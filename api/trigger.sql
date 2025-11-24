@@ -1,7 +1,41 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
    
+       
 insert into "GeneralSettings"("Id","Name","Value","CreatedAt") 
 VALUES(uuid_generate_v4(),'one_kilo_price',150,CURRENT_TIMESTAMP);
+
+CREATE OR REPLACE FUNCTION get_monthly_stats()
+RETURNS TABLE(
+  totalFee numeric,
+  totalOrder bigint,
+  totalDeliveryDistance numeric,
+  userCount bigint,
+  productCount bigint
+) AS $$
+BEGIN
+RETURN QUERY
+    WITH monthRevenue AS
+       (SELECT SUM("TotalPrice") AS totalFee,
+       count(*)as totoalOrder,
+       SUM("DistanceFee") as totalDeliveryDistance
+       FROM "Orders" 
+       WHERE "Status"=5 AND "CreatedAt" = DATE_TRUNC('month',NOW()))
+    ,toalUser AS 
+        (SELECT COUNT(*) AS userCount
+        FROM "Users"),
+    toalProduct AS (
+        SELECT COUNT(*) as toalProduct 
+        FROM "Products")
+    SELECT
+    COALESCE(mr.totalFee,0.0) as totalFee,
+    COALESCE(mr.totoalOrder,0) as totoalOrder,
+    COALESCE(mr.totalDeliveryDistance,0.0) as totalDeliveryDistance,
+    COALESCE(tu.userCount,0) as userCount,
+    COALESCE(tp.toalProduct,0) as toalProduct
+FROM monthRevenue mr, toalUser tu, toalProduct tp;
+END;
+$$ LANGUAGE plpgsql;
+
 
 --triger for prevent deleted the OrderItems  after it is complated received
 CREATE OR REPLACE FUNCTION Fun_prevent_delete_orderItem()

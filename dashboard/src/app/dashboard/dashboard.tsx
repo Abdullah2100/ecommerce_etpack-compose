@@ -1,18 +1,19 @@
 "use client";
 
-import NavLink from "@/components/layout/nav/navLinks";
 import { useEffect, useRef, useState } from "react";
 import useOrder from "@/stores/order";
 import * as signalR from "@microsoft/signalr";
-import { HubConnection } from "@microsoft/signalr";
 import Main from "@/app/dashboard/body/main";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Header } from "@/components/layout/Header";
 
-interface DashboardContentProps {}
+interface DashboardContentProps { }
 
-const Dashboard = ({}: DashboardContentProps) => {
+const Dashboard = ({ }: DashboardContentProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { isHasNewOrder, changeHasNewOrderStatus } = useOrder();
-    const [connection, setConnection] = useState<signalR.HubConnection | undefined>(undefined);
+  const [connection, setConnection] = useState<signalR.HubConnection | undefined>(undefined);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const play = () => {
@@ -25,7 +26,7 @@ const Dashboard = ({}: DashboardContentProps) => {
 
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`http://localhost:5077/orderHub`)
+      .withUrl(process.env.NEXT_PUBLIC_ORDER_HUB_URL || "")
       .withAutomaticReconnect()
       .build();
 
@@ -40,12 +41,12 @@ const Dashboard = ({}: DashboardContentProps) => {
         .catch((e) => console.log("Connection failed: ", e));
 
       connection.on("createdOrder", (user, message) => {
-          console.log(`orders ${JSON.stringify(user)}`)
+        console.log(`orders ${JSON.stringify(user)}`)
         changeHasNewOrderStatus(true);
         play();
       });
 
-     }
+    }
   }, [connection]);
 
   useEffect(() => {
@@ -53,17 +54,28 @@ const Dashboard = ({}: DashboardContentProps) => {
   }, [selectedIndex]);
 
   return (
-    <div className="flex flex-row px-10">
+    <div className="flex min-h-screen bg-background text-foreground">
       <audio ref={audioRef} src="/sound/mixkit-bell-notification-933.wav" />
-      <div className="w-auto ">
-        <NavLink
-          selectedIndex={selectedIndex}
-          setSelectedIndex={setSelectedIndex}
-          isNewOrder={isHasNewOrder}
-        />
-      </div>
-      <div className="flex-grow overflow-y-auto">
-        <Main currentPage={selectedIndex} />
+
+      {/* Sidebar */}
+      <Sidebar
+        selectedIndex={selectedIndex}
+        setSelectedIndex={(index) => {
+          setSelectedIndex(index);
+          setIsSidebarOpen(false); // Close sidebar on selection (mobile)
+        }}
+        isNewOrder={isHasNewOrder}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+
+      {/* Main Content Area */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Header onMenuClick={() => setIsSidebarOpen(true)} />
+
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
+          <Main currentPage={selectedIndex} />
+        </main>
       </div>
     </div>
   );

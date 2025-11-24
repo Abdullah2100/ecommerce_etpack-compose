@@ -1,12 +1,12 @@
 'use client';
 
 import MyInfoPage from "./myinfo"
-import Variant from "./varient"
 import Users from "./users"
 import Stores from "./stores"
 import Category from "./category"
 import Product from "./product"
 import Order from "./order"
+import Analytics from "./analytics"
 
 interface iMainPageProp {
     currentPage: number
@@ -15,23 +15,23 @@ interface iMainPageProp {
 const Main = ({ currentPage }: iMainPageProp) => {
 
 
-    return (<div className="py-10 px-5  w-auto" >
+    return (<div className="py-10 px-5  w-full h-full" >
         {(() => {
             switch (currentPage) {
+                case 0:
+                    return <Analytics />;
                 case 1:
-                    return <MyInfoPage />;
-                case 2:
-                    return <Variant />
-                case 3:
-                    return <Category />
-                case 4:
-                    return <Users />
-                case 5:
-                    return <Stores />
-                case 6:
                     return <Product />
-                case 7:
-                    return <Order/>
+                case 2:
+                    return <Order />
+                case 3:
+                    return <Users />
+                case 4:
+                    return <Stores />
+                case 5:
+                    return <Category />
+                case 6:
+                    return <MyInfoPage />;
                 default:
                     return null;
             }

@@ -258,7 +258,8 @@ fun AccountPage(
                             DropdownMenu(
                                 containerColor = Color.White,
                                 expanded = isExpandLanguage.value,
-                                onDismissRequest = { isExpandLanguage.value = false }) {
+                                onDismissRequest = { isExpandLanguage.value = false })
+                            {
                                 listOf<String>(
                                     "العربية",
                                     "English"

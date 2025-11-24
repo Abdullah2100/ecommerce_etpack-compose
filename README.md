@@ -79,3 +79,5 @@ The `ecommerce-delivery-man` directory contains the Android application for deli
 ### Technology Stack
 
 - Kotlin
+- c#
+- React

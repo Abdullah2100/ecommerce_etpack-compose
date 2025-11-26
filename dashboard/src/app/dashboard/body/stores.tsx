@@ -1,13 +1,55 @@
 import { mockStores } from "@/lib/mockData";
-import { useState } from "react";
-import { ToastContainer } from "react-toastify";
+import { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { changeStoreStatus, getStoreAtPage, getStorePages } from "@/lib/api/store";
 
 const Stores = () => {
-    const [currentPage, setCurrentPage] = useState(1);
-    const data = mockStores;
-    const storePages = 1;
+    // const [currentPage, setCurrentPage] = useState(1);
+    // const data = mockStores;
+    // const storePages = 1;
+
+    const queryClient = useQueryClient()
+    const { data: storePages } = useQuery({
+        queryKey: ['storePages'],
+        queryFn: () => getStorePages()
+
+    })
+
+    const [currnetPage, setCurrentPage] = useState(1);
+
+    const { data, refetch, isPlaceholderData } = useQuery({
+        queryKey: ['stores', currnetPage],
+        queryFn: () => getStoreAtPage(currnetPage)
+
+    })
+
+    useEffect(() => {
+        queryClient.prefetchQuery({
+            queryKey: ['stores', currnetPage],
+            queryFn: () => getStoreAtPage(currnetPage),
+        })
+    }, [currnetPage])
+
+
+    const changeStoreStatusFun = useMutation(
+        {
+            mutationFn: (store_id: string) => changeStoreStatus(store_id),
+            onError: (e) => {
+                toast.error(e.message)
+            },
+            onSuccess: (res) => {
+                refetch()
+                toast.success("تم التعديل بنجاح")
+
+
+            }
+        }
+    )
+
+    if (data == null) return;
 
     return (
         <div className="flex flex-col w-full h-full space-y-6 p-6 animate-in fade-in duration-500">
@@ -70,12 +112,14 @@ const Stores = () => {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <Button
+
                                             variant={!value.isBlocked ? "destructive" : "default"}
                                             size="sm"
                                             className="h-7 text-xs"
                                             onClick={() => {
                                                 // Mock toggle logic
                                                 console.log(`Toggle store ${value.id}`);
+                                                changeStoreStatusFun.mutate(value.id)
                                             }}
                                         >
                                             {!value.isBlocked ? 'Block' : 'Unblock'}
@@ -90,13 +134,13 @@ const Stores = () => {
 
             <div className="flex justify-center mt-6">
                 <div className="flex gap-2">
-                    {Array.from({ length: storePages }, (_, i) => (
+                    {Array.from({ length: storePages ?? 1 }, (_, i) => (
                         <button
                             key={i}
                             onClick={() => setCurrentPage(i + 1)}
                             className={`
                                 h-9 w-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200
-                                ${currentPage === i + 1
+                                ${currnetPage === i + 1
                                     ? 'bg-primary text-primary-foreground shadow-md scale-105'
                                     : 'bg-card border border-border hover:bg-accent hover:text-accent-foreground'
                                 }

@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace api.domain.entity;
 
+
 public class User
 {
     [Key] public Guid Id { get; set; }

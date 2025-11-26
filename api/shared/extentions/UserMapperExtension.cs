@@ -120,7 +120,7 @@ public static class UserMapperExtension
             }
             default:
             {
-                if (user.Role == 1 && user.IsBlocked)
+                if (user is { Role: 1, IsBlocked: true })
                 {
                     return new Result<AuthDto?>
                     (

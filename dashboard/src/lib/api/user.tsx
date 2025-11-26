@@ -3,7 +3,7 @@ import axios from "axios";
 import { iUserInfo } from "../../model/iUserInfo";
 import { iUserUpdateInfoDto } from "../../dto/response/iUserUpdateInfoDto";
 
- async function getMyInfo() {
+async function getMyInfo() {
     const url = process.env.NEXT_PUBLIC_PASE_URL + '/api/User/me';
     console.log(`funtion is Called ${url}`)
     try {
@@ -31,7 +31,7 @@ import { iUserUpdateInfoDto } from "../../dto/response/iUserUpdateInfoDto";
 }
 
 
-  async function updateUser({
+async function updateUser({
     name,
     newPassword,
     password,
@@ -39,29 +39,33 @@ import { iUserUpdateInfoDto } from "../../dto/response/iUserUpdateInfoDto";
     thumbnail
 }: iUserUpdateInfoDto) {
     const userData = new FormData()
-    if (name.trim().length > 1)
+    if (name != null && name?.trim().length > 1)
         userData.append("name", name)
-    if (phone.trim().length > 1)
+    if (phone != null && phone.trim().length > 1)
         userData.append("phone", phone)
-    if (thumbnail != undefined)
+    if (thumbnail != null && thumbnail != undefined)
         userData.append("thumbnail", thumbnail)
-    if (password != undefined)
+    if (password != null && password != undefined)
         userData.append("password", password)
-    if (newPassword != undefined)
+    if (newPassword != null && newPassword != undefined)
         userData.append("newPassword", newPassword)
 
     const url = process.env.NEXT_PUBLIC_PASE_URL + '/api/User';
     console.log(`funtion is Called ${url}`)
     try {
-        return await axios.put(url,
+        const result = await axios.put(url,
             userData, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
 
             }
+        })
+        if (result.status == 200) {
+            return true
+        } else {
+            return false
         }
 
-        )
     } catch (error) {
         // Extract meaningful error message
         let errorMessage = "An unexpected error occurred";
@@ -79,7 +83,7 @@ import { iUserUpdateInfoDto } from "../../dto/response/iUserUpdateInfoDto";
 
 }
 
-  async function getUserPages() {
+async function getUserPages() {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/User/pages`;
     console.log(`funtion is Called ${url}`)
     try {
@@ -106,7 +110,7 @@ import { iUserUpdateInfoDto } from "../../dto/response/iUserUpdateInfoDto";
 
 }
 
-  async function getUserAtPage(pageNumber: number) {
+async function getUserAtPage(pageNumber: number) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/User/${pageNumber}`;
     console.log(`funtion is Called ${url}`)
     try {
@@ -133,7 +137,7 @@ import { iUserUpdateInfoDto } from "../../dto/response/iUserUpdateInfoDto";
 
 }
 
- async function changeUserStatus(userId: string) {
+async function changeUserStatus(userId: string) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/User/status/${userId}`;
     console.log(`funtion is Called ${url}`)
     console.log(`token ${userId}`)

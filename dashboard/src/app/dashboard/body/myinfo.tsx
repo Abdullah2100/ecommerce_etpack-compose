@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import edite from '../../../../public/images/edite.svg';
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { iUserUpdateInfoDto } from "@/dto/response/iUserUpdateInfoDto";
-import { getMyInfo, updateUser } from "@/lib/api/user";
+import { getMyInfo, updateUser as updateFun } from "@/lib/api/user";
 import { toast } from "react-toastify";
 import { convertImageToValidUrl } from "@/lib/utils/imageUtils";
 
@@ -17,34 +17,38 @@ const MyInfoPage = () => {
         queryFn: () => getMyInfo()
     })
 
-    const [userUpdate, setUserUpdate] = useState({
-        name: data?.name ?? "",
-        phone: data?.phone ?? "",
-        email: data?.email ?? "",
-        password: '',
-        newPassword: '',
-        thumbnail: data?.thumbnail ?? undefined
+    const [userUpdate, setUserUpdate] = useState<iUserUpdateInfoDto>({
+        name: data?.name ?? null,
+        phone: data?.phone ?? null,
+        password: null,
+        newPassword: null,
+        thumbnail: null
     });
+    const [thumbnailFile, setThumbnailFile] = useState<File | undefined>(undefined);
     const [previewImage, setPreviewImage] = useState(convertImageToValidUrl(data?.thumbnail ?? ""));
 
     const inputRef = useRef<HTMLInputElement>(null);
 
 
+
+
     const updateUserData = useMutation(
         {
-            mutationFn: (userData: iUserUpdateInfoDto) => updateUser(userData),
+            mutationFn: (userData: iUserUpdateInfoDto) => updateFun(userData),
             onError: (e) => {
+                console.error('Mutation onError triggered:', e)
                 toast.error(e.message)
             },
-            onSuccess: () => {
-                refetch();
+            onSuccess: (data) => {
+                console.log('Mutation onSuccess triggered, result:', data)
                 toast.success("تم التعديل بنجاح");
+                refetch();
                 setUserUpdate(prev => ({
                     ...prev,
-                    thumbnail: undefined,
                     password: '',
                     newPassword: ''
                 }));
+                setThumbnailFile(undefined);
             }
         }
     )
@@ -102,7 +106,7 @@ const MyInfoPage = () => {
                             <input
                                 type="text"
                                 className="flex h-10 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                value={userUpdate.name}
+                                value={userUpdate.name ?? data.name}
                                 onChange={(e) => setUserUpdate({ ...userUpdate, name: e.target.value })}
                             />
                         </div>
@@ -111,7 +115,7 @@ const MyInfoPage = () => {
                             <input
                                 type="tel"
                                 className="flex h-10 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                value={userUpdate.phone}
+                                value={userUpdate.phone ?? data.phone}
                                 onChange={(e) => setUserUpdate({ ...userUpdate, phone: e.target.value })}
                             />
                         </div>
@@ -123,13 +127,19 @@ const MyInfoPage = () => {
                             type="email"
                             disabled
                             className="flex h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed"
-                            value={userUpdate.email}
+                            value={data.email}
                         />
                     </div>
 
                     <div className="pt-4">
                         <Button
-                            // onClick={ }
+                            onClick={() => {
+                                const updateData: iUserUpdateInfoDto = {
+                                    ...userUpdate,
+                                    ...(thumbnailFile && { thumbnail: thumbnailFile })
+                                };
+                                updateUserData.mutate(updateData);
+                            }}
                             className="w-full shadow-lg shadow-primary/25 h-11 text-base">
                             Save Changes
                         </Button>

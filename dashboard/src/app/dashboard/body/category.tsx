@@ -1,6 +1,6 @@
 import { mockCategories } from "@/lib/mockData";
 import { useState, useRef } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import edite from "../../../../public/images/edite.svg";
@@ -206,7 +206,6 @@ const Category = () => {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };

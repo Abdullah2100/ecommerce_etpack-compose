@@ -6,6 +6,7 @@ import * as signalR from "@microsoft/signalr";
 import Main from "@/app/dashboard/body/main";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
+import { ToastContainer } from "react-toastify";
 
 interface DashboardContentProps { }
 
@@ -77,6 +78,7 @@ const Dashboard = ({ }: DashboardContentProps) => {
           <Main currentPage={selectedIndex} />
         </main>
       </div>
+      <ToastContainer />
     </div>
   );
 };

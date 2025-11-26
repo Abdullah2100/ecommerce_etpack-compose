@@ -340,7 +340,7 @@ public class UserService(
 
         if (userDto.Password != null && userDto.NewPassword != null)
         {
-            if (user.Password != ClsUtil.HashingText(userDto.Password))
+            if (user?.Password != ClsUtil.HashingText(userDto.Password))
             {
                 return new Result<UserInfoDto?>
                 (

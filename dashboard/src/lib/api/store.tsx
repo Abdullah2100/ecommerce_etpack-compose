@@ -4,7 +4,7 @@ import iStore from "../../model/iStore";
 
 
 
-  async function getStorePages() {
+async function getStorePages() {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Store/pages`;
     console.log(`funtion is Called ${url}`)
     try {
@@ -31,7 +31,7 @@ import iStore from "../../model/iStore";
 
 }
 
-  async function getStoreAtPage(pageNumber: number) {
+async function getStoreAtPage(pageNumber: number) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Store/all/${pageNumber}`;
     console.log(`funtion is Called ${url}`)
     try {
@@ -58,12 +58,12 @@ import iStore from "../../model/iStore";
 
 }
 
-  async function changeStoreStatus(store_id: string) {
+async function changeStoreStatus(store_id: string) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Store/status/${store_id}`;
     console.log(`funtion is Called ${url}`)
     console.log(`token ${store_id}`)
     try {
-        const result = await axios.put(url, undefined, {
+        const result = await axios.patch(url, undefined, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             },

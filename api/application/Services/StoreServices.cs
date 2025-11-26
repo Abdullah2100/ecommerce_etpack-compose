@@ -401,7 +401,7 @@ public class StoreServices(
                 data: null,
                 message: "store not found",
                 isSuccessful: false,
-                statusCode: 404
+                statusCode: 400
             );
 
         isValide = store.user.IsValidateFunc(true);
@@ -412,12 +412,22 @@ public class StoreServices(
                 isSuccessful: false,
                 data: null,
                 message: "only Admin can update his store Status",
-                statusCode: 404
+                statusCode: 400
             );
         }
 
 
         store.IsBlock = !store.IsBlock;
+
+        if (store.IsBlock == true && user?.Role == 0)
+        {
+            return new Result<bool?>(
+                isSuccessful: false,
+                data: null,
+                message: "this store is belong to admin you could not block it ",
+                statusCode: 400
+            ); 
+        }
         
         unitOfWork.StoreRepository.Update(store);
         int result = await unitOfWork.SaveChanges();

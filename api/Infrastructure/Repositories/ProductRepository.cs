@@ -87,6 +87,11 @@ public class ProductRepository(
             .FirstOrDefaultAsync(p => p.Id == id && p.StoreId == storeId);
     }
 
+    public async Task<int?> GetProductPages()
+    {
+        return await context.Products.CountAsync();
+    }
+
     public async Task<Product?> GetProductByUser(Guid id, Guid userId)
     {
         return await context.Products
@@ -141,7 +146,7 @@ public class ProductRepository(
 
     public async Task<IEnumerable<Product>> GetProducts(int page, int length)
     {
-        return await context.Products
+        var products= await context.Products
             .AsNoTracking()
             .Include(pro=>pro.Store)
             .Include(pro => pro.SubCategory)
@@ -152,6 +157,15 @@ public class ProductRepository(
             .Take(length)
             .OrderDescending()
             .ToListAsync();
+        for (int i = 0; i < products.Count; i++)
+        {
+           products[i].ProductVariants = await context.ProductVariants
+               .Include(pr=>pr.Variant)
+               .Where(p => p.ProductId == products[i].Id).ToListAsync();
+        }
+
+        return products;
+
     }
 
     public async Task<IEnumerable<Product>> GetProductsByCategory(

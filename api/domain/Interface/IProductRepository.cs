@@ -7,6 +7,7 @@ public interface IProductRepository:IRepository<Product>
     
     Task<Product?> GetProduct(Guid id);
     Task<Product?> GetProduct(Guid id, Guid storeId);
+    Task<int?> GetProductPages();
     Task<Product?> GetProductByUser(Guid id,Guid userId);
     
     Task<IEnumerable<Product>> GetProducts(Guid storeId,Guid subCategoryId,int pageNum,int pageSize);

@@ -133,6 +133,39 @@ public class ProductController(
     }
 
 
+    [HttpGet("pages")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetProductsPagesNum()
+    {
+        
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = authenticationService.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+
+        Guid adminId = Guid.Empty;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
+        {
+            adminId = outId;
+        }
+
+        if (adminId == Guid.Empty)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var result = await productServices.GetProductsPagesForAdmin(adminId,25);
+
+        return result.IsSuccessful switch
+        {
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
+    }
+
+
+    
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -204,6 +237,8 @@ public class ProductController(
         };
     }
 
+    
+    
     [HttpDelete("{storeId:guid}/{productId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

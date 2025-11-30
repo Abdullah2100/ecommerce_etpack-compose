@@ -4,6 +4,7 @@ import Image from "next/image";
 import { getProductPages, getProductAtPage } from "@/lib/api/product";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { convertImageToValidUrl } from "@/lib/utils/imageUtils";
+import iProductResponseDto from "@/dto/response/iProductResponseDto";
 
 const Product = () => {
     const queryClient = useQueryClient()
@@ -14,6 +15,8 @@ const Product = () => {
     })
 
     const [currnetPage, setCurrentPage] = useState(1);
+    const [selectedProduct, setSelectedProduct] = useState<iProductResponseDto | null>(null);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     const { data, refetch, isPlaceholderData } = useQuery({
         queryKey: ['products', currnetPage],
@@ -28,9 +31,53 @@ const Product = () => {
         })
     }, [currnetPage])
 
+    // Keyboard navigation for dialog
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (!selectedProduct) return;
+
+            if (e.key === 'Escape') {
+                closeImageDialog();
+            } else if (e.key === 'ArrowLeft') {
+                prevImage();
+            } else if (e.key === 'ArrowRight') {
+                nextImage();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedProduct, currentImageIndex]);
+
+    const openImageDialog = (product: iProductResponseDto) => {
+        setSelectedProduct(product);
+        setCurrentImageIndex(0);
+    };
+
+    const closeImageDialog = () => {
+        setSelectedProduct(null);
+        setCurrentImageIndex(0);
+    };
+
+    const getProductImages = (product: iProductResponseDto) => {
+        return product.productImages;
+    };
+
+    const nextImage = () => {
+        if (selectedProduct) {
+            const images = getProductImages(selectedProduct);
+            setCurrentImageIndex((prev) => (prev + 1) % images.length);
+        }
+    };
+
+    const prevImage = () => {
+        if (selectedProduct) {
+            const images = getProductImages(selectedProduct);
+            setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+        }
+    };
 
     if (data === undefined) return;
-    console.log("data is ", JSON.stringify(data))
 
 
     return (
@@ -69,7 +116,10 @@ const Product = () => {
                                                     className="object-cover"
                                                 />
                                             </div>
-                                            <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+                                            <span
+                                                onClick={() => openImageDialog(value)}
+                                                className="font-medium text-foreground group-hover:text-primary transition-colors cursor-pointer hover:underline"
+                                            >
                                                 {value.name}
                                             </span>
                                         </div>
@@ -91,15 +141,37 @@ const Product = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="flex flex-wrap gap-1">
-                                            {value.productVarients !== undefined && value.productVarients.length > 0 ? (
-                                                value.productVarients.map((group, gIndex) => (
-                                                    group.map((variant, vIndex) => (
-                                                        <span key={`${gIndex}-${vIndex}`} className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-muted text-muted-foreground border border-border/50">
-                                                            {variant.name}
-                                                        </span>
+                                        <div className="flex flex-col gap-2">
+                                            {value.productVariants !== undefined && value.productVariants.length > 0 ? (
+                                                value.productVariants
+                                                    .filter(group => group && group.length > 0) // Only show groups with items
+                                                    .map((group, gIndex) => (
+                                                        <div key={gIndex} className="flex items-start gap-2">
+                                                            {/* Display the variant type name prominently */}
+                                                            <span className="text-xs font-bold text-foreground bg-secondary/50 px-2 py-1 rounded-md min-w-[60px] text-center">
+                                                                {group[0].variantName}
+                                                            </span>
+                                                            {/* Display all values in this variant group */}
+                                                            <div className="flex flex-wrap gap-1.5 items-center">
+                                                                {group.map((variant, vIndex) => (
+                                                                    variant.variantName === "Color" ?
+                                                                        <div
+                                                                            key={`${gIndex}-${vIndex}`}
+                                                                            style={{ backgroundColor: variant.name }}
+                                                                            className="w-6 h-6 rounded-md border-1 border-border/50 shadow-sm"
+                                                                            title={variant.name}
+                                                                        />
+                                                                        :
+                                                                        <span
+                                                                            key={`${gIndex}-${vIndex}`}
+                                                                            className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-accent text-accent-foreground border border-border/50"
+                                                                        >
+                                                                            {variant.name}
+                                                                        </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
                                                     ))
-                                                ))
                                             ) : (
                                                 <span className="text-muted-foreground text-xs italic">No variants</span>
                                             )}
@@ -117,9 +189,10 @@ const Product = () => {
                 </div>
             </div>
 
+            {/* pagination number */}
             <div className="flex justify-center mt-6">
                 <div className="flex gap-2">
-                    {Array.from({ length: userPages ?? 0 }, (_, i) => (
+                    {Array.from({ length: Number(userPages) || 0 }, (_, i) => (
                         <button
                             key={i}
                             onClick={() => setCurrentPage(i + 1)}
@@ -136,6 +209,73 @@ const Product = () => {
                     ))}
                 </div>
             </div>
+
+            {/* Image Dialog Modal */}
+            {selectedProduct && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
+                    onClick={closeImageDialog}
+                >
+                    <div
+                        className="relative w-full max-w-4xl mx-4 bg-card rounded-2xl shadow-2xl border border-border/50 overflow-hidden animate-in zoom-in-95 duration-300"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+
+                        <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/30">
+                            <button
+                                onClick={closeImageDialog}
+                                className="h-10 w-10 flex items-center justify-center rounded-lg hover:bg-muted transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="relative bg-muted/20 p-8">
+                            <div className="relative w-full aspect-square max-h-[500px] rounded-xl overflow-hidden bg-background border border-border/50 shadow-lg">
+                                <Image
+                                    src={convertImageToValidUrl(getProductImages(selectedProduct)[currentImageIndex])}
+                                    alt={`${selectedProduct.name} - Image ${currentImageIndex + 1}`}
+                                    fill
+                                    className="object-contain"
+                                    priority
+                                />
+                            </div>
+
+                            {/* Navigation Arrows - Only show if multiple images */}
+                            {getProductImages(selectedProduct).length > 1 && (
+                                <>
+                                    <button
+                                        onClick={prevImage}
+                                        className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 flex items-center justify-center rounded-full bg-background/90 border border-border/50 shadow-lg hover:bg-background hover:scale-110 transition-all duration-200"
+                                    >
+                                        <svg
+                                            style={{ color: currentImageIndex > 0 ? 'black' : 'gray' }}
+                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="15 18 9 12 15 6"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button
+                                        onClick={nextImage}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 flex items-center justify-center rounded-full bg-background/90 border border-border/50 shadow-lg hover:bg-background hover:scale-110 transition-all duration-200"
+                                    >
+                                        <svg
+                                            style={{ color: currentImageIndex + 1 < selectedProduct.productImages.length ? 'black' : 'gray' }}
+                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="9 18 15 12 9 6"></polyline>
+                                        </svg>
+                                    </button>
+                                </>
+                            )}
+                        </div>
+
+
+                    </div>
+                </div>
+            )}
+
             <ToastContainer />
         </div>
     );

@@ -1,5 +1,5 @@
-export default interface iProductVarientDto{
-    name:string,
-    percentage:number,
-    varientName:string
+export default interface iProductVarientDto {
+    name: string,
+    percentage: number,
+    variantName: string
 }

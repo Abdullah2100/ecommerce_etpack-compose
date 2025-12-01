@@ -64,7 +64,7 @@ namespace api.Presentation.dto
         public string Subcategory { get; set; }
         public string StoreName { get; set; }
         public decimal Price { get; set; }
-        public List<List<AdminProductVarientDto>>? ProductVariants { get; set; }
+        public List<List<AdminProductVariantDto>>? ProductVariants { get; set; }
         public List<string> ProductImages { get; set; } 
     }
 }

@@ -132,10 +132,19 @@ public class ProductServices(
         }
 
 
-        List<AdminProductsDto> products = (await unitOfWork.ProductRepository
+        List<AdminProductsDto?> products = (await unitOfWork.ProductRepository
                 .GetProducts(pageNum, pageSize))
             .Select((de) => de.ToAdminDto(config.getKey("url_file")))
             .ToList();
+        
+        if(products.Count == 0 || products.Any(x=>x==null))
+            return new Result<List<AdminProductsDto>>
+            (
+                data: new List<AdminProductsDto>(),
+                message: "No products found",
+                isSuccessful: false,
+                statusCode: 400
+            );
 
         return new Result<List<AdminProductsDto>>(
             data: products,
@@ -145,7 +154,47 @@ public class ProductServices(
         );
     }
 
-/*
+    public async Task<Result<int>> GetProductsPagesForAdmin(Guid adminId,int length=25)
+    {
+        User? admin = await unitOfWork.UserRepository.GetUser(adminId);
+        
+        var isValidate = admin.IsValidateFunc(false, true);
+
+        if (isValidate is not null)
+        {
+            return new Result<int>
+            (
+                data: 0,
+                message: isValidate.Message,
+                isSuccessful: false,
+                statusCode: isValidate.StatusCode
+            );
+        }
+
+
+        var productPageLength= await unitOfWork.ProductRepository.GetProductPages();
+        
+        if (productPageLength is  null)
+        {
+            return new Result<int>
+            (
+                data: 0,
+                message: "no pages found",
+                isSuccessful: false,
+                statusCode:404 
+            );
+        } 
+        
+        return new Result<int>
+        (
+            data:(int) Math.Ceiling((double)productPageLength / length),
+            message: "",
+            isSuccessful: true,
+            statusCode:200 
+        ); 
+    }
+
+    /*
     private async Task<Result<ProductDto?>?> isUserNotExistOrNotHasStore(Guid userId)
     {
         User? user = await unitOfWork.UserRepository

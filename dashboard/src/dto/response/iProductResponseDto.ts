@@ -8,5 +8,6 @@ export default interface iProductResponseDto {
     subcategory: string,
     storeName: string,
     price: number,
-    productVarients: iProductVarientDto[][] | undefined
+    productVariants: iProductVarientDto[][] | undefined
+    productImages: string[]
 }

@@ -26,23 +26,35 @@ public static class ProductMapperExtension
         };
     }
  
-    public static AdminProductsDto ToAdminDto(this Product product,string url)
+    public static AdminProductsDto? ToAdminDto(this Product product,string url)
     {
-        return new AdminProductsDto 
+        try
         {
-            Id = product.Id,
-            Name = product.Name,
-            Description = product.Description,
-            Price = product.Price,
-            Thumbnail = string.IsNullOrEmpty(product.Thumbnail) ? "" : url+ product.Thumbnail,
-            StoreName = product.Store.Name,
-            ProductImages =product?.ProductImages==null?new List<string>():product.ProductImages.Select(pi=>url+pi.Path).ToList(),
-            ProductVariants = product?.ProductVariants==null?new List<List<AdminProductVarientDto>>(): product.ProductVariants
-                .GroupBy(pv => pv.VariantId, (key, g)
-                    => g.Select(pvH=>pvH.ToAdminProductVarientDto()).ToList()
-                ).ToList(),
-            Subcategory =  product.SubCategory.Name,
-        };
+            return new AdminProductsDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Thumbnail = string.IsNullOrEmpty(product.Thumbnail) ? "" : url + product.Thumbnail,
+                StoreName = product.Store.Name,
+                ProductImages = product?.ProductImages == null
+                    ? new List<string>()
+                    : product.ProductImages.Select(pi => url + pi.Path).ToList(),
+                ProductVariants = product?.ProductVariants == null || product.ProductVariants.Count == 0
+                    ? new List<List<AdminProductVariantDto>>()
+                    : product.ProductVariants
+                        .GroupBy(pv => pv.VariantId, (key, g)
+                            => g.Select(pvH => pvH.ToAdminProductVariantDto()).ToList()
+                        ).ToList(),
+                Subcategory = product?.SubCategory?.Name ?? "",
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return new AdminProductsDto();
+        }
     }
 
     public static bool IsEmpty(this UpdateProductDto dto)

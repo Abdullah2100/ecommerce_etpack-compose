@@ -28,6 +28,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<GeneralSetting> GeneralSettings { get; set; }
 
     public DbSet<Delivery> Deliveries { get; set; }
+    public DbSet<Currency> Payments { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

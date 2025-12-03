@@ -12,6 +12,7 @@ obj/
 *.dbmdl
 *.pfx
 *.publishsettings
+
 *.ncrunchsolution
 *.ncrunchproject
 Migrations/

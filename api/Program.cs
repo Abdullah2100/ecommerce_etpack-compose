@@ -56,6 +56,8 @@ builder.Services.AddTransient<IOrderServices, OrderServices>();
 builder.Services.AddTransient<IOrderItemServices, OrderItemServices>();
 builder.Services.AddTransient<IRefreshTokenServices, RefreshTokenServices>();
 builder.Services.AddTransient<IAnalyseServices, AnalyseServices>();
+builder.Services.AddTransient<ICurrencyServices, CurrencyServices>();
+
 
 
  var fireBaseConfig = Path.Combine(

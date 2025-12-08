@@ -3,7 +3,7 @@ using api.domain.entity;
 using api.Infrastructure;
 using api.Presentation.dto;
 using api.application.Result;
-using api.shared.extentions;
+using api.shared.mapper;
 using api.util;
 using ecommerc_dotnet.midleware.ConfigImplment;
 
@@ -33,6 +33,9 @@ public class CurrencyServices(IUnitOfWork unitOfWork) : ICurrencyServices
             Id = ClsUtil.GenerateGuid(),
             CreatedAt = DateTime.Now,
             Symbol = currencyDto.Symbol,
+            Name = currencyDto.Name,
+            Value = currencyDto.Value,
+            IsDefault =currencyDto.IsDefault 
         };
         unitOfWork.CurrencyRepository.Add(currency);
         var result = await unitOfWork.SaveChanges();
@@ -47,7 +50,7 @@ public class CurrencyServices(IUnitOfWork unitOfWork) : ICurrencyServices
             );
         }
 
-        CurrencyDto? paymentToDto = currency.toPaymentDto();
+        CurrencyDto? paymentToDto = currency.ToPaymentDto();
         return new Result<CurrencyDto?>(
             isSuccessful: true,
             data: paymentToDto,
@@ -104,7 +107,7 @@ public class CurrencyServices(IUnitOfWork unitOfWork) : ICurrencyServices
 
         return new Result<CurrencyDto?>(
             isSuccessful: true,
-            data: currency.toPaymentDto(),
+            data: currency.ToPaymentDto(),
             message: "",
             statusCode: 200
         );
@@ -152,7 +155,6 @@ public class CurrencyServices(IUnitOfWork unitOfWork) : ICurrencyServices
         }
 
 
-        CurrencyDto? paymentToDto = payment.toPaymentDto();
         return new Result<bool>(
             isSuccessful: true,
             data: true,
@@ -165,9 +167,9 @@ public class CurrencyServices(IUnitOfWork unitOfWork) : ICurrencyServices
              
         var payments = await unitOfWork.CurrencyRepository.GetAll(pageNum, pageSize);
         
-        var paymentToDto = payments.Select(payment => payment.toPaymentDto()).ToList();
+        var paymentToDto = payments.Select(payment => payment.ToPaymentDto()).ToList();
         return new Result<List<CurrencyDto>>(
-            isSuccessful: false,
+            isSuccessful: true,
             data: paymentToDto,
             message:"", 
             statusCode:200 

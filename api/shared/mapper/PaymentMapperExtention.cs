@@ -1,12 +1,11 @@
-using api.application.Interface.payment;
 using api.domain.entity;
 using api.Presentation.dto;
 
-namespace api.shared.extentions;
+namespace api.shared.mapper;
 
-public static class PaymentMapperExtention
+public static class PaymentMapperExtension
 {
-    public static CurrencyDto toPaymentDto(this Currency currency)
+    public static CurrencyDto ToPaymentDto(this Currency currency)
     {
         return new CurrencyDto
         {
@@ -14,8 +13,9 @@ public static class PaymentMapperExtention
             CreatedAt = currency.CreatedAt,
             UpdatedAt = currency.UpdatedAt,
             Name = currency.Name,
-            value= currency.Value,
-            image = currency.Symbol
+            Value= currency.Value,
+            Symbol = currency.Symbol,
+            IsDefault = currency.IsDefault
         };
     }
 }

@@ -5,8 +5,8 @@ namespace api.application.Interface.payment;
 public class StripePayment (IConfig config) :IPayment
 {
     
-    public Task<bool> IsValidPayment(string paymentId)
+    public async Task<bool> IsValidPayment(string paymentId)
     {
-        
+        return true;
     }
 }

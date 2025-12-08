@@ -48,7 +48,7 @@ public class CurrencyController(
         };
     }
 
-    [HttpPatch("")]
+    [HttpPut("")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -79,12 +79,12 @@ public class CurrencyController(
         };
     }
 
-    [HttpDelete("{variantId:guid}")]
+    [HttpDelete("{currencyId:guid}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeleteCurrency(Guid currencyID)
+    public async Task<IActionResult> DeleteCurrency(Guid currencyId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = authenticationService.GetPayloadFromToken("id",
@@ -102,7 +102,7 @@ public class CurrencyController(
         }
 
 
-        var result = await currencyServices.DeleteCurrency(adminId.Value, currencyID);
+        var result = await currencyServices.DeleteCurrency(adminId.Value, currencyId);
 
         return result.IsSuccessful switch
         {

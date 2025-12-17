@@ -249,7 +249,7 @@ public class UserService(
         var pageUserCount = userPages>0?(int)Math.Ceiling((double)userPages/pageLenght):0;
         return new Result<int?>(
             isSuccessful: true,
-            data: pageLenght,
+            data: pageUserCount,
             message:  "",
             statusCode: 200
         ); 

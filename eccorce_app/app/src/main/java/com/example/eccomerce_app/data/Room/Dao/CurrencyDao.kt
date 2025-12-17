@@ -13,7 +13,10 @@ interface CurrencyDao {
     @Query("Select * from Currency")
     fun getSavedCurrenciesAsFlow(): Flow<List<Currency>>
 
-    @Query("Select * from Currency where isSelected = 1")
+    @Query("Select * from Currency where isSelected or isDefault")
+    fun getSelectedCurrencyFlow():Flow<Currency?>
+
+    @Query("Select * from Currency where isSelected ")
     suspend fun getSelectedCurrency():Currency?
 
     @Query("Select * from Currency")

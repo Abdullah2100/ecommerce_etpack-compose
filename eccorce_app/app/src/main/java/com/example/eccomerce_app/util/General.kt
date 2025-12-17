@@ -13,6 +13,7 @@ import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.data.Room.Model.AuthModelEntity
+import com.example.eccomerce_app.data.Room.Model.Currency
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.number
@@ -79,6 +80,34 @@ object General {
 //        config.setLayoutDirection(locale)
 //
 //        context.resources.updateConfiguration(config, context.resources.displayMetrics)
+    }
+
+    fun convertPriceToAnotherCurrency(price: Double,productSymbol:String,selectedCurrency: Currency?,currencies:List<Currency>?): Double{
+        if(currencies.isNullOrEmpty())return price
+        if(selectedCurrency==null)return price
+
+        val productCurrency = currencies.firstOrNull{it->it.symbol==productSymbol}
+
+        return when  {
+         productCurrency!=selectedCurrency ->{
+                  when{
+                      selectedCurrency.isDefault ->{
+                          val changer = (price/productCurrency!!.value)
+                          changer
+                      }
+                      productCurrency!!.isDefault->{
+                          val changer = (price*selectedCurrency.value)
+                          changer
+                      }
+                      else ->{
+                          val defaultCurrency = currencies.firstOrNull{it->it.isDefault}
+                          val changer = (price/(defaultCurrency?.value?:1))*selectedCurrency.value
+                          changer
+                      }
+                  }
+          }
+        else-> price
+    }
     }
 
     fun Uri.toCustomFil(context: Context): File? {

@@ -13,7 +13,6 @@ namespace api.Presentation.controller;
 public class VariantController(
     IVariantServices variantServices,
     IAuthenticationService authenticationService
-
     ) : ControllerBase
 {
     

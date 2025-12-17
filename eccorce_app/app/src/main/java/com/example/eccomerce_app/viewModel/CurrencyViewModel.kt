@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import com.example.eccomerce_app.data.Room.Model.*
+import io.ktor.util.reflect.instanceOf
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
 class CurrencyViewModel(
     private val currencyRepository: CurrencyRepository,
@@ -21,8 +24,20 @@ class CurrencyViewModel(
     private val currencyDao: CurrencyDao
 ) : ViewModel() {
 
-    private val _currencies = MutableStateFlow<List<Currency>?>(null)
-    val currencies = _currencies.asStateFlow()
+
+
+
+    val selectedCurrency = currencyDao
+        .getSelectedCurrencyFlow()
+        .stateIn(scop,
+            started = SharingStarted.WhileSubscribed(2000L),
+            initialValue = null)
+
+    val currenciesList= currencyDao
+        .getSavedCurrenciesAsFlow()
+        .stateIn(scop,
+            started = SharingStarted.WhileSubscribed(2000L),
+            initialValue = null)
 
 
     val _coroutineException = CoroutineExceptionHandler { _, message ->
@@ -36,13 +51,8 @@ class CurrencyViewModel(
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     val data = result.data as List<CurrencyDto>
-                    _currencies.emit(null)
 
                     if (data.isEmpty()) {
-                        val currenies = currencyDao.getSavedCurrencies()
-                        if (!currenies.isNullOrEmpty()) {
-                            _currencies.emit(currenies)
-                        }
                         return@launch
                     }
 
@@ -59,8 +69,6 @@ class CurrencyViewModel(
                         )
                     }
                     currencyDao.addNewCurrency(currencyToDbModel)
-
-                    _currencies.emit(currencyToDbModel)
 
                 }
 

@@ -61,14 +61,18 @@ import com.example.e_commercompose.model.ProductVariant
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.eccomerce_app.util.General.convertPriceToAnotherCurrency
 import com.example.eccomerce_app.viewModel.CartViewModel
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.SubCategoryViewModel
 import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.eccomerce_app.viewModel.BannerViewModel
+import com.example.eccomerce_app.viewModel.CurrencyViewModel
+import com.example.eccomerce_app.viewModel.UserViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.core.context.startKoin
 import java.util.UUID
 
 
@@ -85,6 +89,9 @@ fun ProductDetail(
     subCategoryViewModel: SubCategoryViewModel,
     productViewModel: ProductViewModel,
     isCanNavigateToStore: Boolean,
+    userViewModel: UserViewModel,
+    currencyViewModel: CurrencyViewModel,
+
 ) {
 
     val context = LocalContext.current
@@ -99,7 +106,9 @@ fun ProductDetail(
     val products = productViewModel.products.collectAsState()
     val variants = variantViewModel.variants.collectAsState()
     val stores = storeViewModel.stores.collectAsState()
-
+    val myInfo = userViewModel.userInfo.collectAsState()
+    val defaultCurrency = currencyViewModel.selectedCurrency.collectAsState()
+    val currencies = currencyViewModel.currenciesList.collectAsState()
 
     val productData = products.value?.firstOrNull { it.id == productId }
     val storeData = stores.value?.firstOrNull { it.id == productData?.storeId }
@@ -213,7 +222,7 @@ fun ProductDetail(
             )
         },
         bottomBar = {
-//            if (isFromHome && (myInfo.value == null || (myInfo.value != null && myInfo.value?.store_id != productData?.store_id)))
+//            if (isFromHome && (myInfo.value == null || (myInfo.value != null && myInfo.value?.storeId != productData?.storeId)))
             BottomAppBar(
                 containerColor = Color.White,
                 modifier = Modifier.padding(horizontal = 15.dp)
@@ -229,7 +238,7 @@ fun ProductDetail(
                                 productId = productData!!.id,
                                 name = productData.name,
                                 thumbnail = productData.thumbnail,
-                                price = productData.price,
+                                price =convertPriceToAnotherCurrency(productData.price,productData.symbol,defaultCurrency.value,currencies.value),
                                 productVariants = selectedProductVariants.value,
                                 storeId = productData.storeId
                             )

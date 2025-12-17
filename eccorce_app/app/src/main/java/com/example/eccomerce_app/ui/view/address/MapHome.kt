@@ -361,17 +361,16 @@ fun MapHomeScreen(
                     isOpenSheet.value = false
                 },
                 sheetState = sheetState,
+                containerColor = Color.White
 
                 )
             {
-
                 Column(
                     modifier = Modifier
                         .padding(horizontal = 10.dp)
                         .fillMaxWidth()
                 )
                 {
-
                     TextInputWithTitle(
                         value = addressTitle,
                         title = stringResource(R.string.address_title),

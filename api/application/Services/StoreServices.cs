@@ -89,7 +89,7 @@ public class StoreServices(
             Name = store.Name,
             WallpaperImage = wallperper,
             SmallImage = smallImage,
-            IsBlock = user?.Role==0?true:false,
+            IsBlock = user?.Role != 0,
             UserId = userId,
             CreatedAt = DateTime.Now,
             UpdatedAt = null,

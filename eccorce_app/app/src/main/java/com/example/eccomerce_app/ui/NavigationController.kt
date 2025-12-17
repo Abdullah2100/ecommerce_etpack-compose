@@ -478,7 +478,8 @@ fun NavController(
                     bannerViewModel = bannerViewModel,
                     subCategoryViewModel = subCategoryViewModel,
                     productViewModel = productViewModel,
-                    isCanNavigateToStore = store.isCanNavigateToStore
+                    isCanNavigateToStore = store.isCanNavigateToStore,
+                    userViewModel = userViewModel
                 )
 
             }

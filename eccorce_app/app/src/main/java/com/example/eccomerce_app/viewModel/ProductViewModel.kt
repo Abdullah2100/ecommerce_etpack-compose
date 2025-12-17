@@ -12,6 +12,7 @@ import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.data.Room.Dao.CurrencyDao
 import com.example.eccomerce_app.data.repository.ProductRepository
+import com.example.eccomerce_app.util.General.convertPriceToAnotherCurrency
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,25 +58,16 @@ class ProductViewModel(
     private suspend fun convertProductCurrencyToSavedCurrency(): Boolean{
         val currencyList = currencyDao.getSavedCurrencies()
         if(!_products.value.isNullOrEmpty()&& currencyList.isNotEmpty()){
-           val defaultCurrency= currencyList.firstOrNull{it->it.isDefault}
             val targetCurrency = currencyList.firstOrNull{it-> it.isSelected }
 
             val productToNewCurrency = _products.value?.map { data->
-                if(data.symbol != defaultCurrency?.symbol) {
-                    val currentCurrency = currencyList.firstOrNull{it->it.symbol==data.symbol}
-                    if(currentCurrency!=null){
-                        val changer = (data.price/currentCurrency.value)*targetCurrency!!.value
-                        data.copy(price = changer,symbol = targetCurrency.symbol)
-                    }
-                    else {
-                        data
-                    }
-                }else if(data.symbol == defaultCurrency.symbol){
-                    val changer = (data.price)*targetCurrency!!.value
-                    data.copy(price = changer,symbol = targetCurrency.symbol)
-
-                }
-                else data
+                data.copy(
+                    price = convertPriceToAnotherCurrency(
+                        data.price,
+                        data.symbol,
+                        targetCurrency,
+                        currencyList),
+                    symbol = targetCurrency?.symbol?:data.symbol)
             }
 
             _products.emit(null)
@@ -93,22 +85,16 @@ class ProductViewModel(
         val currencyList = currencyDao.getSavedCurrencies()
         val targetCurrency = currencyList.firstOrNull{it-> it.isSelected }
         if(!products.isNullOrEmpty()&&targetCurrency!=null){
-            val defaultCurrency= currencyList.firstOrNull{it->it.id==0}
 
             val productToNewCurrency = products.map { data->
-                if(!data.symbol.equals(defaultCurrency?.symbol)) {
-                    val currentCurrency = currencyList.firstOrNull{it->it.symbol==data.symbol}
-                    if(currentCurrency!=null){
-                        val changer = (data.price/currentCurrency.value)*targetCurrency.value
-                        data.copy(price = changer,symbol = targetCurrency.symbol)
-                    } else {
-                        data
-                    }
-                }else if(data.symbol.equals(defaultCurrency?.symbol)){
-                    val changer = (data.price)*targetCurrency.value
-                    data.copy(price = changer,symbol = targetCurrency.symbol)
 
-                } else data
+                data.copy(price = convertPriceToAnotherCurrency(
+                    data.price,
+                    data.symbol,
+                    targetCurrency,
+                    currencyList),
+                    symbol = targetCurrency.symbol)
+
             }
 
             return productToNewCurrency

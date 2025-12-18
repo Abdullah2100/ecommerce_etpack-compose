@@ -106,5 +106,4 @@ vcs.xml
 local.properties
 
 google-services.json
-appsettings.Development.json
 appsettings.json

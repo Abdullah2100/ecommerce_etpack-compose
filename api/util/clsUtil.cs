@@ -33,6 +33,19 @@ namespace api.util
                 }
             }
         }
+        public static string RemoveAdditionalPath(string dir)
+        {
+            if (dir.Contains("http://72.60.232.89:5077/staticFiles"))
+            {
+                return dir.Replace("http://72.60.232.89:5077/staticFiles", "");
+            }else if (dir.Contains("http://localhost:5077/staticFiles"))
+            {
+                return dir.Replace("http://localhost:5077/staticFiles", "");
+
+            }
+            else
+                return dir;
+        }
 
 
         public static string HashingText(string? text)

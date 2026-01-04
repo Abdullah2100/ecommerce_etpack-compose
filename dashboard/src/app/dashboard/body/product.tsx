@@ -65,6 +65,8 @@ const Product = () => {
     const [deleteProductVariants, setDeleteProductVariant] = useState<IProductVariant[] | undefined>([]);
     const [currentVariant, setCurrentVariant] = useState<IVariant | undefined>(undefined);
 
+    const [deletedImage, setDeletedImage] = useState<string[]>([]);
+
 
     const { data: stores } = useQuery({
         queryKey: ['stores', debouncedStoreSearchTerm],
@@ -167,17 +169,23 @@ const Product = () => {
         });
 
         // Step 3: Handle files (do NOT add to productObj)
-        if (data.thumbnail && data.thumbnail instanceof File) {
+        if (data?.thumbnail && data?.thumbnail instanceof File) {
             formData.append('Thumbnail', data.thumbnail);
-        } else if (data.thumbnail?.[0] && data.thumbnail[0] instanceof File) {
+        } else if (data?.thumbnail && data?.thumbnail?.[0] && data?.thumbnail[0] instanceof File) {
             formData.append('Thumbnail', data.thumbnail[0]);
         }
 
-        if (data?.images && Array.isArray(data.images) && data.images.length > 0) {
+        if ( data?.images && Array.isArray(data?.images) && data?.images?.length > 0) {
             for (let i = 0; i < data.images.length; i++) {
                 if (data.images[i] instanceof File) {
                     formData.append('Images', data.images[i]);
                 }
+            }
+        }
+
+         if (deletedImage?.length>0  ) {
+            for (let i = 0; i < deletedImage.length; i++) {
+                    formData.append('Deletedimages', deletedImage[i]);
             }
         }
 
@@ -190,13 +198,7 @@ const Product = () => {
                     formData.append(`ProductVariants[${productVariantIndex}].Name`, variant.name!!.toString());
                     formData.append(`ProductVariants[${productVariantIndex}].Percentage`, variant.percentage!!.toString());
                 }
-                // else{
-                //     toast.error(`Please select variant: ${variants?.find(v => v.id === variant.variantId)?.name}`);
-                //   }
-                //     formData.append(`ProductVariants[${index}].VariantId`, variant.variantId!!.toString());
-                //     formData.append(`ProductVariants[${index}].Name`, variant.name!!.toString());
-                //     formData.append(`ProductVariants[${index}].Percentage`, variant.percentage!!.toString());
-
+             
             });
 
         if (deleteProductVariants?.length !== 0) {
@@ -248,8 +250,6 @@ const Product = () => {
         }
     };
 
-
-
     const addOrUpdateProductVariant = (name: string, precentage: number) => {
         if (currentVariant) {
             const index = selectedProductVariants?.findIndex(v => v.name === name && v.variantId === currentVariant.id);
@@ -278,8 +278,6 @@ const Product = () => {
         }
 
     };
-
-
 
     const removeProductVariant = (variant: IProductVariant) => {
 
@@ -321,6 +319,7 @@ const Product = () => {
             setCurrentVariant(undefined);
             setSelectedProductVariant(undefined);
             setDeleteProductVariant(undefined)
+            setDeletedImage([]);
 
         }
     }, [isDialogOpen, reset]);
@@ -437,6 +436,7 @@ const Product = () => {
                                     error={errors.name?.message}
                                     {...register("name")}
                                 />
+                                <div className="h-2"/>
 
                                 <InputWithLabelAndError
                                     label="Description"
@@ -445,6 +445,8 @@ const Product = () => {
                                     error={errors.description?.message}
                                     {...register("description")}
                                 />
+                                                                <div className="h-2"/>
+
                                 <div className="flex gap-2">
                                     <InputWithLabelAndError
                                         label="Price"
@@ -453,7 +455,7 @@ const Product = () => {
                                         error={errors.price?.message}
                                         {...register("price")}
                                     />
-
+ 
                                     <InputWithLabelAndError
                                         label="Symbol"
                                         type="txt"
@@ -484,7 +486,11 @@ const Product = () => {
 
                                         (files: File[]) => {
                                             if (files?.length > 0) {
-
+                                                if (editingProduct) {
+                                                    if (deletedImage.indexOf(editingProduct.thumbnail) === -1) {
+                                                        setDeletedImage([...deletedImage, editingProduct.thumbnail]);
+                                                    }
+                                                }
                                                 register("thumbnail")
                                                 setValue("thumbnail", files[0])
                                             }
@@ -493,13 +499,27 @@ const Product = () => {
                                         }
                                     }
                                 />
+                                                                <div className="h-2"/>
+
                                 <InputImageWithLabelAndError
                                     key={editingProduct ? `edit-imgs-${editingProduct.id}` : 'create-imgs'}
-                                    initialPreviews={editingProduct && editingProduct.productImages ? editingProduct.productImages.map(i => convertImageToValidUrl(i)) : []}
+                                    initialPreviews={
+                                        editingProduct && editingProduct.productImages ? 
+                                        editingProduct.productImages.filter(img => !deletedImage.includes(img)).map(i => convertImageToValidUrl(i))
+                                        : []}
                                     label="Images"
                                     error={errors.images?.message?.toString()}
                                     isSingle={false}
                                     height={300}
+                                    isCanDeleteImage={true}
+                                    deleteImage={(imgUrl: string) => {
+                                        if (editingProduct) {
+                                            if (deletedImage.indexOf(imgUrl) === -1) {
+                                                setDeletedImage([...deletedImage, imgUrl]);
+                                            }
+                                        }
+                                    }
+                                    }
                                     onChange={
 
                                         (files: File[]) => {
@@ -567,6 +587,8 @@ const Product = () => {
                                             placeholder="Precentage from Price"
                                             {...productVariantRegeister("percentage", { valueAsNumber: true })}
                                         />
+                                        <div className="h-2" />
+
                                         <Button
                                             onClick={
                                                 productVariantHandle((data) => {

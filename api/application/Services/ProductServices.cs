@@ -524,8 +524,10 @@ public class ProductServices(
            await unitOfWork.ProductVariantRepository.SaveProductVariants(productVariants);
         }
 
-        //delete the previs images 
-
+        if (savedImage is not null)
+        {
+            await Task.Run(()=>unitOfWork.ProductImageRepository.AddProductImage(savedImage));
+        }
 
         product!.Name = productDto.Name ?? product.Name;
         product.Description = productDto.Description ?? product.Description;
@@ -533,10 +535,9 @@ public class ProductServices(
         product.Price = productDto.Price ?? product.Price;
         product.UpdatedAt = DateTime.Now;
         product.Thumbnail = savedThumbnail ?? product.Thumbnail;
-        product.ProductImages = savedImage;
         product.Symbol = productDto.Symbol ?? product.Symbol;
-
         unitOfWork.ProductRepository.Update(product);
+        
         result = await unitOfWork.SaveChanges();
 
         if (result == 0)
@@ -552,11 +553,11 @@ public class ProductServices(
             );
         }
 
-        Product? finalUpdateProduct = await unitOfWork.ProductRepository.GetProduct(product.Id);
+        product = await unitOfWork.ProductRepository.GetProduct(product.Id);
 
         return new Result<ProductDto?>
         (
-            data: finalUpdateProduct?.ToDto(config.getKey("url_file")),
+            data: product?.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 200

@@ -2,21 +2,33 @@ import { Input } from "./input";
 import { Label } from "../label";
 import { FieldError } from "react-hook-form";
 import React, { useEffect, useRef, useState } from "react";
+import { Trash2 } from "lucide-react";
 
 type IInputImageWithLabelAndErrorProps = {
     label: string;
-    error?: String|undefined;
+    error?: String | undefined;
     isSingle?: boolean;
     isBorderEnable?: boolean;
+    isCanDeleteImage?: boolean;
     height: number;
     initialPreviews?: string[];
     onChange?: (files: File[]) => void;
+    deleteImage?: (deletedImages: string) => void;
 };
 
 export const InputImageWithLabelAndError = React.forwardRef<
     HTMLInputElement,
     IInputImageWithLabelAndErrorProps
->(({ label, error, onChange, isSingle = true, height = 200, isBorderEnable = false, initialPreviews = [], ...props }, ref) => {
+>(({
+    label,
+    error,
+    onChange,
+    deleteImage,
+    isSingle = true,
+    height = 200,
+    isBorderEnable = false,
+    isCanDeleteImage = false,
+    initialPreviews = [], ...props }, ref) => {
     const fileRef = (ref as React.RefObject<HTMLInputElement>) || useRef<HTMLInputElement>(null);
     const [isDragActive, setIsDragActive] = useState(false);
     const [previews, setPreviews] = useState<string[]>(initialPreviews);
@@ -74,7 +86,7 @@ export const InputImageWithLabelAndError = React.forwardRef<
     };
 
     return (
-        <div className="max-h-96">
+        <div className="min-h-40 max-w-lg">
             <Label className="mb-2">{label}</Label>
 
             <div
@@ -92,11 +104,29 @@ export const InputImageWithLabelAndError = React.forwardRef<
                     <div className="mt-3">
                         {previews?.length > 0 && (
                             <div
-                                className="flex gap-2 overflow-x-auto"
+                                className="flex max-w-lg flex-wrap justify-center"
                                 style={{ height: `${height}px` }}
                             >
                                 {previews?.map((src, idx) => (
-                                    <div key={idx} className={`w-28 h-28 flex-shrink-0 overflow-hidden ${isBorderEnable ? "border" : ""} rounded-2xl p-2`}>
+                                    <div key={idx} className={`
+                                    w-28 h-28 flex-shrink-0 overflow-hidden ${isBorderEnable ? "border" : ""} rounded-2xl p-2`}>
+                                       
+                                       {isCanDeleteImage && (
+                                           <div className="sticky top-1">
+                                               <button
+                                                   type="button"
+                                                   onClick={() => {
+                                                       if (deleteImage) {
+                                                           deleteImage(src);
+                                                            setPreviews([...previews.filter((p) => p !== src)]);
+                                                       }
+                                                   }}
+                                                   className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                                               >
+                                                   <Trash2 size={14} />
+                                               </button>
+                                           </div>
+                                       )}
                                         <img src={src} alt={`preview-${idx}`} className="object-cover w-full h-full" />
                                     </div>
                                 ))}

@@ -124,7 +124,6 @@ import java.io.File
 import java.util.UUID
 
 enum class EnOperation { STORE }
-enum class EnStoreOperation { Create, Update }
 
 enum class EnBottomSheetType { SupCategory, Banner }
 enum class EnDateTimeType { Date, Time }
@@ -163,7 +162,6 @@ fun StoreScreen(
 
 
     val operationType = remember { mutableStateOf<EnOperation?>(null) }
-    val storeOperation = remember { mutableStateOf<EnStoreOperation?>(null) }
     val bottomSheetType = remember { mutableStateOf<EnBottomSheetType?>(null) }
     val bottomSheetDateTimeType = remember { mutableStateOf<EnDateTimeType?>(null) }
 
@@ -181,6 +179,8 @@ fun StoreScreen(
 
     val page = remember { mutableIntStateOf(1) }
 
+
+    val isChangingInData =  storeViewModel.isUpdate.collectAsState()
 
     val isLoadingMore = remember { mutableStateOf(false) }
     val isRefresh = remember { mutableStateOf(false) }
@@ -207,7 +207,7 @@ fun StoreScreen(
     val myStoreId = myInfo.value?.storeId
     val stores = storeViewModel.stores.collectAsState()
     val storeData = stores.value?.firstOrNull { it.id == (storeId.value ?: myStoreId) }
-    val storeBanners = banners.value?.filter { it.storeId == storeId }
+    val storeBanners = banners.value?.filter { it.storeId == storeId.value }
     val storeSubCategories = subcategories.value?.filter { it.storeId == (storeId.value?:myStoreId) }
     val storeProduct =
         if (products.value != null && myStoreId != null) products.value!!.filter { it.storeId == (myStoreId) }
@@ -240,11 +240,14 @@ fun StoreScreen(
     val locationClient = LocationServices.getFusedLocationProviderClient(context)
 
     fun handlingLocation(mapType: enMapType, currentLocation: Location): LatLng? {
-        return when (mapType) {
-            enMapType.MyStore -> LatLng(currentLocation.latitude, currentLocation.longitude)
-            else -> {
+        return when {
+            mapType == enMapType.MyStore || isFromHome ==true ->
                 if (storeData == null) null
-                else LatLng(storeData.latitude, storeData.longitude)
+                else
+                    LatLng(storeData.latitude, storeData.longitude)
+            else -> {
+                LatLng(currentLocation.latitude, currentLocation.longitude)
+
             }
         }
     }
@@ -268,17 +271,12 @@ fun StoreScreen(
                         location?.toString()
                         if (location != null) {
                             val type =
-                                when ((myStoreId == storeId || myStoreId == null) && isFromHome == false) {
+                                when ((myStoreId == storeId.value || myStoreId == null) && isFromHome == false) {
                                     true -> enMapType.MyStore
                                     else -> enMapType.Store
                                 }
+
                             val locationHolder = handlingLocation(type, location)
-                            Log.d(
-                                "thisTheLocation",
-                                "${locationHolder.toString()}\n " +
-                                        "${location.latitude} ${location.longitude}\n " +
-                                        "${storeData?.latitude} ${storeData?.longitude}"
-                            )
 
                             nav.navigate(
                                 Screens.MapScreen(
@@ -332,7 +330,6 @@ fun StoreScreen(
                             true -> {
                                 storeViewModel.setStoreCreateData(
                                     wallpaperImage = fileHolder,
-                                    updateStoreOperation = storeOperation,
                                     storeId = storeId.value
                                 )
                             }
@@ -340,7 +337,6 @@ fun StoreScreen(
                             else -> {
                                 storeViewModel.setStoreCreateData(
                                     smallImage = fileHolder,
-                                    updateStoreOperation = storeOperation,
                                     storeId = storeId.value
                                 )
                             }
@@ -385,9 +381,6 @@ fun StoreScreen(
         productViewModel.getProducts(mutableIntStateOf(1), id, isLoading)
     }
 
-    fun changeStoreOperation(storeOperationStore: EnStoreOperation?) {
-        storeOperation.value = storeOperationStore
-    }
 
     fun createOrUpdateStoreInfo() {
 
@@ -400,7 +393,7 @@ fun StoreScreen(
         operationType.value = EnOperation.STORE
         coroutine.launch {
             val result = async {
-                if (storeOperation.value == EnStoreOperation.Update) storeViewModel.updateStore(
+                if (myInfo.value?.storeId!=null) storeViewModel.updateStore(
                     name = storeName.value.text,
                     wallpaperImage = createdStoreInfoHolder.value?.wallpaperImage,
                     smallImage = createdStoreInfoHolder.value?.smallImage,
@@ -421,7 +414,6 @@ fun StoreScreen(
                         getStoreInfoByStoreId(id)
                     })
             }.await()
-            changeStoreOperation(null)
 
             isSendingData.value = false
             operationType.value = null
@@ -549,13 +541,6 @@ fun StoreScreen(
 
     }
 
-    LaunchedEffect(Unit) {
-        changeStoreOperation(
-            if (isFromHome == false && myStoreId == null) EnStoreOperation.Create
-            else null
-        )
-    }
-
 
    Log.d("thisData",subcategories.value.toString())
 
@@ -585,7 +570,7 @@ fun StoreScreen(
                                         if (bannerEndDateTime.value != null)
                                             bannerEndDateTime.value = LocalDateTime(
                                                 year = year,
-                                                month = month,
+                                                month = month+1,
                                                 day = day,
                                                 hour = bannerEndDateTime.value!!.hour,
                                                 second = bannerEndDateTime.value!!.second,
@@ -594,13 +579,14 @@ fun StoreScreen(
                                         else {
                                             bannerEndDateTime.value = LocalDateTime(
                                                 year = year,
-                                                month = month,
+                                                month = month+1,
                                                 day = day,
                                                 hour = 0,
                                                 second = 0,
                                                 minute = 0
                                             )
                                         }
+
                                         isDateTimeBottomSheetOpen.value = false
                                     },
 
@@ -655,6 +641,7 @@ fun StoreScreen(
                                                 )
                                             }
                                         }
+
                                         isDateTimeBottomSheetOpen.value = false
 
                                     },
@@ -1039,7 +1026,7 @@ fun StoreScreen(
                         )
                     }
                 }, actions = {
-                    if (isFromHome == false && storeOperation.value != null) {
+                    if (isFromHome == false) {
                         TextButton(
                             enabled = !isSendingData.value, onClick = {
 
@@ -1054,9 +1041,10 @@ fun StoreScreen(
 
                                 else -> {
                                     Text(
-                                        if (storeOperation.value == EnStoreOperation.Update) stringResource(
-                                            R.string.update
-                                        ) else stringResource(R.string.create),
+                                        when {
+                                          isChangingInData.value && myInfo.value?.storeId!=null-> stringResource(R.string.update)
+                                         isChangingInData.value && myInfo.value?.storeId==null -> stringResource(R.string.create)
+                                        else-> ""},
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Normal,
                                         fontSize = (16).sp,
@@ -1510,7 +1498,6 @@ fun StoreScreen(
                                 onChange = { it ->
                                     storeViewModel.setStoreCreateData(
                                         storeTitle = it,
-                                        updateStoreOperation = storeOperation,
                                         storeId = storeId.value
                                     )
                                 },
@@ -1522,14 +1509,15 @@ fun StoreScreen(
 
                 }
 
-                if (isFromHome == true || myStoreId != null) item {
-                    if (isFromHome == false) {
+                if (isFromHome == false && myStoreId != null)
+                    item {
                         Sizer(10)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+                        )
+                        {
                             Text(
                                 stringResource(R.string.store_banner),
                                 fontFamily = General.satoshiFamily,
@@ -1562,7 +1550,6 @@ fun StoreScreen(
 
                         }
                     }
-                }
 
                 item {
 
@@ -1676,7 +1663,7 @@ fun StoreScreen(
                                     color = CustomColor.neutralColor950,
                                     textAlign = TextAlign.Center,
                                 )
-
+                            if(isFromHome==false && myStoreId != null)
                                 Box(
                                     modifier = Modifier
                                         .height(40.dp)
@@ -1913,11 +1900,8 @@ fun StoreScreen(
 
                     }
                 }
-                item {
-                    Sizer(50)
-                }
-                if (!isLoadingMore.value) item {
-                    Sizer(140)
+               item {
+                    Sizer(90)
                 }
 
             }

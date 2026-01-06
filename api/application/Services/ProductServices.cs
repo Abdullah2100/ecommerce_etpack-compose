@@ -17,7 +17,7 @@ public class ProductServices(
 )
     : IProductServices
 {
-    private void deleteProductImages(List<string>? images = null, string? savedThumbnail = null)
+    private void DeleteProductImages(List<string>? images = null, string? savedThumbnail = null)
     {
         if (images is not null)
             fileServices.DeleteFile(images);
@@ -241,7 +241,7 @@ public class ProductServices(
 
             if (savedImage is null || savedThumbnail is null)
             {
-                deleteProductImages(savedImage, savedThumbnail);
+                DeleteProductImages(savedImage, savedThumbnail);
 
                 return new Result<ProductDto?>
                 (
@@ -265,7 +265,7 @@ public class ProductServices(
 
             if ((images.Count) > 20)
             {
-                deleteProductImages(savedImage, savedThumbnail);
+                DeleteProductImages(savedImage, savedThumbnail);
                 return new Result<ProductDto?>
                 (
                     data: null,
@@ -293,7 +293,7 @@ public class ProductServices(
 
             if (productVariants is not null && productVariants.Count > 20)
             {
-                deleteProductImages(savedImage, savedThumbnail);
+                DeleteProductImages(savedImage, savedThumbnail);
 
                 return new Result<ProductDto?>
                 (
@@ -326,7 +326,7 @@ public class ProductServices(
 
             if (result == 0)
             {
-                deleteProductImages(savedImage, savedThumbnail);
+                DeleteProductImages(savedImage, savedThumbnail);
 
                 return new Result<ProductDto?>
                 (
@@ -469,7 +469,7 @@ public class ProductServices(
 
         if (savedImage is not null && (savedImage.Count + product?.ProductImages?.Count) > 20)
         {
-            deleteProductImages(savedImage.Select(value => value.Path).ToList(), savedThumbnail);
+            DeleteProductImages(savedImage.Select(value => value.Path).ToList(), savedThumbnail);
             return new Result<ProductDto?>
             (
                 data: null,
@@ -481,7 +481,7 @@ public class ProductServices(
 
         if ((savedImage?.Count + product?.ProductImages?.Count) < 1)
         {
-            deleteProductImages(savedImage?.Select(value => value.Path).ToList(), savedThumbnail);
+            DeleteProductImages(savedImage?.Select(value => value.Path).ToList(), savedThumbnail);
             return new Result<ProductDto?>
             (
                 data: null,
@@ -508,7 +508,7 @@ public class ProductServices(
 
         if (productVariants is not null && (productVariants.Count + product?.ProductVariants?.Count) > 20)
         {
-            deleteProductImages(savedImage?.Select(value => value.Path).ToList(), savedThumbnail);
+            DeleteProductImages(savedImage?.Select(value => value.Path).ToList(), savedThumbnail);
 
             return new Result<ProductDto?>
             (
@@ -542,7 +542,7 @@ public class ProductServices(
 
         if (result == 0)
         {
-            deleteProductImages(savedImage?.Select(value => value.Path).ToList(), savedThumbnail);
+            DeleteProductImages(savedImage?.Select(value => value.Path).ToList(), savedThumbnail);
 
             return new Result<ProductDto?>
             (

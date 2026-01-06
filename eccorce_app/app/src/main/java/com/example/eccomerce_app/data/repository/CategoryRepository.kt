@@ -1,7 +1,7 @@
 package com.example.eccomerce_app.data.repository
 
 import com.example.eccomerce_app.dto.CategoryDto
-import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.util.GeneralValue
 import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
@@ -19,12 +19,12 @@ class CategoryRepository(val client: HttpClient)  {
      suspend fun getCategory(pageNumber: Int): NetworkCallHandler {
         return try {
             val result = client.get(
-                Secrets.getBaseUrl() + "/Category/all/${pageNumber}"
+                Secrets.getUrl() + "/Category/all/${pageNumber}"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }

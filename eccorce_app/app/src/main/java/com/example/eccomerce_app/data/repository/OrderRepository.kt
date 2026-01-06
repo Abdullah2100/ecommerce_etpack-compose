@@ -2,7 +2,7 @@ package com.example.eccomerce_app.data.repository
 
 import com.example.eccomerce_app.dto.CreateOrderDto
 import com.example.eccomerce_app.dto.OrderDto
-import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.util.GeneralValue
 import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
@@ -24,12 +24,12 @@ class OrderRepository(val client: HttpClient)   {
 
      suspend fun submitOrder(cartData: CreateOrderDto): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Order"
+            val fullUrl = Secrets.getUrl() + "/Order"
             val result = client.post(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
                 contentType(ContentType.Application.Json)
@@ -67,12 +67,12 @@ class OrderRepository(val client: HttpClient)   {
 
      suspend fun getMyOrders(pageNumber: Int): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Order/me/${pageNumber}"
+            val fullUrl = Secrets.getUrl() + "/Order/me/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
 
@@ -112,12 +112,12 @@ class OrderRepository(val client: HttpClient)   {
 
      suspend fun deleteOrder(orderId: UUID): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Order/${orderId}"
+            val fullUrl = Secrets.getUrl() + "/Order/${orderId}"
             val result = client.delete(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
 

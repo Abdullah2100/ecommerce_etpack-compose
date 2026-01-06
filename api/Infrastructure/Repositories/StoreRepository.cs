@@ -14,7 +14,17 @@ public class StoreRepository(AppDbContext context) : IStoreRepository
 
     public void Update(Store entity)
     {
-        context.Stores.Update(entity);
+        var storeData = new Store()
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            WallpaperImage = entity.WallpaperImage,
+            SmallImage = entity.SmallImage,
+            IsBlock = entity.IsBlock,
+            UserId = entity.UserId,
+            UpdatedAt = entity.UpdatedAt
+        };
+        context.Stores.Update(storeData);
     }
 
     public void  Delete(Guid id)

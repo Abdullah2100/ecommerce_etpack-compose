@@ -2,7 +2,7 @@ package com.example.eccomerce_app.data.repository
 
 import com.example.eccomerce_app.dto.CreateSubCategoryDto
 import com.example.eccomerce_app.dto.SubCategoryDto
-import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.util.GeneralValue
 import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.dto.UpdateSubCategoryDto
@@ -26,12 +26,12 @@ class SubCategoryRepository(val client: HttpClient) {
 
      suspend fun createSubCategory(data: CreateSubCategoryDto): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/SubCategory"
+            val fullUrl = Secrets.getUrl() + "/SubCategory"
             val result = client.post(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
                 setBody(data)
@@ -66,12 +66,12 @@ class SubCategoryRepository(val client: HttpClient) {
 
      suspend fun updateSubCategory(data: UpdateSubCategoryDto): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/SubCategory"
+            val fullUrl = Secrets.getUrl() + "/SubCategory"
             val result = client.put(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
                 setBody(data)
@@ -106,12 +106,12 @@ class SubCategoryRepository(val client: HttpClient) {
 
      suspend fun deleteSubCategory(subCategoryID: UUID): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/SubCategory/${subCategoryID}"
+            val fullUrl = Secrets.getUrl() + "/SubCategory/${subCategoryID}"
             val result = client.delete(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }
@@ -143,12 +143,12 @@ class SubCategoryRepository(val client: HttpClient) {
 
      suspend fun getStoreSubCategory(id: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/SubCategory/${id}/${pageNumber}"
+            val fullUrl = Secrets.getUrl() + "/SubCategory/${id}/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }

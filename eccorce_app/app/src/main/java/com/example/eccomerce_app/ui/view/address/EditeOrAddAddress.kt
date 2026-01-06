@@ -68,18 +68,23 @@ import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.eccomerce_app.viewModel.CartViewModel
+import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditOrAddLocationScreen(
     nav: NavHostController,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    storeViewModel: StoreViewModel,
+    cartViewModel: CartViewModel
 ) {
     val context = LocalContext.current
     val userInfo = userViewModel.userInfo.collectAsState()
@@ -89,6 +94,7 @@ fun EditOrAddLocationScreen(
     val coroutine = rememberCoroutineScope()
     val state = rememberPullToRefreshState()
 
+    val stores = storeViewModel.stores.collectAsState()
 
     val snackBarHostState = remember { SnackbarHostState() }
     val locationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -122,16 +128,18 @@ fun EditOrAddLocationScreen(
 
                                 location?.toString()
                                 if (location != null)
-                                    nav.navigate(
+                                { nav.navigate(
                                         Screens.MapScreen(
-                                            lognit = location.longitude,
-                                            latitt = location.latitude,
+                                            lognit = currentAddress.value?.longitude?: location.longitude,
+                                            latitt = currentAddress.value?.latitude?: location.latitude,
                                             isFromLogin = false,
                                             title = currentAddress.value?.title,
                                             id = currentAddress.value?.id?.toString(),
                                             mapType = enMapType.My,
                                         )
                                     )
+                                currentAddress.value =null
+                                }
                                 else
                                     coroutine.launch {
                                         snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
@@ -154,6 +162,21 @@ fun EditOrAddLocationScreen(
         }
     )
 
+    fun updateCurrentAddress(addressID: UUID){
+        coroutine.launch {
+            isLoading.value = true
+            val result = async {
+                userViewModel.setCurrentActiveUserAddress(
+                  addressID,
+                )
+            }.await()
+            isLoading.value = false
+            val message = result
+                ?: context.getString(R.string.update_current_address_successfully)
+            cartViewModel.calculateOrderDistanceToUser(stores.value,userInfo.value?.address?.firstOrNull() { value->value.isCurrent })
+            snackBarHostState.showSnackbar(message)
+        }
+    }
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackBarHostState)
@@ -323,19 +346,7 @@ fun EditOrAddLocationScreen(
                                     .combinedClickable(
                                         onClick = {
                                             if (!userInfo.value!!.address!![index].isCurrent) {
-                                                coroutine.launch {
-                                                    isLoading.value = true
-                                                    val result = async {
-                                                        userViewModel.setCurrentActiveUserAddress(
-                                                            userInfo.value!!.address!![index].id!!,
-                                                        )
-                                                    }.await()
-                                                    isLoading.value = false
-                                                    val message = result
-                                                        ?: context.getString(R.string.update_current_address_successfully)
-
-                                                    snackBarHostState.showSnackbar(message)
-                                                }
+                                                updateCurrentAddress(userInfo.value!!.address!![index].id!!)
 
                                             }
 

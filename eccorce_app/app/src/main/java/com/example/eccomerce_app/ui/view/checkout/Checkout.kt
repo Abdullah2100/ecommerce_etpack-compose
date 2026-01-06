@@ -427,7 +427,7 @@ fun CheckoutScreen(
                                 textAlign = TextAlign.Center
                             )
                             Text(
-                                "\$${(totalDeliveryPrice)}",
+                                "$totalDeliveryPrice",
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = (16).sp,

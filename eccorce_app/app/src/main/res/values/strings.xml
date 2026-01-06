@@ -32,7 +32,7 @@
     <string name="product_detail">Product Detail</string>
     <string name="add_to_cart">Add To Cart</string>
     <string name="product_details">Product Details</string>
-    <string name="select">Select %1$s</string>
+    <string name="select">Select</string>
     <string name="visit_store">Visit Store</string>
     <string name="select_category_name">Select Category Name</string>
     <string name="cancel">Cancel</string>

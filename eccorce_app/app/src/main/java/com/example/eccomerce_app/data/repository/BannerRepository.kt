@@ -1,7 +1,7 @@
 package com.example.eccomerce_app.data.repository
 
 import com.example.eccomerce_app.dto.BannerDto
-import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.util.GeneralValue
 import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
@@ -25,12 +25,12 @@ class BannerRepository(val client: HttpClient) {
 
     suspend fun getBannerByStoreId(storeId: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Banner/${storeId}/${pageNumber}"
+            val fullUrl = Secrets.getUrl() + "/Banner/${storeId}/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
 
@@ -58,12 +58,12 @@ class BannerRepository(val client: HttpClient) {
 
     suspend fun getRandomBanner(): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Banner"
+            val fullUrl = Secrets.getUrl() + "/Banner"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
 
@@ -94,12 +94,12 @@ class BannerRepository(val client: HttpClient) {
     suspend fun createBanner(endDate: String, image: File): NetworkCallHandler {
         return try {
             val result = client.post(
-                Secrets.getBaseUrl() + "/Banner"
+                Secrets.getUrl() + "/Banner"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
                 setBody(
@@ -147,12 +147,12 @@ class BannerRepository(val client: HttpClient) {
     suspend fun deleteBanner(bannerId: UUID): NetworkCallHandler {
         return try {
             val result = client.delete(
-                Secrets.getBaseUrl() + "/Banner/${bannerId}"
+                Secrets.getUrl() + "/Banner/${bannerId}"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
 

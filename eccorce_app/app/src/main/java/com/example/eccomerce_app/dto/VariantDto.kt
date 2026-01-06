@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 import java.util.UUID
 
 @Serializable
-data  class VarientDto(
+data  class VariantDto(
     @Serializable(with= UUIDKserialize::class)
-    val Id: UUID,
-    val Name:String
+    val id: UUID,
+    val name:String
 )

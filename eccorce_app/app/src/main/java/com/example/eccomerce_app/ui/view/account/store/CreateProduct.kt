@@ -110,7 +110,7 @@ fun CreateProductScreen(
 
     val products = productViewModel.products.collectAsState()
     val variants = variantViewModel.variants.collectAsState()
-    val currencies = currencyViewModel.currencies.collectAsState()
+    val currencies = currencyViewModel.currenciesList.collectAsState()
 
     val subCategory = subCategoryViewModel.subCategories.collectAsState()
     val storeSubCategory = subCategory.value?.filter { it.storeId == storeIdHolder }

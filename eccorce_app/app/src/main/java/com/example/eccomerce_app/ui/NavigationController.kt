@@ -115,7 +115,8 @@ fun NavController(
                 nav = nav,
                 userViewModel = userViewModel,
                 storeViewModel = storeViewModel,
-                mapViewModel = mapViewModel
+                mapViewModel = mapViewModel,
+                cartViewModel = cartViewModel
             )
 
         }
@@ -544,7 +545,10 @@ fun NavController(
                     )
                 }) {
                 EditOrAddLocationScreen(
-                    nav = nav, userViewModel = userViewModel
+                    nav = nav,
+                    userViewModel = userViewModel,
+                    cartViewModel = cartViewModel,
+                    storeViewModel = storeViewModel
 
                 )
 

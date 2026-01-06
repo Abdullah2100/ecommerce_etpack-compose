@@ -166,7 +166,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.compose.runntime)
 
-    //qc
+
    // implementation(libs.qr.kit)
     implementation(libs.zxing.android.embedded)
     implementation(libs.core)
@@ -182,7 +182,8 @@ dependencies {
     //local datetime kotlin
     implementation(libs.kotlinx.datetime)
 
-
+    //payment strip
+    implementation("com.stripe:stripe-android:20.48.6")
 
 }
 

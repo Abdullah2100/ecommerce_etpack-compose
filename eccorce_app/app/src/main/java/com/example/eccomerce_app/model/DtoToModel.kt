@@ -21,7 +21,7 @@ import com.example.eccomerce_app.dto.DeliveryDto
 import com.example.eccomerce_app.dto.DeliveryUserInfoDto
 import com.example.eccomerce_app.dto.StoreDto
 import com.example.eccomerce_app.dto.SubCategoryDto
-import com.example.eccomerce_app.dto.VarientDto
+import com.example.eccomerce_app.dto.VariantDto
 import com.example.eccomerce_app.dto.GeneralSettingDto
 import com.example.eccomerce_app.dto.OrderProductDto
 import com.example.eccomerce_app.dto.OrderDto
@@ -45,7 +45,7 @@ object DtoToModel {
         return Category(
             id = this.id,
             name = this.name,
-            image = this.image.replace("0.0.0.0", Secrets.imageUrl)
+            image = this.image.replace("localhost", Secrets.imageUrl)
         )
     }
 
@@ -64,8 +64,8 @@ object DtoToModel {
             id = this.id,
             name = this.name,
             userId = this.userId,
-            pigImage = this.wallpaperImage.replace("0.0.0.0", Secrets.imageUrl),
-            smallImage = this.smallImage.replace("0.0.0.0", Secrets.imageUrl),
+            pigImage = this.wallpaperImage.replace("localhost", Secrets.imageUrl),
+            smallImage = this.smallImage.replace("localhost", Secrets.imageUrl),
             latitude = this.latitude,
             longitude = this.longitude
         )
@@ -78,7 +78,7 @@ object DtoToModel {
             phone = this.phone,
             email = this.email,
             thumbnail = if (!this.thumbnail.isEmpty()) this.thumbnail.replace(
-                "0.0.0.0",
+                "localhost",
                 Secrets.imageUrl
             ) else "",
             address = this.address?.map { it.toAddress() }?.toList(),
@@ -119,17 +119,17 @@ object DtoToModel {
         return BannerModel(
             id = this.id,
             image = if (this.image.isNotEmpty()) this.image.replace(
-                "0.0.0.0",
+                "localhost",
                 Secrets.imageUrl
             ) else "",
             storeId = this.storeId
         )
     }
 
-    fun VarientDto.toVariant(): VarirntModel {
+    fun VariantDto.toVariant(): VarirntModel {
         return VarirntModel(
-            id = this.Id,
-            name = this.Name
+            id = this.id,
+            name = this.name
         )
     }
 
@@ -148,7 +148,7 @@ object DtoToModel {
             name = this.name,
             description = this.description,
             thumbnail = if (this.thumbnail.isNotEmpty()) this.thumbnail.replace(
-                "0.0.0.0",
+                "localhost",
                 Secrets.imageUrl
             ) else "",
             subcategoryId = this.subcategoryId,
@@ -161,7 +161,7 @@ object DtoToModel {
             },
             productImages = this.productImages.map { it ->
                 if (it.isNotEmpty()) it.replace(
-                    "0.0.0.0",
+                    "localhost",
                     Secrets.imageUrl
                 ) else ""
             }
@@ -180,7 +180,7 @@ object DtoToModel {
             id = this.id,
             name = this.name,
             thumbnail = if (this.thmbnail != null && this.thmbnail.isNotEmpty()) this.thmbnail.replace(
-                "0.0.0.0",
+                "localhost",
                 Secrets.imageUrl
             ) else ""
         )

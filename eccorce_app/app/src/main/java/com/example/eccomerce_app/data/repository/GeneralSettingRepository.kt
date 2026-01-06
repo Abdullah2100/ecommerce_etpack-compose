@@ -1,9 +1,10 @@
 package com.example.eccomerce_app.data.repository
 
-import com.example.eccomerce_app.dto.GeneralSettingDto
-import com.example.eccomerce_app.util.General
+
+import com.example.eccomerce_app.util.GeneralValue
 import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.dto.GeneralSettingDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -18,12 +19,12 @@ class GeneralSettingRepository(val client: HttpClient)   {
      suspend fun getGeneral(pageNumber: Int): NetworkCallHandler {
         return try {
             val result = client.get(
-                Secrets.getBaseUrl() + "/General/all/${pageNumber}"
+                Secrets.getUrl() + "/General/all/${pageNumber}"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }

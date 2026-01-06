@@ -3,7 +3,7 @@ package com.example.eccomerce_app.data.repository
 
 import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.eccomerce_app.dto.ProductDto
-import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.util.GeneralValue
 import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
@@ -28,22 +28,22 @@ class ProductRepository(val client: HttpClient)  {
 
     suspend fun getProduct(pageNumber: Int): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Product/all/${pageNumber}"
+            val fullUrl = Secrets.getUrl() + "/Product/all/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }
 
             when (result.status) {
-                HttpStatusCode.Companion.OK -> {
+                HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<List<ProductDto>>())
                 }
 
-                HttpStatusCode.Companion.NoContent -> {
+                HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
 
@@ -71,12 +71,12 @@ class ProductRepository(val client: HttpClient)  {
         pageNumber: Int
     ): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Product/category/${categoryId}/${pageNumber}"
+            val fullUrl = Secrets.getUrl() + "/Product/category/${categoryId}/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }
@@ -111,12 +111,12 @@ class ProductRepository(val client: HttpClient)  {
 
     suspend fun getProduct(storeId: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Product/${storeId}/${pageNumber}"
+            val fullUrl = Secrets.getUrl() + "/Product/${storeId}/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }
@@ -156,12 +156,12 @@ class ProductRepository(val client: HttpClient)  {
     ): NetworkCallHandler {
         return try {
             val fullUrl =
-                Secrets.getBaseUrl() + "/Product/${storeId}/${subCategory}/${pageNumber}"
+                Secrets.getUrl() + "/Product/${storeId}/${subCategory}/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }
@@ -207,12 +207,12 @@ class ProductRepository(val client: HttpClient)  {
         images: List<File>
     ): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Product"
+            val fullUrl = Secrets.getUrl() + "/Product"
             val result = client.post(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
                 setBody(
@@ -310,12 +310,12 @@ class ProductRepository(val client: HttpClient)  {
         deleteImages: List<String>?
     ): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Product"
+            val fullUrl = Secrets.getUrl() + "/Product"
             val result = client.put(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
                 setBody(
@@ -437,12 +437,12 @@ class ProductRepository(val client: HttpClient)  {
 
     suspend fun deleteProduct(storeId: UUID, productId: UUID): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Product/${storeId}/${productId}"
+            val fullUrl = Secrets.getUrl() + "/Product/${storeId}/${productId}"
             val result = client.delete(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }

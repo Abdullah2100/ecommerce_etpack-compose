@@ -14,6 +14,7 @@ import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.data.Room.Dao.LocaleDao
 import com.example.eccomerce_app.data.repository.AuthRepository
 import com.example.eccomerce_app.util.General.currentLocal
+import com.example.eccomerce_app.util.GeneralValue
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -69,7 +70,7 @@ class AuthViewModel(
     fun getCurrentLocalization() {
         viewModelScope.launch(Dispatchers.Default) {
             val dbLocale = localDao.getCurrentLocal()
-            Log.d("CurrentLocalization",dbLocale?.name?:"no data")
+            Log.d("CurrentLocalization", dbLocale?.name ?: "no data")
 
             if (dbLocale == null) {
                 return@launch
@@ -84,12 +85,12 @@ class AuthViewModel(
             val isPassOnBoard = authDao.isPassOnBoarding()
             val isLocation = authDao.isPassLocationScreen()
             Log.d("AuthDataIs", isPassOnBoard.toString())
-            General.authData.emit(authData)
+            if (authData != null)
+                GeneralValue.authData = authData
             when (isPassOnBoard) {
                 false -> {
                     _currentScreen.emit(1)
                 }
-
                 else -> {
                     when (authData == null) {
                         true -> {
@@ -157,7 +158,7 @@ class AuthViewModel(
                     authDataHolder
                 )
 
-                General.authData.emit(authDataHolder)
+                GeneralValue.authData = authDataHolder
                 null;
 
             }
@@ -202,7 +203,7 @@ class AuthViewModel(
                 authDao.saveAuthData(
                     authDataHolder
                 )
-                General.authData.emit(authDataHolder)
+                GeneralValue.authData = authDataHolder
                 null
             }
 
@@ -286,7 +287,7 @@ class AuthViewModel(
                 authDao.saveAuthData(
                     authDataHolder
                 )
-                General.authData.emit(authDataHolder)
+                GeneralValue.authData = authDataHolder
 
                 return null
             }

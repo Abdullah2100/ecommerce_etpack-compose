@@ -17,7 +17,7 @@ public class ProductServices(
 )
     : IProductServices
 {
-    private void deleteProductImages(List<string>? images = null, string? savedThumbnail = null)
+    private void DeleteProductImages(List<string>? images = null, string? savedThumbnail = null)
     {
         if (images is not null)
             fileServices.DeleteFile(images);
@@ -241,7 +241,7 @@ public class ProductServices(
 
             if (savedImage is null || savedThumbnail is null)
             {
-                deleteProductImages(savedImage, savedThumbnail);
+                DeleteProductImages(savedImage, savedThumbnail);
 
                 return new Result<ProductDto?>
                 (
@@ -265,7 +265,7 @@ public class ProductServices(
 
             if ((images.Count) > 20)
             {
-                deleteProductImages(savedImage, savedThumbnail);
+                DeleteProductImages(savedImage, savedThumbnail);
                 return new Result<ProductDto?>
                 (
                     data: null,
@@ -293,7 +293,7 @@ public class ProductServices(
 
             if (productVariants is not null && productVariants.Count > 20)
             {
-                deleteProductImages(savedImage, savedThumbnail);
+                DeleteProductImages(savedImage, savedThumbnail);
 
                 return new Result<ProductDto?>
                 (
@@ -326,7 +326,7 @@ public class ProductServices(
 
             if (result == 0)
             {
-                deleteProductImages(savedImage, savedThumbnail);
+                DeleteProductImages(savedImage, savedThumbnail);
 
                 return new Result<ProductDto?>
                 (
@@ -469,7 +469,7 @@ public class ProductServices(
 
         if (savedImage is not null && (savedImage.Count + product?.ProductImages?.Count) > 20)
         {
-            deleteProductImages(savedImage.Select(value => value.Path).ToList(), savedThumbnail);
+            DeleteProductImages(savedImage.Select(value => value.Path).ToList(), savedThumbnail);
             return new Result<ProductDto?>
             (
                 data: null,
@@ -481,7 +481,7 @@ public class ProductServices(
 
         if ((savedImage?.Count + product?.ProductImages?.Count) < 1)
         {
-            deleteProductImages(savedImage?.Select(value => value.Path).ToList(), savedThumbnail);
+            DeleteProductImages(savedImage?.Select(value => value.Path).ToList(), savedThumbnail);
             return new Result<ProductDto?>
             (
                 data: null,
@@ -508,7 +508,7 @@ public class ProductServices(
 
         if (productVariants is not null && (productVariants.Count + product?.ProductVariants?.Count) > 20)
         {
-            deleteProductImages(savedImage?.Select(value => value.Path).ToList(), savedThumbnail);
+            DeleteProductImages(savedImage?.Select(value => value.Path).ToList(), savedThumbnail);
 
             return new Result<ProductDto?>
             (
@@ -524,8 +524,10 @@ public class ProductServices(
            await unitOfWork.ProductVariantRepository.SaveProductVariants(productVariants);
         }
 
-        //delete the previs images 
-
+        if (savedImage is not null)
+        {
+            await Task.Run(()=>unitOfWork.ProductImageRepository.AddProductImage(savedImage));
+        }
 
         product!.Name = productDto.Name ?? product.Name;
         product.Description = productDto.Description ?? product.Description;
@@ -533,15 +535,14 @@ public class ProductServices(
         product.Price = productDto.Price ?? product.Price;
         product.UpdatedAt = DateTime.Now;
         product.Thumbnail = savedThumbnail ?? product.Thumbnail;
-        product.ProductImages = savedImage;
         product.Symbol = productDto.Symbol ?? product.Symbol;
-
         unitOfWork.ProductRepository.Update(product);
+        
         result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
-            deleteProductImages(savedImage?.Select(value => value.Path).ToList(), savedThumbnail);
+            DeleteProductImages(savedImage?.Select(value => value.Path).ToList(), savedThumbnail);
 
             return new Result<ProductDto?>
             (
@@ -552,11 +553,11 @@ public class ProductServices(
             );
         }
 
-        Product? finalUpdateProduct = await unitOfWork.ProductRepository.GetProduct(product.Id);
+        product = await unitOfWork.ProductRepository.GetProduct(product.Id);
 
         return new Result<ProductDto?>
         (
-            data: finalUpdateProduct?.ToDto(config.getKey("url_file")),
+            data: product?.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 200

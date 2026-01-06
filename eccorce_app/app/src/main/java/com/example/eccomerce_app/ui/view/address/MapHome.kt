@@ -69,6 +69,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.util.UUID
 import com.example.e_commercompose.R
+import com.example.eccomerce_app.viewModel.CartViewModel
 import com.example.eccomerce_app.viewModel.MapViewModel
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -96,6 +97,7 @@ fun MapHomeScreen(
     userViewModel: UserViewModel,
     storeViewModel: StoreViewModel,
     mapViewModel: MapViewModel,
+    cartViewModel: CartViewModel,
     title: String? = null,
     id: String? = null,
     longitude: Double?,
@@ -171,6 +173,7 @@ fun MapHomeScreen(
     }
 
     fun handleMapClick(point: LatLng) {
+        Log.d("userChossloction",point.toString())
         when (mapType) {
             enMapType.My -> {
                 updateMainLocation(point)
@@ -385,20 +388,26 @@ fun MapHomeScreen(
                             coroutine.launch {
                                 isLoading.value = true
                                 isOpenSheet.value = false
+
                                 val result = async {
                                     if (id.isNullOrEmpty()) userViewModel.addUserAddress(
-                                        longitude = marker.position.target.longitude,
-                                        latitude = marker.position.target.latitude,
+                                        longitude = mainLocation.position.longitude,
+                                        latitude = mainLocation.position.latitude,
                                         title = addressTitle.value.text
                                     )
                                     else userViewModel.updateUserAddress(
                                         addressId = UUID.fromString(id),
                                         addressTitle = addressTitle.value.text,
-                                        longitude = marker.position.target.longitude,
-                                        latitude = marker.position.target.latitude,
+                                        longitude = mainLocation.position.longitude,
+                                    latitude = mainLocation.position.latitude,
 
                                         )
                                 }.await()
+
+                                cartViewModel.calculateOrderDistanceToUser(
+                                    stores = storeViewModel.stores.value,
+                                    currentAddress = userViewModel.userInfo.value?.address?.firstOrNull { it -> it.isCurrent }
+                                )
                                 isLoading.value = false
                                 if (!result.isNullOrEmpty()) {
                                     snackBarHostState.showSnackbar(result)

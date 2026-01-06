@@ -10,7 +10,7 @@ import org.koin.dsl.module
 
 fun bannerEvent(): HubConnection? {
     try {
-        val connectionUrl=Secrets.getBaseUrl().replace("/api","")+"/bannerHub"
+        val connectionUrl=Secrets.getUrl().replace("/api","")+"/bannerHub"
         return  HubConnectionBuilder
             .create(connectionUrl)
             .withTransport(TransportEnum.LONG_POLLING)
@@ -22,7 +22,7 @@ fun bannerEvent(): HubConnection? {
 
 fun orderEvent(): HubConnection? {
     try {
-        val connectionUrl=Secrets.getBaseUrl().replace("/api","")+"/orderHub"
+        val connectionUrl=Secrets.getUrl().replace("/api","")+"/orderHub"
         return  HubConnectionBuilder
             .create(connectionUrl)
             .withTransport(TransportEnum.LONG_POLLING)
@@ -33,7 +33,7 @@ fun orderEvent(): HubConnection? {
 }
 fun orderItemEvent(): HubConnection? {
     try {
-        val connectionUrl=Secrets.getBaseUrl().replace("/api","")+"/orderItemHub"
+        val connectionUrl=Secrets.getUrl().replace("/api","")+"/orderItemHub"
         return  HubConnectionBuilder
             .create(connectionUrl)
             .withTransport(TransportEnum.LONG_POLLING)
@@ -45,7 +45,7 @@ fun orderItemEvent(): HubConnection? {
 
 fun storeEvent(): HubConnection? {
     try {
-        val connectionUrl=Secrets.getBaseUrl().replace("/api","")+"/storeHub"
+        val connectionUrl=Secrets.getUrl().replace("/api","")+"/storeHub"
         return  HubConnectionBuilder
             .create(connectionUrl)
             .withTransport(TransportEnum.LONG_POLLING)

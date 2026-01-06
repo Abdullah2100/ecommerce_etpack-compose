@@ -1,13 +1,14 @@
 using api.application;
 using api.domain.entity;
 using api.domain.Interface;
+using api.util;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Infrastructure.Repositories;
 
 public class ProductImageRepository(AppDbContext context) : IProductImageRepository
 {
-    public void  DeleteProductImages(Guid id)
+    public void DeleteProductImages(Guid id)
     {
         var result = context.ProductImages.FirstOrDefault(p => p.ProductId == id);
         if (result != null) throw new ArgumentNullException();
@@ -16,21 +17,21 @@ public class ProductImageRepository(AppDbContext context) : IProductImageReposit
 
     public void DeleteProductImages(List<string> images, Guid id)
     {
-        foreach (var image in images)
+        for (int i = 0; i < images.Count; i++)
         {
-         var result =    context.ProductImages.Where(pi => pi.Path == image && pi.ProductId == id).ToList();
-         context.ProductImages.RemoveRange(result);
+            var imagePath = ClsUtil.RemoveAdditionalPath(images[i]);
+            var result = context.ProductImages.FirstOrDefault(pi => pi.Path ==imagePath && pi.ProductId == id);
+            if (result is not null)
+                context.ProductImages.Remove(result);
         }
-
     }
 
 
-
-    public  void AddProductImage(ICollection<ProductImage> productImage)
+    public void AddProductImage(ICollection<ProductImage> productImage)
     {
         for (var i = 0; i < productImage.Count; i++)
         {
-             context.ProductImages.Add(productImage.ElementAt(i));
+            context.ProductImages.Add(productImage.ElementAt(i));
         }
     }
 
@@ -42,6 +43,7 @@ public class ProductImageRepository(AppDbContext context) : IProductImageReposit
             .Select(pi => pi.Path)
             .ToListAsync();
     }
+    
 
     public void Add(ProductImage entity)
     {

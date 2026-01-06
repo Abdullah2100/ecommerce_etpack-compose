@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.ui.view.account.store
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -72,7 +73,6 @@ import com.example.eccomerce_app.viewModel.CurrencyViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.koin.core.context.startKoin
 import java.util.UUID
 
 
@@ -117,6 +117,7 @@ fun ProductDetail(
     val selectedImage = remember { mutableStateOf(productData?.thumbnail) }
 
     val selectedProductVariants = remember { mutableStateOf<List<ProductVariant>>(emptyList()) }
+
     if (selectedProductVariants.value.isEmpty() && productData?.productVariants?.isNotEmpty() == true) {
         productData.productVariants.forEach { it ->
             val firstElement = it.first()
@@ -155,8 +156,6 @@ fun ProductDetail(
             images.value = listOf<String>(productData.thumbnail)
         }
     }
-
-
 
     fun getStoreInfoByStoreId(id: UUID? = UUID.randomUUID()) {
         storeViewModel.getStoreData(storeId = id!!)
@@ -418,7 +417,7 @@ fun ProductDetail(
                         variants.value?.firstOrNull { it.id == productData.productVariants!![index][0].variantId }?.name
                             ?: ""
                     Text(
-                        text = stringResource(R.string.select, title),
+                        text = stringResource(R.string.select),
                         color = CustomColor.neutralColor950,
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
@@ -426,99 +425,125 @@ fun ProductDetail(
                         modifier = Modifier.padding(start = 15.dp)
                     )
                     Sizer(10)
-                    FlowRow(
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
                         modifier = Modifier
                             .padding(horizontal = 15.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                            .fillMaxWidth()
                     ) {
-                        repeat(productData.productVariants[index].size) { pvIndex ->
+                        Text(
+                            text = title,
+                            color = CustomColor.neutralColor950,
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(start = 15.dp)
+                        )
+                        Sizer(width=10)
+                        FlowRow(
+                            modifier = Modifier
+                                .weight(1f),
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            repeat(productData.productVariants[index].size) { pvIndex ->
 
-                            val productVariantHolder = ProductVariant(
-                                id = productData.productVariants[index][pvIndex].id,
-                                name = productData.productVariants[index][pvIndex].name,
-                                percentage = productData.productVariants[index][pvIndex].percentage,
-                                variantId = productData.productVariants[index][pvIndex].variantId
-                            )
-                            when (title == "Color") {
-                                true -> {
-                                    val colorValue =
-                                        General.convertColorToInt(productData.productVariants[index][pvIndex].name)
+                                val productVariantHolder = ProductVariant(
+                                    id = productData.productVariants[index][pvIndex].id,
+                                    name = productData.productVariants[index][pvIndex].name,
+                                    percentage = productData.productVariants[index][pvIndex].percentage,
+                                    variantId = productData.productVariants[index][pvIndex].variantId
+                                )
 
-                                    if (colorValue != null)
+
+                                when (title == "Color" || title == "color") {
+                                    true -> {
+                                        val colorValue =
+                                            General.convertColorToInt(productData.productVariants[index][pvIndex].name)
+
+                                        if (colorValue != null)
+                                            Box(
+                                                modifier = Modifier
+                                                    .height(24.dp)
+                                                    .width(24.dp)
+                                                    .border(
+                                                        width = if (selectedProductVariants.value.contains(
+                                                                productVariantHolder
+                                                            )
+                                                        ) 1.dp else 0.dp,
+                                                        color = if (selectedProductVariants.value.contains(
+                                                                productVariantHolder
+                                                            )
+                                                        ) CustomColor.primaryColor700
+                                                        else Color.Transparent,
+                                                        shape = RoundedCornerShape(20.dp)
+                                                    )
+                                                    .clip(RoundedCornerShape(20.dp))
+                                                    .clickable {
+
+                                                        val copyVariant =
+                                                            mutableListOf<ProductVariant>()
+
+                                                        copyVariant.add(productVariantHolder)
+                                                        copyVariant.addAll(selectedProductVariants.value)
+                                                        selectedProductVariants.value =
+                                                            copyVariant.distinctBy { it.variantId }
+
+                                                    }
+                                            )
+                                            {
+                                                    Box(
+                                                        Modifier
+                                                            .padding(2.dp)
+                                                            . height(22.dp)
+                                                            .width(22.dp)
+                                                            .background(
+                                                                colorValue,
+                                                                RoundedCornerShape(20.dp)
+                                                            )
+
+                                                    ) { }
+                                            }
+                                    }
+
+                                    else -> {
                                         Box(
                                             modifier = Modifier
-                                                .height(24.dp)
-                                                .width(24.dp)
-                                                .background(
-                                                    colorValue,
-                                                    RoundedCornerShape(20.dp)
-                                                )
                                                 .border(
-                                                    width = if (selectedProductVariants.value.contains(
+                                                    1.dp,
+                                                    if (selectedProductVariants.value.contains(
                                                             productVariantHolder
                                                         )
-                                                    ) 1.dp else 0.dp,
-                                                    color = if (selectedProductVariants.value.contains(
-                                                            productVariantHolder
-                                                        )
-                                                    ) CustomColor.primaryColor700
-                                                    else Color.Transparent,
-                                                    shape = RoundedCornerShape(20.dp)
+                                                    ) CustomColor.primaryColor700 else CustomColor.neutralColor200,
+                                                    RoundedCornerShape(8.dp)
                                                 )
+                                                .padding(horizontal = 10.dp, vertical = 10.dp)
                                                 .clip(RoundedCornerShape(20.dp))
                                                 .clickable {
 
-                                                    val copyVarient =
+                                                    val copyVariant =
                                                         mutableListOf<ProductVariant>()
 
-                                                    copyVarient.add(productVariantHolder)
-                                                    copyVarient.addAll(selectedProductVariants.value)
-                                                    selectedProductVariants.value =
-                                                        copyVarient.distinctBy { it.variantId }
+                                                    copyVariant.add(productVariantHolder)
+                                                    copyVariant.addAll(selectedProductVariants.value)
+                                                    selectedProductVariants.value = copyVariant
+                                                        .distinctBy { it.variantId }
 
-                                                }
-                                                .padding(5.dp)
-                                        )
-                                }
-
-                                else -> {
-                                    Box(
-                                        modifier = Modifier
-                                            .border(
-                                                1.dp,
-                                                if (selectedProductVariants.value.contains(
-                                                        productVariantHolder
-                                                    )
-                                                ) CustomColor.primaryColor700 else CustomColor.neutralColor200,
-                                                RoundedCornerShape(8.dp)
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = productData.productVariants[index][pvIndex].name,
+                                                color = CustomColor.neutralColor950,
+                                                fontFamily = General.satoshiFamily,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 16.sp,
+                                                // modifier = Modifier.padding(start = 15.dp)
                                             )
-                                            .padding(horizontal = 10.dp, vertical = 10.dp)
-                                            .clip(RoundedCornerShape(20.dp))
-                                            .clickable {
-
-                                                val copyVarient = mutableListOf<ProductVariant>()
-
-                                                copyVarient.add(productVariantHolder)
-                                                copyVarient.addAll(selectedProductVariants.value)
-                                                selectedProductVariants.value = copyVarient
-                                                    .distinctBy { it.variantId }
-
-                                            },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = productData.productVariants[index][pvIndex].name,
-                                            color = CustomColor.neutralColor950,
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 16.sp,
-                                            // modifier = Modifier.padding(start = 15.dp)
-                                        )
+                                        }
                                     }
                                 }
-                            }
 
+                            }
                         }
                     }
                 }

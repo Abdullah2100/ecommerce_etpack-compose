@@ -2,7 +2,7 @@ package com.example.eccomerce_app.data.repository
 
 import com.example.eccomerce_app.dto.UpdateMyInfoDto
 import com.example.eccomerce_app.dto.UserDto
-import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.util.GeneralValue
 import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
@@ -24,12 +24,12 @@ class UserRepository(val client: HttpClient) {
      suspend fun getMyInfo(): NetworkCallHandler {
         return try {
             val result = client.get(
-                Secrets.getBaseUrl() + "/User/me"
+                Secrets.getUrl() + "/User/me"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }
@@ -58,12 +58,12 @@ class UserRepository(val client: HttpClient) {
      suspend fun UpdateMyInfo(data: UpdateMyInfoDto): NetworkCallHandler {
         return try {
             val result = client.put(
-                Secrets.getBaseUrl() + "/User"
+                Secrets.getUrl() + "/User"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
                 setBody(

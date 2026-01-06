@@ -3,11 +3,12 @@ package com.example.eccomerce_app.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.eccomerce_app.dto.VarientDto
+import com.example.eccomerce_app.dto.VariantDto
 import com.example.eccomerce_app.model.DtoToModel.toVariant
 import com.example.e_commercompose.model.VarirntModel
 import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.data.repository.VariantRepository
+import com.example.eccomerce_app.util.GeneralValue
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,10 +29,11 @@ class VariantViewModel(val variantRepository: VariantRepository) : ViewModel() {
     fun getVariants(pageNumber: Int = 1) {
         if (pageNumber == 1 && _variants.value != null) return
         viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+
             val result = variantRepository.getVariant(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    val variantsHolder = result.data as List<VarientDto>
+                    val variantsHolder = result.data as List<VariantDto>
 
                     val mutableVariant = mutableListOf<VarirntModel>()
 

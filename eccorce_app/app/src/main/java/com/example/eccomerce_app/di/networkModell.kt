@@ -2,10 +2,12 @@ package com.example.eccomerce_app.di
 
 import android.util.Log
 import com.example.eccomerce_app.data.Room.Dao.AuthDao
+import com.example.eccomerce_app.util.General
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -34,16 +36,16 @@ fun provideHttpClient(authDao:AuthDao): HttpClient {
                 //  sendWithoutRequest { true }
 //                loadTokens {
 //                    BearerTokens(
-//                        General.authData.value?.token?:"",
-//                        General.authData.value?.refreshToken ?:""
+//                        General.authData?.token ?: "",
+//                        General.authData?.refreshToken ?: ""
 //                    )
 //                }
-
+//
 //                    try {
 //                        val refreshToken = client.
 //                        post("${General.BASED_URL}/refreshToken/refresh") {
 //                            url {
-//                                parameters.append("tokenHolder", General.authData.value?.refreshToken ?: "")
+//                                parameters.append("tokenHolder", General.authData?.refreshToken ?: "")
 //                            }
 //                            markAsrefreshTokenRequest()
 //                        }

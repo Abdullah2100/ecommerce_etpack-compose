@@ -35,12 +35,13 @@ public class BannerRepository(AppDbContext context) : IBannerRepository
 
     public void Delete(Guid id)
     {
-        var banners = context
-            .Banner
-            .Where(ba => ba.Id == id)
-            .ToListAsync();
 
-        context.RemoveRange(banners);
+        var banner = context
+            .Banner
+            .FirstOrDefault(ba => ba.Id == id);
+        if(banner is null )return;
+
+        context.Remove(banner);
     }
 
     public void Delete(List<Banner> banners)
@@ -52,7 +53,8 @@ public class BannerRepository(AppDbContext context) : IBannerRepository
     {
         return await context
             .Banner
-            .FindAsync(id);
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ba=>ba.Id==id);
     }
 
     public async Task<Banner?> GetBanner(Guid id, Guid storeId)

@@ -3,7 +3,7 @@ package com.example.eccomerce_app.data.repository
 import com.example.eccomerce_app.dto.AddressDto
 import com.example.eccomerce_app.dto.CreateAddressDto
 import com.example.eccomerce_app.dto.UpdateAddressDto
-import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.util.GeneralValue
 import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.dto.DeliveryDto
@@ -31,12 +31,12 @@ class DeliveryRepository(val client: HttpClient) {
     suspend fun getDeliveriesBelongToStore(pageNumber: Int): NetworkCallHandler {
         return try {
             val result = client.get(
-                Secrets.getBaseUrl() + "/Delivery/all/${pageNumber}"
+                Secrets.getUrl() + "/Delivery/all/${pageNumber}"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
 
@@ -73,12 +73,12 @@ class DeliveryRepository(val client: HttpClient) {
     suspend fun createNewDelivery(userId: UUID): NetworkCallHandler {
         return try {
             val result = client.post(
-                Secrets.getBaseUrl() + "/Delivery/new"
+                Secrets.getUrl() + "/Delivery/new"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
                 setBody(

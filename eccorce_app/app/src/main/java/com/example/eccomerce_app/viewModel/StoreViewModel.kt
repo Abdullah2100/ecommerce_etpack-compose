@@ -1,14 +1,12 @@
 package com.example.eccomerce_app.viewModel
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.dto.StoreDto
 import com.example.eccomerce_app.model.DtoToModel.toStore
 import com.example.e_commercompose.model.StoreModel
-import com.example.eccomerce_app.ui.view.account.store.EnStoreOperation
 import com.example.eccomerce_app.dto.CreateStoreDto
 import com.example.eccomerce_app.dto.StoreStatusDto
 import com.example.eccomerce_app.data.NetworkCallHandler
@@ -18,6 +16,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
@@ -29,16 +28,18 @@ class StoreViewModel(
     @Named("storeHub")  val webSocket: HubConnection?
 ) : ViewModel() {
 
-    val _hub = MutableStateFlow<HubConnection?>(null)
+   private val _hub = MutableStateFlow<HubConnection?>(null)
 
     val storeCreateData = MutableStateFlow<CreateStoreDto?>(null)
 
 
-    val _stores = MutableStateFlow<List<StoreModel>?>(null)
+   private val _stores = MutableStateFlow<List<StoreModel>?>(null)
     val stores = _stores.asStateFlow()
 
+   private val _isUpdate = MutableStateFlow(false)
+    val isUpdate = _isUpdate.asStateFlow()
 
-    val _coroutineException = CoroutineExceptionHandler { _, message ->
+  private  val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 
@@ -121,7 +122,6 @@ class StoreViewModel(
         wallpaperImage: File? = null,
         smallImage: File? = null,
         storeTitle: String? = null,
-        updateStoreOperation: MutableState<EnStoreOperation?>? =null,
         storeId: UUID?=null
     ) {
         var myStoreData: CreateStoreDto? = null
@@ -131,6 +131,7 @@ class StoreViewModel(
             }
         if (longitude != null && latitude != null) {
             myStoreData = storeCreateData.value?.copy(latitude = latitude, longitude = longitude)
+
         }
 
 
@@ -147,9 +148,10 @@ class StoreViewModel(
         }
         viewModelScope.launch {
             storeCreateData.emit(myStoreData)
+            _isUpdate.emit(true)
+
         }
-        if (updateStoreOperation != null&&storeId!=null)
-            updateStoreOperation.value = EnStoreOperation.Update
+
     }
 
 
@@ -171,6 +173,7 @@ class StoreViewModel(
         )
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
+                _isUpdate.emit(false)
                 storeCreateData.emit(CreateStoreDto())
                 val data = result.data as StoreDto
                 val storesHolder = mutableListOf<StoreModel>()
@@ -216,17 +219,23 @@ class StoreViewModel(
         )
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                val data = result.data as StoreDto
+                _isUpdate.emit(false)
+                val storeDto = result.data as StoreDto
+                val data = storeDto.toStore()
 
-                val storesHolder = mutableListOf<StoreModel>()
-                if (_stores.value != null) {
-                    storesHolder.add(data.toStore())
-                    storesHolder.addAll(_stores.value!!.toList())
-                } else {
-                    storesHolder.add(data.toStore())
-                }
-                val distinctStore = storesHolder.distinctBy { it.id }.toMutableList()
-                _stores.emit(distinctStore)
+
+                val storeHolder = _stores.value?.map {value->
+                    if(value.id==data.id)
+                        value.copy(
+                            name = data.name,
+                            latitude = data.latitude,
+                            longitude = data.longitude,
+                            smallImage = data.smallImage,
+                            pigImage = data.pigImage)
+                    else value
+                }?.toList()
+
+                _stores.emit(storeHolder)
 
                 return null
             }

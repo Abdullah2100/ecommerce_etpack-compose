@@ -25,11 +25,9 @@ import java.util.Locale
 
 object General {
 
-
-    val authData = MutableStateFlow<AuthModelEntity?>(null)
     val currentLocal = MutableStateFlow<String?>(null)
 
-    val BASED_URL = Secrets.getBaseUrl()
+    val BASED_URL = Secrets.getUrl()
 
 
     fun encryptionFactory(databaseName: String): SupportFactory {
@@ -65,7 +63,7 @@ object General {
 
     fun convertColorToInt(value: String): Color? {
         return try {
-            Color("#${value}".toColorInt())
+            Color(value.toColorInt())
         } catch (ex: Exception) {
             null
         }
@@ -157,7 +155,7 @@ object General {
 
             else -> {
                 if(year==1)return ""
-                "${day}/${month.number+1}/${year}"
+                "${day}/${month.number}/${year}"
             }
         }
 

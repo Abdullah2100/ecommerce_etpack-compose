@@ -78,12 +78,13 @@ namespace api.application.Services
             return images;
         }
 
+       
         public bool DeleteFile(string filePath)
         {
             try
             {
-                var newFilPath = filePath.Substring(1);
-                string fileRealPath = Path.Combine(host.ContentRootPath,"images", newFilPath);
+                var newFilPath =ClsUtil.RemoveAdditionalPath(filePath);
+                string fileRealPath = Path.Combine(host.ContentRootPath,"images/", newFilPath);
                 if (File.Exists(fileRealPath))
                 {
                     File.Delete(fileRealPath);

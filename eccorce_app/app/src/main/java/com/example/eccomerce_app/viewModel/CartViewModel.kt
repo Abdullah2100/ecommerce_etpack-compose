@@ -12,9 +12,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.lang.Math.toRadians
 import java.util.UUID
+import kotlin.math.asin
+import kotlin.math.ceil
+import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.pow
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 
@@ -174,30 +179,29 @@ class CartViewModel() : ViewModel() {
         }
     }
 
+    private fun haversineDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val r = 6371.0 // km
+        val dLat = toRadians(lat2 - lat1)
+        val dLon = toRadians(lon2 - lon1)
+        val a = sin(dLat / 2).pow(2) + cos(toRadians(lat1)) * cos(toRadians(lat2)) * sin(dLon / 2).pow(2)
+        val c = 2 * asin(sqrt(a))
+        return r * c
+    }
     suspend fun calculateOrderDistanceToUser(
         stores: List<StoreModel>?,
         currentAddress: Address?
     ) {
+        Log.d("updateCurrentLocation","${stores?.firstOrNull()?.latitude} ${stores?.firstOrNull()?.longitude} \n${currentAddress?.latitude} ${currentAddress?.longitude}")
+
         if (stores == null || currentAddress == null) return
         var copyDistance = 0.0
         cartItems.value.cartProducts.distinctBy { it.storeId }.forEach { product ->
-            val yPower = (
-                    stores.firstOrNull { it.id == product.storeId }!!.latitude -
-                            currentAddress.latitude
-                    ).pow(2)
 
-            val xPower = (
-                    stores.firstOrNull { it.id == product.storeId }!!.longitude -
-                            currentAddress.longitude
-                    ).pow(2)
-
-
-            val result = sqrt(xPower + yPower)
-
-
-            copyDistance = copyDistance + (max(1.0, (result / 1000)).toInt())
+           val distanceKm = haversineDistance(stores.firstOrNull { it.id == product.storeId }!!.latitude,stores.firstOrNull { it.id == product.storeId }!!.longitude,currentAddress.latitude,currentAddress.longitude)
+            copyDistance = ceil(max(1.0, (distanceKm)))
 
         }
+        Log.d("distanceToUserIs",copyDistance.toString())
         _distance.emit(copyDistance)
     }
 

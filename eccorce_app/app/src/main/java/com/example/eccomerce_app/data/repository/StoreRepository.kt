@@ -1,7 +1,7 @@
 package com.example.eccomerce_app.data.repository
 
 import com.example.eccomerce_app.dto.StoreDto
-import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.util.GeneralValue
 import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
@@ -32,12 +32,12 @@ class StoreRepository(val client: HttpClient)   {
     ): NetworkCallHandler {
         return try {
             val result = client.post(
-                Secrets.getBaseUrl() + "/Store"
+                Secrets.getUrl() + "/Store"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
                 setBody(
@@ -111,12 +111,12 @@ class StoreRepository(val client: HttpClient)   {
     ): NetworkCallHandler {
         return try {
             val result = client.put(
-                Secrets.getBaseUrl() + "/Store"
+                Secrets.getUrl() + "/Store"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
                 setBody(
@@ -188,12 +188,12 @@ class StoreRepository(val client: HttpClient)   {
 
      suspend fun getStoreById(id: UUID): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Store/${id}"
+            val fullUrl = Secrets.getUrl() + "/Store/${id}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }

@@ -3,7 +3,7 @@ package com.example.eccomerce_app.data.repository
 import com.example.eccomerce_app.dto.AddressDto
 import com.example.eccomerce_app.dto.CreateAddressDto
 import com.example.eccomerce_app.dto.UpdateAddressDto
-import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.util.GeneralValue
 import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.dto.CurrencyDto
@@ -28,12 +28,12 @@ class CurrencyRepository(val client: HttpClient) {
 
      suspend fun getStoreCurrencies(pageNumber: Int): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Currencies/all/${pageNumber}"
+            val fullUrl = Secrets.getUrl() + "/Currencies/all/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }

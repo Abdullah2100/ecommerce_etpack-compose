@@ -3,7 +3,7 @@ package com.example.eccomerce_app.data.repository
 import com.example.eccomerce_app.dto.AddressDto
 import com.example.eccomerce_app.dto.CreateAddressDto
 import com.example.eccomerce_app.dto.UpdateAddressDto
-import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.util.GeneralValue
 import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
@@ -27,12 +27,12 @@ class AddressRepository(val client: HttpClient) {
      suspend fun userAddNewAddress(locationData: CreateAddressDto): NetworkCallHandler {
         return try {
             val result = client.post(
-                Secrets.getBaseUrl() + "/User/address"
+                Secrets.getUrl() + "/User/address"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
                 setBody(
@@ -71,12 +71,12 @@ class AddressRepository(val client: HttpClient) {
      suspend fun userUpdateAddress(locationData: UpdateAddressDto): NetworkCallHandler {
         return try {
             val result = client.put(
-                Secrets.getBaseUrl() + "/User/address"
+                Secrets.getUrl() + "/User/address"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
                 setBody(
@@ -115,12 +115,12 @@ class AddressRepository(val client: HttpClient) {
      suspend fun deleteUserAddress(addressID: UUID): NetworkCallHandler {
         return try {
             val result = client.delete(
-                Secrets.getBaseUrl() + "/User/address/${addressID}"
+                Secrets.getUrl() + "/User/address/${addressID}"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
 
@@ -155,19 +155,19 @@ class AddressRepository(val client: HttpClient) {
     suspend fun setAddressAsCurrent(addressId: UUID): NetworkCallHandler {
         return try {
             val result = client.patch(
-                Secrets.getBaseUrl() + "/User/address/active/${addressId}"
+                Secrets.getUrl() + "/User/address/active/${addressId}"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }
 
             when (result.status) {
-                HttpStatusCode.Companion.NoContent -> {
-                    NetworkCallHandler.Successful(result.body<Boolean>())
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Successful(true)
                 }
 
                 else -> {
@@ -193,12 +193,12 @@ class AddressRepository(val client: HttpClient) {
 
      suspend fun getStoreAddress(id: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Store/${id}/${pageNumber}"
+            val fullUrl = Secrets.getUrl() + "/Store/${id}/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${GeneralValue.authData?.refreshToken}"
                     )
                 }
             }

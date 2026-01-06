@@ -84,8 +84,7 @@ fun AccountPage(
 
     val myInfo = userViewModel.userInfo.collectAsState()
     val currentLocale = currentLocal.collectAsState()
-    val currencies = currencyViewModel.currencies.collectAsState()
-    val currentCurrency = currencies.value?.firstOrNull { it -> it.isSelected == true }
+    val currencies = currencyViewModel.currenciesList.collectAsState()
 
 
     val storeId = myInfo.value?.storeId

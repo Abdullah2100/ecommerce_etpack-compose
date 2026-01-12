@@ -62,6 +62,8 @@ import com.example.e_commercompose.model.ProductVariant
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.eccomerce_app.ui.component.ProductShape
+import com.example.eccomerce_app.ui.component.ProductVariantComponent
 import com.example.eccomerce_app.ui.component.SharedAppBar
 import com.example.eccomerce_app.util.General.convertPriceToAnotherCurrency
 import com.example.eccomerce_app.viewModel.CartViewModel
@@ -159,9 +161,9 @@ fun ProductDetail(
     }
 
     fun getStoreInfoByStoreId(id: UUID? = UUID.randomUUID()) {
-        if(id==null) return
-         storeViewModel.getStoreData(storeId = id)
-        bannerViewModel.getStoreBanner(id,1)
+        if (id == null) return
+        storeViewModel.getStoreData(storeId = id)
+        bannerViewModel.getStoreBanner(id, 1)
         subCategoryViewModel.getStoreSubCategories(id, 1)
     }
 
@@ -175,7 +177,7 @@ fun ProductDetail(
         selectedProductVariants.value = copyVariant.distinctBy { it.variantId }
     }
 
-    fun getStoreData(){
+    fun getStoreData() {
         if (productData != null)
             productViewModel
                 .getProducts(
@@ -214,10 +216,10 @@ fun ProductDetail(
             .background(Color.White),
         topBar = {
             SharedAppBar(
-                title =stringResource(R.string.product_detail),
+                title = stringResource(R.string.product_detail),
                 nav = nav,
             )
-           },
+        },
         bottomBar = {
 //            if (isFromHome && (myInfo.value == null || (myInfo.value != null && myInfo.value?.storeId != productData?.storeId)))
             BottomAppBar(
@@ -271,264 +273,43 @@ fun ProductDetail(
             }
         }
 
-    ) {
-        it.calculateTopPadding()
-        it.calculateBottomPadding()
+    ) { scaffoldPadding ->
+        scaffoldPadding.calculateTopPadding()
+        scaffoldPadding.calculateBottomPadding()
 
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
-                .padding(it)
+                .padding(scaffoldPadding)
         ) {
 
-            item {
-                SubcomposeAsyncImage(
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .height(250.dp)
-                        .fillMaxWidth(),
-                    model = General.handlingImageForCoil(
-                        selectedImage.value,
-                        context
-                    ),
-                    contentDescription = "",
-                    loading = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                        ) {
-                            CircularProgressIndicator(
-                                color = Color.Black,
-                                modifier = Modifier.size(54.dp) // Adjust the size here
-                            )
-                        }
-                    },
-                )
-            }
+
 
             item {
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 15.dp)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.Start
-
-                ) {
-                    if (images.value != null && images.value!!.size >= 2) {
-                        Sizer(10)
-                        LazyRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically,
-
-                            ) {
-                            if (!images.value.isNullOrEmpty())
-                                items(
-                                    items = images.value as List<String>,
-                                    key = { image -> image }) { image ->
-
-                                    Box(
-                                        modifier = Modifier
-                                            .padding(end = 5.dp)
-                                            .border(
-                                                1.dp,
-                                                if (image == selectedImage.value)
-                                                    CustomColor.primaryColor700 else CustomColor.neutralColor200,
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                    ) {
-                                        SubcomposeAsyncImage(
-                                            contentScale = ContentScale.Crop,
-                                            modifier = Modifier
-                                                .height(50.dp)
-                                                .width(50.dp)
-                                                .clip(
-                                                    RoundedCornerShape(8.dp)
-                                                )
-                                                .clickable {
-                                                    if (image != selectedImage.value)
-                                                        selectedImage.value = image
-                                                },
-                                            model = General.handlingImageForCoil(
-                                                image,
-                                                context
-                                            ),
-                                            contentDescription = "",
-                                            loading = {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .fillMaxSize(),
-                                                    contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                                                ) {
-                                                    CircularProgressIndicator(
-                                                        color = Color.Black,
-                                                        modifier = Modifier.size(25.dp) // Adjust the size here
-                                                    )
-                                                }
-                                            },
-                                        )
-                                    }
-                                }
-                        }
-
-                    }
-                    Sizer(10)
-                    Text(
-                        text = productData?.name ?: "",
-                        color = CustomColor.neutralColor950,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = (18).sp
-                    )
-                    Sizer(16)
-                    Text(
-                        text = "\$${productData?.price}",
-                        color = CustomColor.neutralColor950,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-
-                    Sizer(16)
-                    Text(
-                        text = stringResource(R.string.product_details),
-                        color = CustomColor.neutralColor950,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-
-                    Sizer(10)
-                    Text(
-                        text = productData?.description ?: "",
-                        color = CustomColor.neutralColor800,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp
-                    )
-                    Sizer(15)
-                }
-            }
+                if(productData!=null)
+                ProductShape(
+                    product = productData,
+                    context = context,
+                    selectedImage = selectedImage.value?:"",
+                    updateSelectIndex = {value->selectedImage.value=value})
+              }
 
             if (!productData?.productVariants.isNullOrEmpty()) {
                 items(productData.productVariants.size) { index ->
                     val title =
-                        variants.value?.firstOrNull { it.id == productData.productVariants!![index][0].variantId }?.name
+                        variants.value?.firstOrNull { it.id == productData.productVariants[index][0].variantId }?.name
                             ?: ""
-                    Text(
-                        text = stringResource(R.string.select),
-                        color = CustomColor.neutralColor950,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(start = 15.dp)
-                    )
-                    Sizer(10)
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier
-                            .padding(horizontal = 15.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = title,
-                            color = CustomColor.neutralColor950,
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(start = 15.dp)
-                        )
-                        Sizer(width = 10)
-                        FlowRow(
-                            modifier = Modifier
-                                .weight(1f),
-                            horizontalArrangement = Arrangement.spacedBy(5.dp)
-                        ) {
-                            repeat(productData.productVariants[index].size) { pvIndex ->
-
-                                val productVariantHolder = ProductVariant(
-                                    id = productData.productVariants[index][pvIndex].id,
-                                    name = productData.productVariants[index][pvIndex].name,
-                                    percentage = productData.productVariants[index][pvIndex].percentage,
-                                    variantId = productData.productVariants[index][pvIndex].variantId
-                                )
-
-
-                                when (title == "Color" || title == "color") {
-                                    true -> {
-                                        val colorValue =
-                                            General.convertColorToInt(productData.productVariants[index][pvIndex].name)
-
-                                        if (colorValue != null)
-                                            Box(
-                                                modifier = Modifier
-                                                    .height(24.dp)
-                                                    .width(24.dp)
-                                                    .border(
-                                                        width = if (selectedProductVariants.value.contains(
-                                                                productVariantHolder
-                                                            )
-                                                        ) 1.dp else 0.dp,
-                                                        color = if (selectedProductVariants.value.contains(
-                                                                productVariantHolder
-                                                            )
-                                                        ) CustomColor.primaryColor700
-                                                        else Color.White,
-                                                        shape = RoundedCornerShape(20.dp)
-                                                    )
-                                                    .clip(RoundedCornerShape(20.dp))
-                                                    .clickable { addProductVariant(productVariantHolder) }
-                                            )
-                                            {
-                                                Box(
-                                                    Modifier
-                                                        .padding(2.dp)
-                                                        .height(22.dp)
-                                                        .width(22.dp)
-                                                        .background(
-                                                            colorValue,
-                                                            RoundedCornerShape(20.dp)
-                                                        )
-
-                                                ) { }
-                                            }
-                                    }
-
-                                    else -> {
-                                        Box(
-                                            modifier = Modifier
-                                                .border(
-                                                    1.dp,
-                                                    if (selectedProductVariants.value.contains(
-                                                            productVariantHolder
-                                                        )
-                                                    ) CustomColor.primaryColor700 else CustomColor.neutralColor200,
-                                                    RoundedCornerShape(8.dp)
-                                                )
-                                                .padding(horizontal = 10.dp, vertical = 10.dp)
-                                                .clip(RoundedCornerShape(20.dp))
-                                                .clickable {  addProductVariant(productVariantHolder)   },
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = productData.productVariants[index][pvIndex].name,
-                                                color = CustomColor.neutralColor950,
-                                                fontFamily = General.satoshiFamily,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 16.sp,
-                                                // modifier = Modifier.padding(start = 15.dp)
-                                            )
-                                        }
-                                    }
-                                }
-
-                            }
+                    ProductVariantComponent(
+                        index = index,
+                        productVariants = productData.productVariants,
+                        variantName = title,
+                        selectedProductVariant = selectedProductVariants.value,
+                        selectProductVariant = { value ->
+                            addProductVariant(value)
                         }
-                    }
+                    )
+
                 }
             }
 
@@ -540,7 +321,9 @@ fun ProductDetail(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(horizontal = 15.dp)
-                    ) {
+                    )
+
+                    {
                         SubcomposeAsyncImage(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
@@ -588,8 +371,8 @@ fun ProductDetail(
                                     color = CustomColor.primaryColor700,
                                     modifier = Modifier
                                         .clickable {
-                                        getStoreData()
-                                    }
+                                            getStoreData()
+                                        }
                                 )
 
 

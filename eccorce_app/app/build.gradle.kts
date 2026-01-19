@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.e_commercompose"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -56,13 +56,17 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
+
     }
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+
+    kotlin {
+        sourceSets.all {
+         //   languageSettings.enableLanguageFeature("XXLanguage:+ExplicitBackingFields")
+            languageSettings.enableLanguageFeature("PropertyParamAnnotationDefaultTargetMode")
+        }
     }
 
     buildFeatures {
@@ -183,8 +187,9 @@ dependencies {
     implementation(libs.kotlinx.datetime)
 
     //payment strip
-    implementation("com.stripe:stripe-android:20.48.6")
-
+    implementation("com.stripe:stripeterminal:5.1.1")
+    implementation("com.stripe:stripeterminal-ktx:5.1.1")
+    implementation("com.stripe:stripe-android:22.6.0")
 }
 
 configurations.all {

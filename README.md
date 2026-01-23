@@ -1,4 +1,4 @@
-# E-commerce Full Stack Project Documentation
+# E-commerce Application Documentation
 
 This document provides an overview of the e-commerce full stack project, including its structure and key components.
 

@@ -17,8 +17,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
@@ -39,27 +41,34 @@ import com.example.e_commercompose.ui.component.Sizer
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.ProductViewModel
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun CategoryShape(
-    categories:List<Category>,
+    categories: List<Category>,
     productViewModel: ProductViewModel,
-    nav: NavHostController
+    nav: ThreePaneScaffoldNavigator<Any>
 ){
     val context = LocalContext.current
+    val coroutine = rememberCoroutineScope()
 
     fun getProductAndNavigateToProduct(id: UUID){
-        productViewModel.getProductsByCategoryID(
-            pageNumber = 1,
-            categoryId = id
-        )
-        nav.navigate(
-            Screens.ProductCategory(
-                id.toString()
+        coroutine.launch {
+            productViewModel.getProductsByCategoryID(
+                pageNumber = 1,
+                categoryId = id
             )
-        )
+            nav.navigateTo(
+                ListDetailPaneScaffoldRole.Detail,
+                Screens.ProductCategory(
+                    id.toString()
+                )
+            )
+        }
+
     }
 
     Row(
@@ -86,7 +95,11 @@ fun CategoryShape(
             color = CustomColor.neutralColor950,
             textAlign = TextAlign.Center,
             modifier = Modifier.clickable {
-                nav.navigate(Screens.Category)
+                coroutine.launch {
+                    nav.navigateTo(
+                        ListDetailPaneScaffoldRole.Detail,
+                        Screens.Category)
+                }
             }
 
         )

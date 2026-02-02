@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.ui.view.account.store
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,8 +20,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -36,7 +38,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.dto.ModelToDto.toListOfProductVariant
@@ -50,6 +52,7 @@ import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.component.CreateProductImage
 import com.example.eccomerce_app.ui.component.ProductVariantCreateComponent
 import com.example.eccomerce_app.ui.component.SharedAppBar
+import com.example.eccomerce_app.ui.component.SharedAppBarDetails
 import com.example.eccomerce_app.viewModel.CurrencyViewModel
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.SubCategoryViewModel
@@ -61,10 +64,11 @@ import java.io.File
 import java.util.UUID
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun CreateProductScreen(
-    nav: NavHostController,
+    nav: ThreePaneScaffoldNavigator<Any>,
     storeId: String,
     productId: String? = null,
     subCategoryViewModel: SubCategoryViewModel,
@@ -81,11 +85,11 @@ fun CreateProductScreen(
     val productIdHolder = if (productId == null) null else UUID.fromString(productId)
 
 
-    val products = productViewModel.products.collectAsState()
-    val variants = variantViewModel.variants.collectAsState()
-    val currencies = currencyViewModel.currenciesList.collectAsState()
+    val products = productViewModel.products.collectAsStateWithLifecycle()
+    val variants = variantViewModel.variants.collectAsStateWithLifecycle()
+    val currencies = currencyViewModel.currenciesList.collectAsStateWithLifecycle()
 
-    val subCategory = subCategoryViewModel.subCategories.collectAsState()
+    val subCategory = subCategoryViewModel.subCategories.collectAsStateWithLifecycle()
     val storeSubCategory = subCategory.value?.filter { it.storeId == storeIdHolder }
 
 
@@ -99,7 +103,7 @@ fun CreateProductScreen(
     val images = remember { mutableStateOf(productData?.productImages ?: emptyList()) }
     val productVariants = remember {
         mutableStateOf(if (productData != null && !productData.productVariants.isNullOrEmpty()) productData.productVariants.toListOfProductVariant()
-            else emptyList()
+        else emptyList()
         )
     }
     val deleteImages = remember { mutableStateOf<List<String>>(emptyList()) }
@@ -127,7 +131,7 @@ fun CreateProductScreen(
 
 
     fun updateConditionValue(isSendingDataValue: Boolean) {
-          isSendingData.value = isSendingDataValue
+        isSendingData.value = isSendingDataValue
     }
 
     fun validateInput(): Boolean {
@@ -237,7 +241,7 @@ fun CreateProductScreen(
                     selectedSubCategoryId.value = null
                     productVariants.value = emptyList()
                     snackBarHostState.showSnackbar(context.getString(R.string.product_created_successfully))
-                    nav.popBackStack()
+                    nav.navigateBack()
                 }
 
             }
@@ -303,7 +307,7 @@ fun CreateProductScreen(
                 selectedSubCategoryId.value = null
                 productVariants.value = emptyList()
                 snackBarHostState.showSnackbar(context.getString(R.string.product_update_successfully))
-                nav.popBackStack()
+                nav.navigateBack()
             }
         }
     }
@@ -335,7 +339,7 @@ fun CreateProductScreen(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBar(
+            SharedAppBarDetails(
                 title = if (productId == null) stringResource(R.string.create_product) else stringResource(
                     R.string.update_product
                 ),
@@ -410,7 +414,6 @@ fun CreateProductScreen(
                 fontWeight = FontWeight.Bold,
                 maxLines = 6
             )
-
             Text(
                 "Currency",
                 fontFamily = General.satoshiFamily,
@@ -439,12 +442,12 @@ fun CreateProductScreen(
             )
             Sizer(5)
             CustomDropDownComponent(
-               value = if (productData != null && selectedSubCategoryId.value == null)
-                   storeSubCategory?.firstOrNull { it.id == productData.subcategoryId }?.name
-                       ?: stringResource(R.string.select_subcategory)
-               else if (selectedSubCategoryId.value == null) stringResource(R.string.select_subcategory)
-               else storeSubCategory?.firstOrNull { it.id == selectedSubCategoryId.value }?.name
-                   ?: "",
+                value = if (productData != null && selectedSubCategoryId.value == null)
+                    storeSubCategory?.firstOrNull { it.id == productData.subcategoryId }?.name
+                        ?: stringResource(R.string.select_subcategory)
+                else if (selectedSubCategoryId.value == null) stringResource(R.string.select_subcategory)
+                else storeSubCategory?.firstOrNull { it.id == selectedSubCategoryId.value }?.name
+                    ?: "",
                 items = storeSubCategory?.map { it.name },
                 onSelectValue = { value ->
                     updateSubCategory(storeSubCategory?.firstOrNull { it.name == value }?.id ?: UUID.randomUUID())
@@ -469,11 +472,11 @@ fun CreateProductScreen(
                     Sizer(5)
 
                 ProductVariantCreateComponent(
-                   productVariants =  productVariants.value,
-                   variants = variants.value,
-                onRemoveProductVariant =  { value->removeProductVariant(value)}
+                    productVariants =  productVariants.value,
+                    variants = variants.value,
+                    onRemoveProductVariant =  { value->removeProductVariant(value)}
                 )
-                 if (productVariants.value.isNotEmpty())
+                if (productVariants.value.isNotEmpty())
                     Sizer(5)
 
                 CustomDropDownComponent(

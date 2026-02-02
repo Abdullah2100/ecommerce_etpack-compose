@@ -1,1 +1,0 @@
-/home/abdullah/Desktop/ecommerce_full_stack-jetpack-compose-asp-/eccorce_app/app/src/main/cpp/CMakeLists.txt

@@ -21,11 +21,13 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,8 +43,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.model.enMapType
 import com.example.e_commercompose.ui.component.CustomAuthBottom
@@ -80,11 +82,12 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 
 
-@SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnrememberedMutableState", "LocalContextGetResourceValueCall")
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun MapHomeScreen(
-    nav: NavHostController,
+    nav: ThreePaneScaffoldNavigator<Any>?=null,
+    navToHome: NavHostController?=null,
     userViewModel: UserViewModel,
     storeViewModel: StoreViewModel,
     mapViewModel: MapViewModel,
@@ -102,7 +105,7 @@ fun MapHomeScreen(
 
     val context = LocalContext.current
 
-    val directions = mapViewModel.googlePlaceInfo.collectAsState()
+    val directions = mapViewModel.googlePlaceInfo.collectAsStateWithLifecycle()
 
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
@@ -314,7 +317,9 @@ fun MapHomeScreen(
                         .height(50.dp)
                         .width(50.dp),
                     onClick = {
-                        nav.popBackStack()
+                        coroutine.launch {
+                            nav!!.navigateBack()
+                        }
                     },
                     shape = RoundedCornerShape(8.dp),
                     containerColor = CustomColor.alertColor_1_600
@@ -392,13 +397,13 @@ fun MapHomeScreen(
                                 )
 
                                 if (!isFomLogin) {
-                                    nav.popBackStack()
+                                    nav!!.navigateBack()
                                     return@launch
                                 }
 
                                 userViewModel.userPassLocation(true)
-                                nav.navigate(Screens.HomeGraph) {
-                                    popUpTo(nav.graph.id) {
+                                navToHome?.navigate(Screens.HomeGraph) {
+                                    popUpTo(navToHome.graph.id) {
                                         inclusive = true
                                     }
                                 }

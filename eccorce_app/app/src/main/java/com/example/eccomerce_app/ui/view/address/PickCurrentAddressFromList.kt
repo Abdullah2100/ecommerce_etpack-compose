@@ -15,20 +15,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.e_commercompose.model.Address
@@ -66,10 +63,10 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun PickCurrentAddressFromAddressScreen(
-    nav: NavHostController,
+    nav: NavHostController? = null,
     bannerViewModel: BannerViewModel,
     categoryViewModel: CategoryViewModel,
     variantViewModel: VariantViewModel,
@@ -81,7 +78,7 @@ fun PickCurrentAddressFromAddressScreen(
     val fontScall = LocalDensity.current.fontScale
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val locations = userViewModel.userInfo.collectAsState()
+    val locations = userViewModel.userInfo.collectAsStateWithLifecycle()
 
     val coroutine = rememberCoroutineScope()
 
@@ -100,7 +97,7 @@ fun PickCurrentAddressFromAddressScreen(
     }
 
 
-    fun choseCurrentUserLocation(address: Address){
+    fun choseCurrentUserLocation(address: Address) {
         coroutine.launch {
             isLoading.value = true
 
@@ -121,7 +118,7 @@ fun PickCurrentAddressFromAddressScreen(
             userViewModel.userPassLocation(true)
 
             initial()
-            nav.navigate(Screens.HomeGraph) {
+            nav?.navigate(Screens.HomeGraph) {
                 popUpTo(nav.graph.id) {
                     inclusive = true
                 }
@@ -141,12 +138,10 @@ fun PickCurrentAddressFromAddressScreen(
         topBar = {
             SharedAppBar(
                 title = stringResource(R.string.enter_your_location),
-                nav=nav,
-                scrollBehavior=scrollBehavior
+                nav = nav,
+                scrollBehavior = scrollBehavior
             )
         }
-
-
     ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()

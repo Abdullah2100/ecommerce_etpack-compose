@@ -1,9 +1,11 @@
 package com.example.eccomerce_app.ui.view.address
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -23,6 +25,11 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -50,20 +57,41 @@ import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.CustomTitleButton
 import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.viewModel.BannerViewModel
+import com.example.eccomerce_app.viewModel.CartViewModel
+import com.example.eccomerce_app.viewModel.CategoryViewModel
+import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
+import com.example.eccomerce_app.viewModel.MapViewModel
+import com.example.eccomerce_app.viewModel.OrderViewModel
+import com.example.eccomerce_app.viewModel.ProductViewModel
+import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
+import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("LocalContextGetResourceValueCall")
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AddressHomeScreen(
-    nav: NavHostController,
-    userViewModel: UserViewModel
-) {
+    nav: NavHostController?=null,
+    userViewModel: UserViewModel,
+    storeViewModel: StoreViewModel,
+    mapViewModel: MapViewModel,
+    cartViewModel: CartViewModel,
+    productViewModel: ProductViewModel,
+    categoryViewModel: CategoryViewModel,
+    variantViewModel: VariantViewModel,
+    bannerViewModel: BannerViewModel,
+    orderViewModel: OrderViewModel,
+    generalSettingViewModel: GeneralSettingViewModel
+
+    ) {
     val context = LocalContext.current
     val fontScall = LocalDensity.current.fontScale
 
     val coroutine = rememberCoroutineScope()
+    val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
     val isNotEnablePermission = remember { mutableStateOf(false) }
 
@@ -99,14 +127,17 @@ fun AddressHomeScreen(
                             addOnSuccessListener { location ->
 
                                 if (location != null)
-                                    nav.navigate(
-                                        Screens.MapScreen(
-                                            lognit = location.longitude,
-                                            latitt = location.latitude,
-                                            isFromLogin = true,
-                                            mapType = enMapType.My
+                                    coroutine.launch {
+                                        navigator.navigateTo(
+                                            ListDetailPaneScaffoldRole.Detail,
+                                            Screens.MapScreen(
+                                                lognit = location.longitude,
+                                                latitt = location.latitude,
+                                                isFromLogin = true,
+                                                mapType = enMapType.My
+                                            )
                                         )
-                                    )
+                                    }
                                 else
                                     coroutine.launch {
                                         snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
@@ -136,119 +167,175 @@ fun AddressHomeScreen(
         userViewModel.getMyInfo()
     }
 
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = snackBarHostState)
-        },
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        it.calculateTopPadding()
-        it.calculateBottomPadding()
+    BackHandler(enabled =navigator.canNavigateBack() ) {
+        coroutine.launch {
+            navigator.navigateBack()
+        }
+    }
 
-        Column(
-            modifier = Modifier
-                .background(Color.White)
-                .padding(it)
-                .padding(horizontal = 10.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        )
-        {
-
-            Box(
+    NavigableListDetailPaneScaffold(
+        navigator = navigator,
+        listPane = {
+            Scaffold(
+                snackbarHost = {
+                    SnackbarHost(hostState = snackBarHostState)
+                },
                 modifier = Modifier
-                    .height(80.dp)
-                    .width(80.dp)
-                    .background(
-                        CustomColor.primaryColor50,
-                        RoundedCornerShape(40.dp),
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = ImageVector
-                        .vectorResource(R.drawable.location), contentDescription = "",
-                    tint = CustomColor.primaryColor700
+                    .fillMaxSize()
+                    .background(Color.White)
+            )
+            {
+                it.calculateTopPadding()
+                it.calculateBottomPadding()
+
+                Column(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .padding(it)
+                        .padding(horizontal = 10.dp)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 )
-            }
+                {
 
-            Sizer(50)
-            Text(
-                stringResource(R.string.what_is_your_location),
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (24 / fontScall).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center
-
-            )
-            Sizer(8)
-            Text(
-                stringResource(R.string.we_need_to_know_your_location_in_order_to_suggest_nearby_services),
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = (16 / fontScall).sp,
-                color = CustomColor.neutralColor800,
-                textAlign = TextAlign.Center
-            )
-            Sizer(50)
-            CustomButton(
-                operation = {
-                    requestPermission.launch(
-                        arrayOf(
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    Box(
+                        modifier = Modifier
+                            .height(80.dp)
+                            .width(80.dp)
+                            .background(
+                                CustomColor.primaryColor50,
+                                RoundedCornerShape(40.dp),
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector
+                                .vectorResource(R.drawable.location), contentDescription = "",
+                            tint = CustomColor.primaryColor700
                         )
+                    }
+
+                    Sizer(50)
+                    Text(
+                        stringResource(R.string.what_is_your_location),
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = (24 / fontScall).sp,
+                        color = CustomColor.neutralColor950,
+                        textAlign = TextAlign.Center
+
                     )
-                },
-                buttonTitle = stringResource(R.string.allow_location_access),
-                color = CustomColor.primaryColor700
-            )
-            Sizer(20)
-            CustomTitleButton(
-                operation = {
-                    userViewModel.getMyInfo()
-                    nav.navigate(Screens.PickCurrentAddress)
-                },
-                buttonTitle = stringResource(R.string.enter_location_manually),
-                color = CustomColor.primaryColor700
-            )
+                    Sizer(8)
+                    Text(
+                        stringResource(R.string.we_need_to_know_your_location_in_order_to_suggest_nearby_services),
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = (16 / fontScall).sp,
+                        color = CustomColor.neutralColor800,
+                        textAlign = TextAlign.Center
+                    )
+                    Sizer(50)
+                    CustomButton(
+                        operation = {
+                            requestPermission.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION
+                                )
+                            )
+                        },
+                        buttonTitle = stringResource(R.string.allow_location_access),
+                        color = CustomColor.primaryColor700
+                    )
+                    Sizer(20)
+                    CustomTitleButton(
+                        operation = {
+                            userViewModel.getMyInfo()
+                            coroutine.launch {
+                                navigator.navigateTo( ListDetailPaneScaffoldRole.Detail,Screens.PickCurrentAddress)
+                            }
+                        },
+                        buttonTitle = stringResource(R.string.enter_location_manually),
+                        color = CustomColor.primaryColor700
+                    )
 
 
-            if (isNotEnablePermission.value) {
-                AlertDialog(
-                    onDismissRequest = {
-                        //Logic when dismiss happens
-                        updateConditionValue(isNotEnablePermissionValue = false)
-                    },
-                    title = {
-                        Text(stringResource(R.string.permission_required))
-                    },
-                    text = {
-                        Text(stringResource(R.string.you_need_to_approve_this_permission_in_order_to))
-                    },
-                    confirmButton = {
+                    if (isNotEnablePermission.value) {
+                        AlertDialog(
+                            onDismissRequest = {
+                                //Logic when dismiss happens
+                                updateConditionValue(isNotEnablePermissionValue = false)
+                            },
+                            title = {
+                                Text(stringResource(R.string.permission_required))
+                            },
+                            text = {
+                                Text(stringResource(R.string.you_need_to_approve_this_permission_in_order_to))
+                            },
+                            confirmButton = {
 //                        TextButton(onClick = {
 //                            Logic when user confirms to accept permissions
 //                        }) {
 //                            Text("Confirm")
 //                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = {
-                            //Logic when user denies to accept permissions
-                        }) {
-                            updateConditionValue(isNotEnablePermissionValue = false)
-                            Text(stringResource(R.string.deny))
-                        }
-                    })
+                            },
+                            dismissButton = {
+                                TextButton(onClick = {
+                                    //Logic when user denies to accept permissions
+                                }) {
+                                    updateConditionValue(isNotEnablePermissionValue = false)
+                                    Text(stringResource(R.string.deny))
+                                }
+                            })
+                    }
+                }
+
+
             }
+
+        },
+        detailPane = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                when (val content = navigator.currentDestination?.contentKey) {
+                    is Screens.MapScreen -> MapHomeScreen(
+                        nav = navigator,
+                        navToHome = nav,
+                        userViewModel = userViewModel,
+                        storeViewModel = storeViewModel,
+                        mapViewModel = mapViewModel,
+                        cartViewModel = cartViewModel,
+                        title = content.title,
+                        id = content.id,
+                        longitude = content.lognit,
+                        latitude = content.latitt,
+                        mapType = content.mapType,
+                        isFomLogin = content.isFromLogin,
+                        additionLat = content.additionLat,
+                        additionLong = content.additionLong,
+                    )
+                    is Screens.PickCurrentAddress ->{
+                        PickCurrentAddressFromAddressScreen(
+                            nav = nav,
+                            userViewModel = userViewModel,
+                            productViewModel = productViewModel,
+                            categoryViewModel = categoryViewModel,
+                            bannerViewModel = bannerViewModel,
+                            variantViewModel = variantViewModel,
+                            orderViewModel = orderViewModel,
+                            generalSettingViewModel = generalSettingViewModel,
+
+
+                        )
+                    }
+                }
+                }
         }
-
-
-    }
-
+    )
 }

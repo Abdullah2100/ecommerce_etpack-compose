@@ -1,35 +1,32 @@
 package com.example.eccomerce_app.ui.view.account
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,12 +37,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
@@ -54,20 +51,33 @@ import com.example.eccomerce_app.ui.component.AccountCustomBottom
 import com.example.eccomerce_app.ui.component.LogoutButton
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.component.SharedAppBar
+import com.example.eccomerce_app.ui.view.account.store.CreateProductScreen
+import com.example.eccomerce_app.ui.view.account.store.StoreScreen
+import com.example.eccomerce_app.ui.view.account.store.delivery.DeliveriesListScreen
+import com.example.eccomerce_app.ui.view.address.AddressHomeScreen
+import com.example.eccomerce_app.ui.view.address.EditOrAddLocationScreen
+import com.example.eccomerce_app.ui.view.address.MapHomeScreen
 import com.example.eccomerce_app.util.General.currentLocal
 import com.example.eccomerce_app.util.General.whenLanguageUpdateDo
 import com.example.eccomerce_app.viewModel.AuthViewModel
+import com.example.eccomerce_app.viewModel.BannerViewModel
+import com.example.eccomerce_app.viewModel.CartViewModel
+import com.example.eccomerce_app.viewModel.CategoryViewModel
 import com.example.eccomerce_app.viewModel.CurrencyViewModel
+import com.example.eccomerce_app.viewModel.DeliveryViewModel
+import com.example.eccomerce_app.viewModel.MapViewModel
 import com.example.eccomerce_app.viewModel.OrderItemsViewModel
 import com.example.eccomerce_app.viewModel.ProductViewModel
+import com.example.eccomerce_app.viewModel.StoreViewModel
+import com.example.eccomerce_app.viewModel.SubCategoryViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
+import com.example.eccomerce_app.viewModel.VariantViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
 @SuppressLint("ConfigurationScreenWidthHeight")
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AccountPage(
     nav: NavHostController,
@@ -75,20 +85,27 @@ fun AccountPage(
     orderItemsViewModel: OrderItemsViewModel,
     authViewModel: AuthViewModel,
     productViewModel: ProductViewModel,
-    currencyViewModel: CurrencyViewModel
+    currencyViewModel: CurrencyViewModel,
+    bannerViewModel: BannerViewModel,
+    categoryViewModel: CategoryViewModel,
+    subCategoryViewModel: SubCategoryViewModel,
+    storeViewModel: StoreViewModel,
+    mapViewModel: MapViewModel,
+    cartViewModel: CartViewModel,
+    variantViewModel: VariantViewModel,
+    deliveryViewModel: DeliveryViewModel
 ) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
     val coroutine = rememberCoroutineScope()
 
-    val myInfo = userViewModel.userInfo.collectAsState()
-    val currentLocale = currentLocal.collectAsState()
-    val currencies = currencyViewModel.currenciesList.collectAsState()
-
-
+    val myInfo = userViewModel.userInfo.collectAsStateWithLifecycle()
+    val currentLocale = currentLocal.collectAsStateWithLifecycle()
+    val currencies = currencyViewModel.currenciesList.collectAsStateWithLifecycle()
     val storeId = myInfo.value?.storeId
 
+    // adaptive navigator initialization
+    val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
     val isChangingCurrency = remember { mutableStateOf(false) }
     val isShowCurrencies = remember { mutableStateOf(false) }
@@ -101,23 +118,15 @@ fun AccountPage(
         isChangingLanguageValue: Boolean? = null,
         isExpandLanguageValue: Boolean? = null
     ) {
-        when {
-            isChangingCurrencyValue != null -> isChangingCurrency.value = isChangingCurrencyValue
-            isShowCurrenciesValue != null -> isShowCurrencies.value = isShowCurrenciesValue
-            isChangingLanguageValue != null -> isChangingLanguage.value = isChangingLanguageValue
-            isExpandLanguageValue != null -> isExpandLanguage.value = isExpandLanguageValue
-        }
+        if (isChangingCurrencyValue != null) isChangingCurrency.value = isChangingCurrencyValue
+        if (isShowCurrenciesValue != null) isShowCurrencies.value = isShowCurrenciesValue
+        if (isChangingLanguageValue != null) isChangingLanguage.value = isChangingLanguageValue
+        if (isExpandLanguageValue != null) isExpandLanguage.value = isExpandLanguageValue
     }
-
 
     val updateDirection = remember {
         derivedStateOf {
-            if (currentLocale.value == "ar") {
-                LayoutDirection.Rtl
-
-            } else {
-                LayoutDirection.Ltr
-            }
+            if (currentLocale.value == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
         }
     }
 
@@ -125,37 +134,24 @@ fun AccountPage(
         coroutine.launch {
             updateConditionValue(isChangingLanguageValue = true)
             delay(100)
-            val currentLange =
-                if (lang == "العربية") {
-                    if (currentLocale.value == "en")
-                        "ar"
-                    else ""
-                } else {
-                    if (currentLocale.value == "ar")
-                        "en"
-                    else ""
-                }
+            val currentLange = if (lang == "العربية") {
+                if (currentLocale.value == "en") "ar" else ""
+            } else {
+                if (currentLocale.value == "ar") "en" else ""
+            }
             if (currentLange.isEmpty()) {
                 updateConditionValue(isChangingLanguageValue = false)
                 return@launch
-            };
-            async {
-                userViewModel.updateCurrentLocale(
-                    currentLange
-                )
-            }.await()
+            }
+            async { userViewModel.updateCurrentLocale(currentLange) }.await()
             currentLocal.emit(currentLange)
-
             whenLanguageUpdateDo(currentLange, context)
             updateConditionValue(isChangingLanguageValue = false, isExpandLanguageValue = false)
-
         }
-
     }
 
     fun updateProductCurrency(symbol: String) {
         updateConditionValue(isChangingLanguageValue = true)
-
         productViewModel.setDefaultCurrency(symbol) { value ->
             updateConditionValue(isChangingLanguageValue = value)
         }
@@ -163,244 +159,308 @@ fun AccountPage(
 
     fun logout() {
         authViewModel.logout()
-        nav.navigate(Screens.AuthGraph)
-        {
-            popUpTo(nav.graph.id) {
-                inclusive = true
-            }
+        nav.navigate(Screens.AuthGraph) {
+            popUpTo(nav.graph.id) { inclusive = true }
         }
     }
+
     LaunchedEffect(isChangingLanguage.value) {
-        if (!isChangingLanguage.value)
-            updateConditionValue(isShowCurrenciesValue = false)
+        if (!isChangingLanguage.value) updateConditionValue(isShowCurrenciesValue = false)
     }
 
-
-    CompositionLocalProvider(
-        LocalLayoutDirection provides updateDirection.value
-    ) {
-        Scaffold(
-
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            topBar = {
-                SharedAppBar(
-                    title =stringResource(R.string.account),
-                    nav=nav,
-                    scrollBehavior = scrollBehavior
-                )
+    CompositionLocalProvider(LocalLayoutDirection provides updateDirection.value) {
+        // Handling back button for adaptive scaffold
+        BackHandler(enabled = navigator.canNavigateBack()) {
+            coroutine.launch {
+                navigator.navigateBack()
             }
-        )
-        {
-            it.calculateTopPadding()
-            it.calculateBottomPadding()
+        }
 
-            if (isChangingLanguage.value || isChangingCurrency.value) Dialog(
-                onDismissRequest = {})
-            {
-                Box(
-                    modifier = Modifier
-                        .height(90.dp)
-                        .width(90.dp)
-                        .background(
-                            Color.White, RoundedCornerShape(15.dp)
-                        ), contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        color = CustomColor.primaryColor700, modifier = Modifier.size(40.dp)
-                    )
-                }
-            }
-
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-                    .padding(paddingValues = it)
-                    .padding(horizontal = 15.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-
-                AccountCustomBottom(
-                    stringResource(R.string.your_profile),
-                    R.drawable.user, {
-                        nav.navigate(Screens.Profile)
-                    })
-                HorizontalDivider(
-                    modifier = Modifier
-                        .height(1.dp)
-                        .fillMaxWidth()
-                        .background(CustomColor.neutralColor200)
-                )
-
-                AccountCustomBottom(
-                    stringResource(R.string.address),
-                    R.drawable.location_address_list, {
-                        nav.navigate(Screens.EditeOrAddNewAddress)
-                    })
-                HorizontalDivider(
-                    modifier = Modifier
-                        .height(1.dp)
-                        .fillMaxWidth()
-                        .background(CustomColor.neutralColor200)
-                )
-                AccountCustomBottom(
-                    stringResource(R.string.my_store),
-                    R.drawable.store, {
-                        nav.navigate(
-                            Screens.Store(
-                                storeId?.toString(),
-                                false
-                            )
+        NavigableListDetailPaneScaffold(
+            navigator = navigator,
+            listPane = {
+                Scaffold(
+                    topBar = {
+                        SharedAppBar(
+                            title = stringResource(R.string.account),
+                            nav = nav,
+                            scrollBehavior = scrollBehavior
                         )
-                    })
-
-                HorizontalDivider(
-                    modifier = Modifier
-                        .height(1.dp)
-                        .fillMaxWidth()
-                        .background(CustomColor.neutralColor200)
-                )
-
-                if (myInfo.value?.storeId != null) {
-
-                    AccountCustomBottom(
-                        stringResource(R.string.order_for_my_store),
-                        R.drawable.order_belong_to_store,
-                        {
-                            orderItemsViewModel.getMyOrderItemBelongToMyStore(
-                                pageNumber = 1,
-                                isLoading = false
-                            )
-                            nav.navigate(Screens.OrderForMyStore)
-                        })
-
-
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .padding(top = 5.dp)
-                            .height(1.dp)
-                            .fillMaxWidth()
-                            .background(CustomColor.neutralColor200)
-                    )
-                }
-
-                AccountCustomBottom(
-                    stringResource(R.string.exchange_currency),
-                    R.drawable.currency_exchange,
-                    {
-                        updateConditionValue(isShowCurrenciesValue = true)
-                    },
-                    additionalComponent = {
-                        Box {
-                            DropdownMenu(
-                                containerColor = Color.White,
-                                expanded = isShowCurrencies.value,
-                                onDismissRequest = { updateConditionValue(isShowCurrenciesValue = false) })
-                            {
-                                currencies.value?.forEach { lang ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                lang.name,
-                                                fontFamily = General.satoshiFamily,
-                                                fontWeight = FontWeight.Medium,
-                                                fontSize = 18.sp,
-                                                color = CustomColor.neutralColor950,
-                                                textAlign = TextAlign.Center
-
-                                            )
-                                        },
-                                        onClick = {
-
-                                            updateProductCurrency(lang.symbol)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    })
-
-                HorizontalDivider(
-                    modifier = Modifier
-                        .height(1.dp)
-                        .fillMaxWidth()
-                        .background(CustomColor.neutralColor200)
-                )
-
-                AccountCustomBottom(
-                    "Language",
-                    R.drawable.language,
-                    operation = {
-                        if (currentLocale.value == "en")
-                            updateLanguage("العربية")
-                        else
-                            updateLanguage("English")
-                    },
-                    additionalComponent = {
-
-                        Box {
-                            TextButton(
+                    }
+                ) { padding ->
+                    if (isChangingLanguage.value || isChangingCurrency.value) {
+                        Dialog(onDismissRequest = {}) {
+                            Box(
                                 modifier = Modifier
-                                    .offset(y = 2.dp),
-                                onClick = { updateConditionValue(isExpandLanguageValue = true) }) {
-                                Text(
-                                    if (currentLocale.value == "en") "English" else "العربية",
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 12.sp,
-                                    color = CustomColor.neutralColor950,
-                                    textAlign = TextAlign.Center
-
+                                    .size(90.dp)
+                                    .background(Color.White, RoundedCornerShape(15.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    color = CustomColor.primaryColor700,
+                                    modifier = Modifier.size(40.dp)
                                 )
-                            }
-                            DropdownMenu(
-                                containerColor = Color.White,
-                                expanded = isExpandLanguage.value,
-                                onDismissRequest = { updateConditionValue(isExpandLanguageValue = false) })
-                            {
-                                listOf<String>(
-                                    "العربية",
-                                    "English"
-                                ).forEach { lang ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                lang,
-                                                fontFamily = General.satoshiFamily,
-                                                fontWeight = FontWeight.Medium,
-                                                fontSize = 18.sp,
-                                                color = CustomColor.neutralColor950,
-                                                textAlign = TextAlign.Center
-
-                                            )
-                                        },
-                                        onClick = {
-                                            updateLanguage(lang)
-                                        }
-                                    )
-                                }
                             }
                         }
                     }
 
-                )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.White)
+                            .padding(padding)
+                            .padding(horizontal = 15.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        AccountCustomBottom(
+                            stringResource(R.string.your_profile),
+                            R.drawable.user, {
+                                coroutine.launch {
+                                    navigator.navigateTo(
+                                        ListDetailPaneScaffoldRole.Detail,
+                                        Screens.Profile
+                                    )
+                                }
+                            })
+                        HorizontalDivider(
+                            Modifier
+                                .height(1.dp)
+                                .fillMaxWidth()
+                                .background(CustomColor.neutralColor200)
+                        )
 
-                HorizontalDivider(
+                        AccountCustomBottom(
+                            stringResource(R.string.address),
+                            R.drawable.location_address_list, {
+                                coroutine.launch {
+
+                                    navigator.navigateTo(
+                                        ListDetailPaneScaffoldRole.Detail,
+                                        Screens.LocationHome
+                                    )
+                                }
+                            })
+                        HorizontalDivider(
+                            Modifier
+                                .height(1.dp)
+                                .fillMaxWidth()
+                                .background(CustomColor.neutralColor200)
+                        )
+
+                        AccountCustomBottom(
+                            stringResource(R.string.my_store),
+                            R.drawable.store, {
+                                coroutine.launch {
+                                    navigator.navigateTo(
+                                        ListDetailPaneScaffoldRole.Detail,
+                                        Screens.Store(storeId.toString(), false)
+
+                                    )
+                                }
+                            })
+                        HorizontalDivider(
+                            Modifier
+                                .height(1.dp)
+                                .fillMaxWidth()
+                                .background(CustomColor.neutralColor200)
+                        )
+
+                        if (myInfo.value?.storeId != null) {
+                            AccountCustomBottom(
+                                stringResource(R.string.order_for_my_store),
+                                R.drawable.order_belong_to_store, {
+                                    coroutine.launch {
+                                        orderItemsViewModel.getMyOrderItemBelongToMyStore(1, false)
+                                        navigator.navigateTo(
+                                            ListDetailPaneScaffoldRole.Detail,
+                                            Screens.OrderForMyStore
+                                        )
+                                    }
+                                })
+                            HorizontalDivider(
+                                Modifier
+                                    .height(1.dp)
+                                    .fillMaxWidth()
+                                    .background(CustomColor.neutralColor200)
+                            )
+                        }
+
+                        AccountCustomBottom(
+                            stringResource(R.string.exchange_currency),
+                            R.drawable.currency_exchange, {
+                                updateConditionValue(isShowCurrenciesValue = true)
+                            },
+                            additionalComponent = {
+                                Box {
+                                    DropdownMenu(
+                                        containerColor = Color.White,
+                                        expanded = isShowCurrencies.value,
+                                        onDismissRequest = {
+                                            updateConditionValue(
+                                                isShowCurrenciesValue = false
+                                            )
+                                        }
+                                    ) {
+                                        currencies.value?.fastForEach { lang ->
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(
+                                                        lang.name,
+                                                        fontFamily = General.satoshiFamily,
+                                                        fontSize = 18.sp
+                                                    )
+                                                },
+                                                onClick = { updateProductCurrency(lang.symbol) }
+                                            )
+                                        }
+                                    }
+                                }
+                            })
+                        HorizontalDivider(
+                            Modifier
+                                .height(1.dp)
+                                .fillMaxWidth()
+                                .background(CustomColor.neutralColor200)
+                        )
+
+                        AccountCustomBottom(
+                            "Language",
+                            R.drawable.language, {
+                                if (currentLocale.value == "en") updateLanguage("العربية") else updateLanguage(
+                                    "English"
+                                )
+                            },
+                            additionalComponent = {
+                                Box {
+                                    TextButton(onClick = {
+                                        updateConditionValue(
+                                            isExpandLanguageValue = true
+                                        )
+                                    }) {
+                                        Text(
+                                            if (currentLocale.value == "en") "English" else "العربية",
+                                            color = CustomColor.neutralColor950
+                                        )
+                                    }
+                                    DropdownMenu(
+                                        containerColor = Color.White,
+                                        expanded = isExpandLanguage.value,
+                                        onDismissRequest = {
+                                            updateConditionValue(
+                                                isExpandLanguageValue = false
+                                            )
+                                        }
+                                    ) {
+                                        listOf("العربية", "English").forEach { lang ->
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(
+                                                        lang,
+                                                        fontFamily = General.satoshiFamily,
+                                                        fontSize = 18.sp
+                                                    )
+                                                },
+                                                onClick = { updateLanguage(lang) }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                        HorizontalDivider(
+                            Modifier
+                                .height(1.dp)
+                                .fillMaxWidth()
+                                .background(CustomColor.neutralColor200)
+                        )
+
+                        LogoutButton(
+                            stringResource(R.string.logout),
+                            R.drawable.logout
+                        ) { logout() }
+                    }
+                }
+            },
+            detailPane = {
+                Box(
                     modifier = Modifier
-                        .height(1.dp)
-                        .fillMaxWidth()
-                        .background(CustomColor.neutralColor200)
-                )
+                        .fillMaxSize()
+                        .background(Color.White)
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    when (val content = navigator.currentDestination?.contentKey) {
+                        is Screens.Profile -> ProfileScreen(
+                            nav = navigator,
+                            userViewModel = userViewModel
+                        )
 
-                LogoutButton(stringResource(R.string.logout), R.drawable.logout, {
-                    logout()
-                })
+                        is Screens.EditeOrAddNewAddress -> EditOrAddLocationScreen(
+                            nav = navigator,
+                            storeViewModel = storeViewModel,
+                            cartViewModel = cartViewModel,
+                            userViewModel = userViewModel
+                        )
 
+                        is Screens.Store -> StoreScreen(
+                            nav = navigator,
+                            copyStoreId = storeId.toString(),
+                            isFromHome = false,
+                            bannerViewModel = bannerViewModel,
+                            categoryViewModel = categoryViewModel,
+                            subCategoryViewModel = subCategoryViewModel,
+                            storeViewModel = storeViewModel,
+                            productViewModel = productViewModel,
+                            userViewModel = userViewModel
+                        )
+
+                        is Screens.OrderForMyStore -> OrderForMyStoreScreen(
+                            nav =  navigator,
+                            orderItemsViewModel =  orderItemsViewModel
+                        )
+
+                        is Screens.MapScreen -> MapHomeScreen(
+                            nav = navigator,
+                            navToHome = nav,
+                            userViewModel = userViewModel,
+                            storeViewModel = storeViewModel,
+                            mapViewModel = mapViewModel,
+                            cartViewModel = cartViewModel,
+                            title = content.title,
+                            id = content.id,
+                            longitude = content.lognit,
+                            latitude = content.latitt,
+                            mapType = content.mapType,
+                            isFomLogin = content.isFromLogin,
+                            additionLat = content.additionLat,
+                            additionLong = content.additionLong,
+                        )
+
+                        is Screens.PickCurrentAddress -> EditOrAddLocationScreen(
+                            nav = navigator,
+                            userViewModel,
+                            storeViewModel,
+                            cartViewModel
+                        )
+
+                        is Screens.CreateProduct -> CreateProductScreen(
+                            nav = navigator,
+                            storeId = storeId.toString(),
+                            subCategoryViewModel = subCategoryViewModel,
+                            variantViewModel = variantViewModel,
+                            productViewModel = productViewModel,
+                            currencyViewModel = currencyViewModel
+                        )
+
+                        is Screens.DeliveriesList -> DeliveriesListScreen(
+                            nav = navigator,
+                            deliveryViewModel = deliveryViewModel
+                        )
+
+                        else -> Text("")
+                    }
+                }
             }
-        }
+        )
     }
-
 }

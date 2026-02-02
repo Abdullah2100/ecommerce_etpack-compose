@@ -22,11 +22,15 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,7 +43,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
@@ -47,17 +50,19 @@ import com.example.e_commercompose.model.BannerModel
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun BannerBage(
+fun BannerPage(
 
     banners: List<BannerModel>,
     isMe: Boolean? = false,
-    nav: NavHostController? = null,
-    deleteBanner:((id: UUID)->Unit)?=null,
-    isShowTitle: Boolean=true
+    nav: ThreePaneScaffoldNavigator<Any>? = null,
+    deleteBanner: ((id: UUID) -> Unit)? =null,
+    isShowTitle: Boolean =true
 ) {
 
     val context = LocalContext.current
@@ -66,6 +71,8 @@ fun BannerBage(
     val pagerState = rememberPagerState { banners.size }
 
     val operationType = remember { mutableStateOf('+') }
+
+    val coroutine = rememberCoroutineScope()
 
     if (banners.size > 1) {
         LaunchedEffect(Unit) {
@@ -143,7 +150,11 @@ if(isShowTitle)
                                 shape = RoundedCornerShape(8.dp)
                             )
                             .clickable {
-                                nav!!.navigate(Screens.Store(banners[page].storeId.toString()))
+                                coroutine.launch {
+                                    nav!!.navigateTo(
+                                        ListDetailPaneScaffoldRole.Detail,
+                                        Screens.Store(banners[page].storeId.toString()))
+                                }
                             }
                             .constrainAs(imageRef) {
                                 top.linkTo(parent.top)

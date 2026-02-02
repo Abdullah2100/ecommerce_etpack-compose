@@ -12,8 +12,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -22,7 +26,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.e_commercompose.model.Address
 import com.example.e_commercompose.ui.component.LocationLoadingShape
@@ -30,25 +33,27 @@ import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.util.General
+import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun HomeAddressComponent(
-    address: Address?=null,
+    address: Address? = null,
     isPassCondition: Boolean = false,
-    screenWidth:Int,
-    animatedComponentSize:Dp,
-    nav: NavHostController
-){
+    screenWidth: Int,
+    animatedComponentSize: Dp,
+    nav: ThreePaneScaffoldNavigator<Any>
+) {
     val interactionSource = remember { MutableInteractionSource() }
-
+    val coroutine = rememberCoroutineScope()
     when (isPassCondition) {
         true -> {
             LocationLoadingShape((screenWidth))
         }
 
         else -> {
-            if (address!=null)
+            if (address != null)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -62,7 +67,12 @@ fun HomeAddressComponent(
                                 interactionSource = interactionSource,
                                 indication = null,
                                 onClick = {
-                                    nav.navigate(Screens.EditeOrAddNewAddress)
+                                    coroutine.launch {
+                                        nav.navigateTo(
+                                            ListDetailPaneScaffoldRole.Detail,
+                                            Screens.EditeOrAddNewAddress
+                                        )
+                                    }
                                 }
                             )
                     ) {

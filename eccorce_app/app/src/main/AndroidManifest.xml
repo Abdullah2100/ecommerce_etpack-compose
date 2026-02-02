@@ -33,6 +33,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Eccomerce_app"
         android:windowSoftInputMode="adjustResize"
+        android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
         tools:targetApi="33"
         android:localeConfig="@xml/locales_config">
 

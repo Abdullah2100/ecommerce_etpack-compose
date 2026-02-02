@@ -33,9 +33,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,7 +55,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
@@ -60,6 +63,7 @@ import com.example.e_commercompose.ui.component.Sizer
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.util.General.toCustomFil
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 /**
@@ -67,16 +71,18 @@ import java.util.UUID
  * @constructor nice
  * @see Int
  */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun ProductShape(
     product: List<ProductModel>,
     delFun: ((it: UUID) -> Unit)? = null,
     updFun: ((productId: UUID) -> Unit)? = null,
-    nav: NavHostController,
+    nav: ThreePaneScaffoldNavigator<Any>,
     isFromHome: Boolean = false,
     isCanNavigateToStore: Boolean = true
 ) {
     val context = LocalContext.current
+    val coroutine = rememberCoroutineScope()
 
     FlowRow(
         modifier = Modifier
@@ -100,13 +106,16 @@ fun ProductShape(
                         .width(160.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .clickable {
-                            nav.navigate(
-                                Screens.ProductDetails(
-                                    product[index].id.toString(),
-                                    isFromHome = isFromHome,
-                                    isCanNavigateToStore = isCanNavigateToStore
+                            coroutine.launch {
+                                nav.navigateTo(
+                                    ListDetailPaneScaffoldRole.Detail,
+                                    Screens.ProductDetails(
+                                        product[index].id.toString(),
+                                        isFromHome = isFromHome,
+                                        isCanNavigateToStore = isCanNavigateToStore
+                                    )
                                 )
-                            )
+                            }
                         }
                         .border(
                             (0.7).dp,
@@ -271,7 +280,7 @@ fun ProductShape(
                 .height(250.dp)
                 .fillMaxWidth(),
             model = General.handlingImageForCoil(
-                product.thumbnail,
+                selectedImage,
                 context
             ),
             contentDescription = "",

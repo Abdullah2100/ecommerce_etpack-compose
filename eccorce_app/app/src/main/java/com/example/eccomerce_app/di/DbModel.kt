@@ -1,7 +1,6 @@
 package com.example.eccomerce_app.di
 
 import android.content.Context
-import android.util.Log
 import androidx.room.Room
 import com.example.eccomerce_app.data.Room.DataBase
 import com.example.eccomerce_app.util.Secrets

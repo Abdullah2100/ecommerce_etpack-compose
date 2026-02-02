@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.ui.view.account.store
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,9 +16,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,7 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.model.CardProductModel
@@ -39,7 +42,7 @@ import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.component.ProductShape
 import com.example.eccomerce_app.ui.component.ProductVariantComponent
-import com.example.eccomerce_app.ui.component.SharedAppBar
+import com.example.eccomerce_app.ui.component.SharedAppBarDetails
 import com.example.eccomerce_app.ui.component.StoreProductQuickInfo
 import com.example.eccomerce_app.util.General.convertPriceToAnotherCurrency
 import com.example.eccomerce_app.viewModel.CartViewModel
@@ -55,10 +58,11 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("LocalContextGetResourceValueCall")
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun ProductDetail(
-    nav: NavHostController,
+    nav: ThreePaneScaffoldNavigator<Any>,
     cartViewModel: CartViewModel,
     productID: String?,
     isFromHome: Boolean,
@@ -82,12 +86,12 @@ fun ProductDetail(
     val productId = if (productID == null) null else UUID.fromString(productID)
 
 
-    val products = productViewModel.products.collectAsState()
-    val variants = variantViewModel.variants.collectAsState()
-    val stores = storeViewModel.stores.collectAsState()
-    val myInfo = userViewModel.userInfo.collectAsState()
-    val defaultCurrency = currencyViewModel.selectedCurrency.collectAsState()
-    val currencies = currencyViewModel.currenciesList.collectAsState()
+    val products = productViewModel.products.collectAsStateWithLifecycle()
+    val variants = variantViewModel.variants.collectAsStateWithLifecycle()
+    val stores = storeViewModel.stores.collectAsStateWithLifecycle()
+    val myInfo = userViewModel.userInfo.collectAsStateWithLifecycle()
+    val defaultCurrency = currencyViewModel.selectedCurrency.collectAsStateWithLifecycle()
+    val currencies = currencyViewModel.currenciesList.collectAsStateWithLifecycle()
 
     val productData = products.value?.firstOrNull { it.id == productId }
     val storeData = stores.value?.firstOrNull { it.id == productData?.storeId }
@@ -154,18 +158,22 @@ fun ProductDetail(
     }
 
     fun getStoreData() {
+        coroutine.launch {
         if (productData != null)
             productViewModel
                 .getProducts(
                     pageNumber = 1,
                     storeId = productData.storeId
                 )
-        nav.navigate(
+
+        nav.navigateTo(
+            ListDetailPaneScaffoldRole.Detail,
             Screens.Store(
                 storeId = storeData?.id.toString(),
                 isFromHome = true
             )
         )
+        }
     }
     if (!isFromHome) {
         LaunchedEffect(Unit) {
@@ -191,7 +199,7 @@ fun ProductDetail(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBar(
+            SharedAppBarDetails(
                 title = stringResource(R.string.product_detail),
                 nav = nav,
             )

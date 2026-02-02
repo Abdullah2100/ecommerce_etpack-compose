@@ -1,4 +1,7 @@
 [versions]
+adaptive = "1.3.0-alpha06"
+adaptiveLayout = "1.3.0-alpha06"
+adaptiveNavigation = "1.3.0-alpha06"
 agp = "8.12.3"
 core = "3.5.4"
 coreSplashscreen = "1.2.0"
@@ -36,6 +39,9 @@ gms="4.4.4"
 mapsUtilsKtx = "5.2.2"
 playServicesMaps = "20.0.0"
 qrKit = "3.1.3"
+stripeAndroid = "22.6.1"
+stripeterminal = "5.1.1"
+stripeterminalKtx = "5.1.1"
 uiGraphics = "1.10.1"
 ui = "1.10.1"
 gradleSecret = "2.0.1"
@@ -44,9 +50,14 @@ junitKtx = "1.3.0"
 mockk = "1.13.13"
 kotlinxCoroutinesTest = "1.10.2"
 coreTesting = "2.2.0"
+material3AdaptiveNavigationSuite = "1.4.0"
 
 
 [libraries]
+androidx-compose-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation", version.ref = "adaptiveNavigation" }
+androidx-compose-material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavigationSuite" }
+androidx-compose-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version.ref = "adaptiveLayout" }
+androidx-compose-adaptive = { module = "androidx.compose.material3.adaptive:adaptive", version.ref = "adaptive" }
 core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
@@ -58,6 +69,9 @@ koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 koin-test-junit4 = { module = "io.insert-koin:koin-test-junit4", version.ref = "koin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+stripe-android = { module = "com.stripe:stripe-android", version.ref = "stripeAndroid" }
+stripeterminal-ktx = { module = "com.stripe:stripeterminal-ktx", version.ref = "stripeterminalKtx" }
+stripeterminal = { module = "com.stripe:stripeterminal", version.ref = "stripeterminal" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "uiGraphics" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }

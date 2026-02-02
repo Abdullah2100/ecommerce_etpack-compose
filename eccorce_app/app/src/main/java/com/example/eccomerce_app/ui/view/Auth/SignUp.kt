@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.ui.view.Auth
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.eccomerce_app.viewModel.AuthViewModel
 import com.example.eccomerce_app.util.General
@@ -60,6 +61,7 @@ import kotlinx.coroutines.async
 
 
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun SignUpPage(
     nav: NavHostController,
@@ -74,7 +76,7 @@ fun SignUpPage(
     val scrollState = rememberScrollState()
 
 
-    val errorMessage = authKoin.errorMessage.collectAsState()
+    val errorMessage = authKoin.errorMessage.collectAsStateWithLifecycle()
 
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -380,7 +382,7 @@ fun SignUpPage(
                                     updateIsLoading = {value->isLoading.value = value}
                                 )
                                 if (result.isNullOrEmpty())
-                                    nav.navigate(Screens.LocationGraph) {
+                                    nav.navigate(Screens.LocationHome) {
                                         popUpTo(nav.graph.id) {
                                             inclusive = true
                                         }

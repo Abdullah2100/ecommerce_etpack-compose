@@ -1,6 +1,7 @@
 package com.example.eccomerce_app.ui.view.address
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
@@ -22,14 +23,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -37,11 +34,13 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,7 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
-import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.Address
@@ -69,6 +68,7 @@ import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.component.SharedAppBar
+import com.example.eccomerce_app.ui.component.SharedAppBarDetails
 import com.example.eccomerce_app.viewModel.CartViewModel
 import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
@@ -79,23 +79,24 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("LocalContextGetResourceValueCall")
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun EditOrAddLocationScreen(
-    nav: NavHostController,
+    nav: ThreePaneScaffoldNavigator<Any>,
     userViewModel: UserViewModel,
     storeViewModel: StoreViewModel,
     cartViewModel: CartViewModel
 ) {
     val context = LocalContext.current
-    val userInfo = userViewModel.userInfo.collectAsState()
+    val userInfo = userViewModel.userInfo.collectAsStateWithLifecycle()
 
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val coroutine = rememberCoroutineScope()
     val state = rememberPullToRefreshState()
 
-    val stores = storeViewModel.stores.collectAsState()
+    val stores = storeViewModel.stores.collectAsStateWithLifecycle()
 
     val snackBarHostState = remember { SnackbarHostState() }
     val locationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -128,21 +129,25 @@ fun EditOrAddLocationScreen(
                             addOnSuccessListener { location ->
 
                                 location?.toString()
+
+                                coroutine.launch {
                                 if (location != null)
-                                { nav.navigate(
-                                        Screens.MapScreen(
-                                            lognit = currentAddress.value?.longitude?: location.longitude,
-                                            latitt = currentAddress.value?.latitude?: location.latitude,
-                                            isFromLogin = false,
-                                            title = currentAddress.value?.title,
-                                            id = currentAddress.value?.id?.toString(),
-                                            mapType = enMapType.My,
+                                {
+
+                                        nav.navigateTo(
+                                            ListDetailPaneScaffoldRole.Detail,
+                                            Screens.MapScreen(
+                                                lognit = currentAddress.value?.longitude?: location.longitude,
+                                                latitt = currentAddress.value?.latitude?: location.latitude,
+                                                isFromLogin = false,
+                                                title = currentAddress.value?.title,
+                                                id = currentAddress.value?.id?.toString(),
+                                                mapType = enMapType.My,
+                                            )
                                         )
-                                    )
-                                currentAddress.value =null
-                                }
-                                else
-                                    coroutine.launch {
+                                        currentAddress.value =null
+                                    }
+                                    else
                                         snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
                                     }
                             }
@@ -186,11 +191,11 @@ fun EditOrAddLocationScreen(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-           SharedAppBar(
-               title =stringResource(R.string.address_list) ,
-               nav=nav,
-               scrollBehavior=scrollBehavior
-           )
+            SharedAppBarDetails(
+                title =stringResource(R.string.address_list) ,
+                nav=nav,
+                scrollBehavior=scrollBehavior
+            )
 
         },
         bottomBar = {

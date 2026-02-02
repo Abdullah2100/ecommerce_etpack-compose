@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.ui.view.Auth
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.ui.Screens
@@ -48,6 +49,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
@@ -58,7 +60,7 @@ fun LoginScreen(
     val fontScall = LocalDensity.current.fontScale
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    val errorMessage = authKoin.errorMessage.collectAsState()
+    val errorMessage = authKoin.errorMessage.collectAsStateWithLifecycle()
 
     val coroutine = rememberCoroutineScope()
 
@@ -116,6 +118,7 @@ fun LoginScreen(
     }
 
     Scaffold(
+        modifier = Modifier.background(Color.White),
         topBar = {
             SharedAppBar(title =  stringResource(R.string.login))
         },
@@ -254,7 +257,7 @@ fun LoginScreen(
                                         },
                                     )
                                     if (result.isNullOrEmpty())
-                                        nav.navigate(Screens.LocationGraph) {
+                                        nav.navigate(Screens.LocationHome) {
                                             popUpTo(nav.graph.id) {
                                                 inclusive = true
                                             }

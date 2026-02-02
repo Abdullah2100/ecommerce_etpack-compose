@@ -119,7 +119,7 @@ fun ReseatPasswordScreen(
                             if (!result.isNullOrEmpty()) {
                                 snackBarHostState.showSnackbar(result)
                             } else {
-                                nav.navigate(Screens.LocationGraph) {
+                                nav.navigate(Screens.LocationHome) {
                                     popUpTo(nav.graph.id) {
                                         inclusive = true
                                     }

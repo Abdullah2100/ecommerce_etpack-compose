@@ -10,6 +10,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.*
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -17,13 +20,14 @@ import androidx.compose.ui.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.*
-import androidx.navigation.NavHostController
 import com.example.eccomerce_app.viewModel.*
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import androidx.compose.ui.res.*
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.LabelValueRow
@@ -32,6 +36,7 @@ import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.PaymentTypeShape
 import com.example.eccomerce_app.ui.component.SharedAppBar
+import com.example.eccomerce_app.ui.component.SharedAppBarDetails
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.Secrets
 import com.stripe.android.PaymentConfiguration
@@ -39,8 +44,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.*
 
 
-@SuppressLint("ConfigurationScreenWidthHeight")
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("ConfigurationScreenWidthHeight","LocalContextGetResourceValueCall")
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun CheckoutScreen(
     nav: NavHostController,
@@ -50,22 +55,23 @@ fun CheckoutScreen(
     orderViewModel: OrderViewModel,
     paymentViewModel: PaymentViewModel,
     paymentTypeViewModel: PaymentTypeViewModel,
-    currencyViewModel:CurrencyViewModel
+    currencyViewModel: CurrencyViewModel,
+    navBack: ThreePaneScaffoldNavigator<Any>
 ) {
     val context = LocalContext.current
     val publicKey = rememberSaveable { mutableStateOf(Secrets.getStripKey()) }
     val coroutine = rememberCoroutineScope()
-    val cartData = cartViewModel.cartItems.collectAsState()
-    val paymentTypes = paymentTypeViewModel.paymentTypes.collectAsState()
-    val currenCurrncy = currencyViewModel.selectedCurrency.collectAsState()
+    val cartData = cartViewModel.cartItems.collectAsStateWithLifecycle()
+    val paymentTypes = paymentTypeViewModel.paymentTypes.collectAsStateWithLifecycle()
+    val currentCurrency = currencyViewModel.selectedCurrency.collectAsStateWithLifecycle()
 
     val snackBarHostState = remember { SnackbarHostState() }
 
 
     val config = LocalConfiguration.current
-    val myInfo = userViewModel.userInfo.collectAsState()
-    val generalSetting = generalSettingViewModel.generalSetting.collectAsState()
-    val distanceToUser = cartViewModel.distance.collectAsState()
+    val myInfo = userViewModel.userInfo.collectAsStateWithLifecycle()
+    val generalSetting = generalSettingViewModel.generalSetting.collectAsStateWithLifecycle()
+    val distanceToUser = cartViewModel.distance.collectAsStateWithLifecycle()
 
 
     val isSendingData = remember { mutableStateOf(false) }
@@ -87,7 +93,7 @@ fun CheckoutScreen(
     val selectedPaymentMethod = remember { mutableIntStateOf(0) }
 
 
-    fun submitOrderFun(isStartLoading: Boolean=false,stripIntentId:String?=null){
+    fun submitOrderFun(isStartLoading: Boolean=false, stripIntentId:String?=null){
         coroutine.launch {
           if(!isStartLoading){
               updateConditionValue(isSendingDataValue = false)
@@ -96,7 +102,7 @@ fun CheckoutScreen(
                 orderViewModel.submitOrder(
                     cartItems = cartData.value,
                     userAddress = currentAddress!!,
-                    symbol= currenCurrncy.value?.symbol?:"$",
+                    symbol= currentCurrency.value?.symbol?:"$",
                     clearCartData = { cartViewModel.clearCart() },
                     stripIntentId=stripIntentId,
                     paymentType =paymentTypes.value[selectedPaymentMethod.intValue].id)
@@ -195,9 +201,9 @@ fun CheckoutScreen(
             SnackbarHost(hostState = snackBarHostState)
         },
         topBar = {
-            SharedAppBar(
+            SharedAppBarDetails(
                 title = stringResource(R.string.checkout),
-                nav = nav
+                nav = navBack
             )
         },
         bottomBar = {
@@ -259,7 +265,12 @@ fun CheckoutScreen(
                                 textAlign = TextAlign.Center
 
                             )
-                            TextButton(onClick = { nav.navigate(Screens.EditeOrAddNewAddress) }) {
+                            TextButton(onClick = {
+                                coroutine.launch {
+                                    navBack.navigateTo(
+                                        ListDetailPaneScaffoldRole.Detail
+                                        ,Screens.EditeOrAddNewAddress)
+                                }}) {
                                 Text(
                                     "Change",
                                     fontFamily = General.satoshiFamily,

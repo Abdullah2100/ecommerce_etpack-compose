@@ -1,6 +1,7 @@
 package com.example.eccomerce_app.ui.view.account.store
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
@@ -9,8 +10,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,12 +33,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Timelapse
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -54,14 +50,15 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -70,7 +67,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -86,14 +82,13 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
-import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
-import com.example.e_commercompose.model.Category
 import com.example.e_commercompose.model.SubCategory
 import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.e_commercompose.model.enMapType
-import com.example.eccomerce_app.ui.component.BannerBage
+import com.example.eccomerce_app.ui.component.BannerPage
 import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.CustomDropDownComponent
 import com.example.e_commercompose.ui.component.ProductLoading
@@ -102,7 +97,7 @@ import com.example.e_commercompose.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.component.SharedAppBar
+import com.example.eccomerce_app.ui.component.SharedAppBarDetails
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.eccomerce_app.util.General.toCustomFil
@@ -126,13 +121,14 @@ import java.util.UUID
 
 enum class EnOperation { STORE }
 
-enum class EnBottomSheetType { SupCategory, Banner }
-enum class EnDateTimeType { Date, Time }
+enum class EnBottomSheetType { SUPCATEGORY, BANNER }
+enum class EnDateTimeType { DATE, TIME }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun StoreScreen(
-    nav: NavHostController,
+    nav: ThreePaneScaffoldNavigator<Any>,
     copyStoreId: String?,
     isFromHome: Boolean?,
     bannerViewModel: BannerViewModel,
@@ -154,12 +150,12 @@ fun StoreScreen(
     val lazyState = rememberLazyListState()
 
 
-    val createdStoreInfoHolder = storeViewModel.storeCreateData.collectAsState()
-    val myInfo = userViewModel.userInfo.collectAsState()
-    val categories = categoryViewModel.categories.collectAsState()
-    val banners = bannerViewModel.banners.collectAsState()
-    val subcategories = subCategoryViewModel.subCategories.collectAsState()
-    val products = productViewModel.products.collectAsState()
+    val createdStoreInfoHolder = storeViewModel.storeCreateData.collectAsStateWithLifecycle()
+    val myInfo = userViewModel.userInfo.collectAsStateWithLifecycle()
+    val categories = categoryViewModel.categories.collectAsStateWithLifecycle()
+    val banners = bannerViewModel.banners.collectAsStateWithLifecycle()
+    val subcategories = subCategoryViewModel.subCategories.collectAsStateWithLifecycle()
+    val products = productViewModel.products.collectAsStateWithLifecycle()
 
 
     val operationType = remember { mutableStateOf<EnOperation?>(null) }
@@ -181,7 +177,7 @@ fun StoreScreen(
     val page = remember { mutableIntStateOf(1) }
 
     //this to recognize if there any update data store is update
-    val isStoreUpdateData = storeViewModel.isUpdate.collectAsState()
+    val isStoreUpdateData = storeViewModel.isUpdate.collectAsStateWithLifecycle()
 
     val isLoadingMore = remember { mutableStateOf(false) }
     val isRefresh = remember { mutableStateOf(false) }
@@ -199,14 +195,15 @@ fun StoreScreen(
 
 
     val storeId = remember {
-        mutableStateOf<UUID?>(
-            if (copyStoreId == null) null else UUID.fromString(copyStoreId)
+        mutableStateOf(
+            if (copyStoreId == null) null
+            else UUID.fromString(copyStoreId)
         )
     }
 
 
     val myStoreId = myInfo.value?.storeId
-    val stores = storeViewModel.stores.collectAsState()
+    val stores = storeViewModel.stores.collectAsStateWithLifecycle()
     val storeData = stores.value?.firstOrNull { it.id == (storeId.value ?: myStoreId) }
     val storeBanners = banners.value?.filter { it.storeId == storeId.value }
     val storeSubCategories =
@@ -238,7 +235,7 @@ fun StoreScreen(
         return when {
             isFromHome == true
                 -> {
-                LatLng(storeData!!.latitude, storeData!!.longitude)
+                LatLng(storeData!!.latitude, storeData.longitude)
 
             }
 
@@ -248,7 +245,7 @@ fun StoreScreen(
                     currentLocation.longitude
                 )
                 else
-                    LatLng(storeData!!.latitude, storeData!!.longitude)
+                    LatLng(storeData.latitude, storeData.longitude)
             }
 
         }
@@ -271,6 +268,7 @@ fun StoreScreen(
                 } else locationClient.lastLocation.apply {
                     addOnSuccessListener { location ->
                         location?.toString()
+                        coroutine.launch {
                         if (location != null) {
                             val type =
                                 when ((myStoreId == storeId.value || myStoreId == null) && isFromHome == false) {
@@ -281,18 +279,21 @@ fun StoreScreen(
                             val locationHolder = handlingLocation(location)
 
                             Log.d("LocationData", "$locationHolder \n $location ")
-                            nav.navigate(
-                                Screens.MapScreen(
-                                    lognit = locationHolder?.longitude,
-                                    latitt = locationHolder?.latitude,
-                                    additionLat = if (type == enMapType.Store) location.latitude else null,
-                                    additionLong = if (type == enMapType.Store) location.longitude else null,
-                                    isFromLogin = false,
-                                    title = null,
-                                    mapType = type,
+
+                                nav.navigateTo(
+                                    ListDetailPaneScaffoldRole.Detail,
+                                    Screens.MapScreen(
+                                        lognit = locationHolder?.longitude,
+                                        latitt = locationHolder?.latitude,
+                                        additionLat = if (type == enMapType.Store) location.latitude else null,
+                                        additionLong = if (type == enMapType.Store) location.longitude else null,
+                                        isFromLogin = false,
+                                        title = null,
+                                        mapType = type,
+                                    )
                                 )
-                            )
-                        } else coroutine.launch {
+
+                        } else
                             snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
                         }
                     }
@@ -356,7 +357,7 @@ fun StoreScreen(
         if (uri != null) {
             val fileHolder = uri.toCustomFil(context = context)
             if (fileHolder != null) {
-                when (isPigImage.value == null || bottomSheetType.value == EnBottomSheetType.Banner) {
+                when (isPigImage.value == null || bottomSheetType.value == EnBottomSheetType.BANNER) {
                     true -> {
                         bannerImage.value = fileHolder
                         updateConditionValue(isShownDateDialogValue = true)
@@ -626,11 +627,11 @@ fun StoreScreen(
     fun dismissBottonSheet() {
         updateConditionValue(isOpenBottomSheetValue = false)
         when (bottomSheetType.value) {
-            EnBottomSheetType.Banner -> {
+            EnBottomSheetType.BANNER -> {
                 dismissBanner()
             }
 
-            EnBottomSheetType.SupCategory -> {
+            EnBottomSheetType.SUPCATEGORY -> {
                 dismissSubCategory()
             }
 
@@ -805,7 +806,7 @@ fun StoreScreen(
                             .fillMaxWidth()
                     ) {
                         when (bottomSheetDateTimeType.value) {
-                            EnDateTimeType.Date -> {
+                            EnDateTimeType.DATE -> {
                                 DatePicker(
                                     onDateSelected = { year, month, day ->
                                         updateDateTime(year, month, day)
@@ -864,7 +865,7 @@ fun StoreScreen(
                             .fillMaxWidth()
                     ) {
                         when (bottomSheetType.value) {
-                            EnBottomSheetType.Banner -> {
+                            EnBottomSheetType.BANNER -> {
                                 Text(
                                     stringResource(R.string.banner_image),
                                     fontFamily = General.satoshiFamily,
@@ -992,7 +993,7 @@ fun StoreScreen(
                                     }
                                     IconButton(
                                         onClick = {
-                                            updateBottonSheetTimeType(EnDateTimeType.Date)
+                                            updateBottonSheetTimeType(EnDateTimeType.DATE)
                                         })
                                     {
                                         Icon(
@@ -1033,7 +1034,7 @@ fun StoreScreen(
                                     }
                                     IconButton(
                                         onClick = {
-                                            updateBottonSheetTimeType(EnDateTimeType.Time)
+                                            updateBottonSheetTimeType(EnDateTimeType.TIME)
 
                                         })
                                     {
@@ -1123,7 +1124,7 @@ fun StoreScreen(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBar(
+            SharedAppBarDetails(
                 title = stringResource(R.string.store),
                 nav = nav,
                 action = {
@@ -1175,7 +1176,11 @@ fun StoreScreen(
                         modifier = Modifier
                             .padding(bottom = 3.dp)
                             .size(50.dp), onClick = {
-                            nav.navigate(Screens.DeliveriesList)
+                                coroutine.launch {
+                                    nav.navigateTo(
+                                        ListDetailPaneScaffoldRole.Detail,
+                                        Screens.DeliveriesList)
+                                }
                         }, containerColor = CustomColor.alertColor_2_700
                     ) {
                         Icon(
@@ -1187,13 +1192,16 @@ fun StoreScreen(
                     }
                     FloatingActionButton(
                         onClick = {
-                            nav.navigate(
-                                Screens.CreateProduct(
-                                    (storeId.value ?: myInfo.value?.storeId
-                                    ?: UUID.randomUUID()).toString(),
-                                    null
+                            coroutine.launch {
+                                nav.navigateTo(
+                                    ListDetailPaneScaffoldRole.Detail,
+                                    Screens.CreateProduct(
+                                        (storeId.value ?: myInfo.value?.storeId
+                                        ?: UUID.randomUUID()).toString(),
+                                        null
+                                    )
                                 )
-                            )
+                            }
                         }, containerColor = CustomColor.alertColor_2_700
                     ) {
                         Icon(
@@ -1624,7 +1632,7 @@ fun StoreScreen(
                                         CustomColor.primaryColor500, RoundedCornerShape(8.dp)
                                     )
                                     .clip(RoundedCornerShape(8.dp))
-                                    .clickable { openBottonSheetAndUpdateType(EnBottomSheetType.Banner) },
+                                    .clickable { openBottonSheetAndUpdateType(EnBottomSheetType.BANNER) },
                                 contentAlignment = Alignment.Center
 
                             ) {
@@ -1657,7 +1665,7 @@ fun StoreScreen(
 
                         else -> {
                             if (!storeBanners.isNullOrEmpty())
-                                BannerBage(
+                                BannerPage(
                                     storeBanners,
                                     true,
                                     deleteBanner = if (isFromHome == true) null else { it ->
@@ -1742,7 +1750,7 @@ fun StoreScreen(
                                             .clip(RoundedCornerShape(8.dp))
                                             .clickable {
                                                 openBottonSheetAndUpdateType(
-                                                    EnBottomSheetType.SupCategory
+                                                    EnBottomSheetType.SUPCATEGORY
                                                 )
                                             }, contentAlignment = Alignment.Center
 
@@ -1911,11 +1919,15 @@ fun StoreScreen(
                                                         deleteProduct(it)
                                                     },
                                                     updFun = if (isFromHome == true) null else { it ->
-                                                        nav.navigate(
-                                                            Screens.CreateProduct(
-                                                                storeId.toString(), it.toString()
+                                                        coroutine.launch {
+                                                            nav.navigateTo(
+                                                                ListDetailPaneScaffoldRole.Detail,
+                                                                Screens.CreateProduct(
+                                                                    storeId.toString(),
+                                                                    it.toString()
+                                                                )
                                                             )
-                                                        )
+                                                        }
                                                     })
                                             }
                                         }

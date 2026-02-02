@@ -14,19 +14,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,7 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.ui.Screens
@@ -48,35 +44,41 @@ import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.ui.component.SharedAppBar
+import com.example.eccomerce_app.ui.component.SharedAppBarDetails
+import kotlinx.coroutines.launch
 import java.util.UUID
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun CategoryScreen(
-    nav: NavHostController,
+    nav: ThreePaneScaffoldNavigator<Any>,
     categoryViewModel: CategoryViewModel,
     productViewModel: ProductViewModel,
 ) {
-    val category = categoryViewModel.categories.collectAsState()
+    val category = categoryViewModel.categories.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val coroutine = rememberCoroutineScope()
 
     fun getProductCategoryAndNavigate(id: UUID) {
-        productViewModel.getProductsByCategoryID(
-            1,
-            id,
-        )
-        nav.navigate(
-            Screens.ProductCategory(
-                id.toString()
+        coroutine.launch {
+            productViewModel.getProductsByCategoryID(
+                1,
+                id,
             )
-        )
+            nav.navigateTo(
+                ListDetailPaneScaffoldRole.Detail,
+                Screens.ProductCategory(
+                    id.toString()
+                )
+            )
+        }
     }
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBar(title = stringResource(R.string.category), nav = nav)
+            SharedAppBarDetails(title = stringResource(R.string.category), nav = nav)
 
         }
 

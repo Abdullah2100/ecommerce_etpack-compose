@@ -64,7 +64,7 @@ android {
 
     kotlin {
         sourceSets.all {
-         //   languageSettings.enableLanguageFeature("XXLanguage:+ExplicitBackingFields")
+            //   languageSettings.enableLanguageFeature("XXLanguage:+ExplicitBackingFields")
             languageSettings.enableLanguageFeature("PropertyParamAnnotationDefaultTargetMode")
         }
     }
@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui)
     implementation(libs.androidx.junit.ktx)
+    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
@@ -112,7 +113,6 @@ dependencies {
     implementation(libs.koin.compose)
     testImplementation(libs.koin.test.junit4)
     testImplementation(libs.koin.test)
-
 
 
     // Ktor dependencies
@@ -138,7 +138,6 @@ dependencies {
 
     //constrain
     implementation(libs.compose.constrin)
-
 
 
     //room
@@ -183,12 +182,12 @@ dependencies {
     implementation(libs.androidx.lifecycle.compose.runntime)
 
 
-   // implementation(libs.qr.kit)
+    // implementation(libs.qr.kit)
     implementation(libs.zxing.android.embedded)
     implementation(libs.core)
 
     //live time
-    implementation (libs.androidx.runtime.livedata)
+    implementation(libs.androidx.runtime.livedata)
 
     //google map
     implementation(libs.maps.utils.ktx)
@@ -199,9 +198,15 @@ dependencies {
     implementation(libs.kotlinx.datetime)
 
     //payment strip
-    implementation("com.stripe:stripeterminal:5.1.1")
-    implementation("com.stripe:stripeterminal-ktx:5.1.1")
-    implementation("com.stripe:stripe-android:22.6.0")
+    implementation(libs.stripeterminal)
+    implementation(libs.stripeterminal.ktx)
+    implementation(libs.stripe.android)
+
+    //adapted ui lib
+    implementation(libs.androidx.compose.adaptive)
+    implementation(libs.androidx.compose.adaptive.layout)
+    implementation(libs.androidx.compose.adaptive.navigation)
+
 }
 
 configurations.all {

@@ -16,9 +16,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -33,16 +30,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.model.CardProductModel
 import com.example.eccomerce_app.model.ProductVariant
 import com.example.eccomerce_app.ui.Screens
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.component.ProductShape
 import com.example.eccomerce_app.ui.component.ProductVariantComponent
-import com.example.eccomerce_app.ui.component.SharedAppBarDetails
+import com.example.eccomerce_app.ui.component.SharedAppBar
 import com.example.eccomerce_app.ui.component.StoreProductQuickInfo
 import com.example.eccomerce_app.util.General.convertPriceToAnotherCurrency
 import com.example.eccomerce_app.viewModel.CartViewModel
@@ -59,10 +57,10 @@ import java.util.UUID
 
 
 @SuppressLint("LocalContextGetResourceValueCall")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetail(
-    nav: ThreePaneScaffoldNavigator<Any>,
+    nav: NavHostController,
     cartViewModel: CartViewModel,
     productID: String?,
     isFromHome: Boolean,
@@ -166,8 +164,7 @@ fun ProductDetail(
                     storeId = productData.storeId
                 )
 
-        nav.navigateTo(
-            ListDetailPaneScaffoldRole.Detail,
+        nav.navigate(
             Screens.Store(
                 storeId = storeData?.id.toString(),
                 isFromHome = true
@@ -199,7 +196,7 @@ fun ProductDetail(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBarDetails(
+            SharedAppBar(
                 title = stringResource(R.string.product_detail),
                 nav = nav,
             )

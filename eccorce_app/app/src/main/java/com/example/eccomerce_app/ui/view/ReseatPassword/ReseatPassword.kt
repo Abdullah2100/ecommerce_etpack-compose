@@ -30,7 +30,7 @@ import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomButton
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.AuthViewModel

@@ -21,9 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
-import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -86,14 +83,6 @@ fun AccountPage(
     authViewModel: AuthViewModel,
     productViewModel: ProductViewModel,
     currencyViewModel: CurrencyViewModel,
-    bannerViewModel: BannerViewModel,
-    categoryViewModel: CategoryViewModel,
-    subCategoryViewModel: SubCategoryViewModel,
-    storeViewModel: StoreViewModel,
-    mapViewModel: MapViewModel,
-    cartViewModel: CartViewModel,
-    variantViewModel: VariantViewModel,
-    deliveryViewModel: DeliveryViewModel
 ) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -103,9 +92,6 @@ fun AccountPage(
     val currentLocale = currentLocal.collectAsStateWithLifecycle()
     val currencies = currencyViewModel.currenciesList.collectAsStateWithLifecycle()
     val storeId = myInfo.value?.storeId
-
-    // adaptive navigator initialization
-    val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
     val isChangingCurrency = remember { mutableStateOf(false) }
     val isShowCurrencies = remember { mutableStateOf(false) }
@@ -169,298 +155,186 @@ fun AccountPage(
     }
 
     CompositionLocalProvider(LocalLayoutDirection provides updateDirection.value) {
-        // Handling back button for adaptive scaffold
-        BackHandler(enabled = navigator.canNavigateBack()) {
-            coroutine.launch {
-                navigator.navigateBack()
-            }
-        }
 
-        NavigableListDetailPaneScaffold(
-            navigator = navigator,
-            listPane = {
-                Scaffold(
-                    topBar = {
-                        SharedAppBar(
-                            title = stringResource(R.string.account),
-                            nav = nav,
-                            scrollBehavior = scrollBehavior
-                        )
-                    }
-                ) { padding ->
-                    if (isChangingLanguage.value || isChangingCurrency.value) {
-                        Dialog(onDismissRequest = {}) {
-                            Box(
-                                modifier = Modifier
-                                    .size(90.dp)
-                                    .background(Color.White, RoundedCornerShape(15.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(
-                                    color = CustomColor.primaryColor700,
-                                    modifier = Modifier.size(40.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White)
-                            .padding(padding)
-                            .padding(horizontal = 15.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        AccountCustomBottom(
-                            stringResource(R.string.your_profile),
-                            R.drawable.user, {
-                                coroutine.launch {
-                                    navigator.navigateTo(
-                                        ListDetailPaneScaffoldRole.Detail,
-                                        Screens.Profile
-                                    )
-                                }
-                            })
-                        HorizontalDivider(
-                            Modifier
-                                .height(1.dp)
-                                .fillMaxWidth()
-                                .background(CustomColor.neutralColor200)
-                        )
-
-                        AccountCustomBottom(
-                            stringResource(R.string.address),
-                            R.drawable.location_address_list, {
-                                coroutine.launch {
-
-                                    navigator.navigateTo(
-                                        ListDetailPaneScaffoldRole.Detail,
-                                        Screens.LocationHome
-                                    )
-                                }
-                            })
-                        HorizontalDivider(
-                            Modifier
-                                .height(1.dp)
-                                .fillMaxWidth()
-                                .background(CustomColor.neutralColor200)
-                        )
-
-                        AccountCustomBottom(
-                            stringResource(R.string.my_store),
-                            R.drawable.store, {
-                                coroutine.launch {
-                                    navigator.navigateTo(
-                                        ListDetailPaneScaffoldRole.Detail,
-                                        Screens.Store(storeId.toString(), false)
-
-                                    )
-                                }
-                            })
-                        HorizontalDivider(
-                            Modifier
-                                .height(1.dp)
-                                .fillMaxWidth()
-                                .background(CustomColor.neutralColor200)
-                        )
-
-                        if (myInfo.value?.storeId != null) {
-                            AccountCustomBottom(
-                                stringResource(R.string.order_for_my_store),
-                                R.drawable.order_belong_to_store, {
-                                    coroutine.launch {
-                                        orderItemsViewModel.getMyOrderItemBelongToMyStore(1, false)
-                                        navigator.navigateTo(
-                                            ListDetailPaneScaffoldRole.Detail,
-                                            Screens.OrderForMyStore
-                                        )
-                                    }
-                                })
-                            HorizontalDivider(
-                                Modifier
-                                    .height(1.dp)
-                                    .fillMaxWidth()
-                                    .background(CustomColor.neutralColor200)
-                            )
-                        }
-
-                        AccountCustomBottom(
-                            stringResource(R.string.exchange_currency),
-                            R.drawable.currency_exchange, {
-                                updateConditionValue(isShowCurrenciesValue = true)
-                            },
-                            additionalComponent = {
-                                Box {
-                                    DropdownMenu(
-                                        containerColor = Color.White,
-                                        expanded = isShowCurrencies.value,
-                                        onDismissRequest = {
-                                            updateConditionValue(
-                                                isShowCurrenciesValue = false
-                                            )
-                                        }
-                                    ) {
-                                        currencies.value?.fastForEach { lang ->
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(
-                                                        lang.name,
-                                                        fontFamily = General.satoshiFamily,
-                                                        fontSize = 18.sp
-                                                    )
-                                                },
-                                                onClick = { updateProductCurrency(lang.symbol) }
-                                            )
-                                        }
-                                    }
-                                }
-                            })
-                        HorizontalDivider(
-                            Modifier
-                                .height(1.dp)
-                                .fillMaxWidth()
-                                .background(CustomColor.neutralColor200)
-                        )
-
-                        AccountCustomBottom(
-                            "Language",
-                            R.drawable.language, {
-                                if (currentLocale.value == "en") updateLanguage("العربية") else updateLanguage(
-                                    "English"
-                                )
-                            },
-                            additionalComponent = {
-                                Box {
-                                    TextButton(onClick = {
-                                        updateConditionValue(
-                                            isExpandLanguageValue = true
-                                        )
-                                    }) {
-                                        Text(
-                                            if (currentLocale.value == "en") "English" else "العربية",
-                                            color = CustomColor.neutralColor950
-                                        )
-                                    }
-                                    DropdownMenu(
-                                        containerColor = Color.White,
-                                        expanded = isExpandLanguage.value,
-                                        onDismissRequest = {
-                                            updateConditionValue(
-                                                isExpandLanguageValue = false
-                                            )
-                                        }
-                                    ) {
-                                        listOf("العربية", "English").forEach { lang ->
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(
-                                                        lang,
-                                                        fontFamily = General.satoshiFamily,
-                                                        fontSize = 18.sp
-                                                    )
-                                                },
-                                                onClick = { updateLanguage(lang) }
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        )
-                        HorizontalDivider(
-                            Modifier
-                                .height(1.dp)
-                                .fillMaxWidth()
-                                .background(CustomColor.neutralColor200)
-                        )
-
-                        LogoutButton(
-                            stringResource(R.string.logout),
-                            R.drawable.logout
-                        ) { logout() }
-                    }
-                }
-            },
-            detailPane = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.White)
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    when (val content = navigator.currentDestination?.contentKey) {
-                        is Screens.Profile -> ProfileScreen(
-                            nav = navigator,
-                            userViewModel = userViewModel
-                        )
-
-                        is Screens.EditeOrAddNewAddress -> EditOrAddLocationScreen(
-                            nav = navigator,
-                            storeViewModel = storeViewModel,
-                            cartViewModel = cartViewModel,
-                            userViewModel = userViewModel
-                        )
-
-                        is Screens.Store -> StoreScreen(
-                            nav = navigator,
-                            copyStoreId = storeId.toString(),
-                            isFromHome = false,
-                            bannerViewModel = bannerViewModel,
-                            categoryViewModel = categoryViewModel,
-                            subCategoryViewModel = subCategoryViewModel,
-                            storeViewModel = storeViewModel,
-                            productViewModel = productViewModel,
-                            userViewModel = userViewModel
-                        )
-
-                        is Screens.OrderForMyStore -> OrderForMyStoreScreen(
-                            nav =  navigator,
-                            orderItemsViewModel =  orderItemsViewModel
-                        )
-
-                        is Screens.MapScreen -> MapHomeScreen(
-                            nav = navigator,
-                            navToHome = nav,
-                            userViewModel = userViewModel,
-                            storeViewModel = storeViewModel,
-                            mapViewModel = mapViewModel,
-                            cartViewModel = cartViewModel,
-                            title = content.title,
-                            id = content.id,
-                            longitude = content.lognit,
-                            latitude = content.latitt,
-                            mapType = content.mapType,
-                            isFomLogin = content.isFromLogin,
-                            additionLat = content.additionLat,
-                            additionLong = content.additionLong,
-                        )
-
-                        is Screens.PickCurrentAddress -> EditOrAddLocationScreen(
-                            nav = navigator,
-                            userViewModel,
-                            storeViewModel,
-                            cartViewModel
-                        )
-
-                        is Screens.CreateProduct -> CreateProductScreen(
-                            nav = navigator,
-                            storeId = storeId.toString(),
-                            subCategoryViewModel = subCategoryViewModel,
-                            variantViewModel = variantViewModel,
-                            productViewModel = productViewModel,
-                            currencyViewModel = currencyViewModel
-                        )
-
-                        is Screens.DeliveriesList -> DeliveriesListScreen(
-                            nav = navigator,
-                            deliveryViewModel = deliveryViewModel
-                        )
-
-                        else -> Text("")
-                    }
-                }
+        Scaffold(
+            topBar = {
+                SharedAppBar(
+                    title = stringResource(R.string.account),
+                    nav = nav,
+                    scrollBehavior = scrollBehavior
+                )
             }
         )
+        { padding ->
+            if (isChangingLanguage.value || isChangingCurrency.value) {
+                Dialog(onDismissRequest = {}) {
+                    Box(
+                        modifier = Modifier
+                            .size(90.dp)
+                            .background(Color.White, RoundedCornerShape(15.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = CustomColor.primaryColor700,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .padding(padding)
+                    .padding(horizontal = 15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AccountCustomBottom(
+                    stringResource(R.string.your_profile),
+                    R.drawable.user, {
+                            nav.navigate(Screens.Profile)
+                    })
+                HorizontalDivider(
+                    Modifier
+                        .height(1.dp)
+                        .fillMaxWidth()
+                        .background(CustomColor.neutralColor200)
+                )
+
+                AccountCustomBottom(
+                    stringResource(R.string.address),
+                    R.drawable.location_address_list, {
+                            nav.navigate(Screens.EditeOrAddNewAddress)
+                    })
+                HorizontalDivider(
+                    Modifier
+                        .height(1.dp)
+                        .fillMaxWidth()
+                        .background(CustomColor.neutralColor200)
+                )
+
+                AccountCustomBottom(
+                    stringResource(R.string.my_store),
+                    R.drawable.store, {
+                            nav.navigate(Screens.Store(storeId.toString(), false))
+                    })
+                HorizontalDivider(
+                    Modifier
+                        .height(1.dp)
+                        .fillMaxWidth()
+                        .background(CustomColor.neutralColor200)
+                )
+
+                if (myInfo.value?.storeId != null) {
+                    AccountCustomBottom(
+                        stringResource(R.string.order_for_my_store),
+                        R.drawable.order_belong_to_store, {
+                                orderItemsViewModel.getMyOrderItemBelongToMyStore(1, false)
+                                nav.navigate(Screens.OrderForMyStore)
+                        })
+                    HorizontalDivider(
+                        Modifier
+                            .height(1.dp)
+                            .fillMaxWidth()
+                            .background(CustomColor.neutralColor200)
+                    )
+                }
+
+                AccountCustomBottom(
+                    stringResource(R.string.exchange_currency),
+                    R.drawable.currency_exchange, {
+                        updateConditionValue(isShowCurrenciesValue = true)
+                    },
+                    additionalComponent = {
+                        Box {
+                            DropdownMenu(
+                                containerColor = Color.White,
+                                expanded = isShowCurrencies.value,
+                                onDismissRequest = {
+                                    updateConditionValue(
+                                        isShowCurrenciesValue = false
+                                    )
+                                }
+                            ) {
+                                currencies.value?.fastForEach { lang ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                lang.name,
+                                                fontFamily = General.satoshiFamily,
+                                                fontSize = 18.sp
+                                            )
+                                        },
+                                        onClick = { updateProductCurrency(lang.symbol) }
+                                    )
+                                }
+                            }
+                        }
+                    })
+                HorizontalDivider(
+                    Modifier
+                        .height(1.dp)
+                        .fillMaxWidth()
+                        .background(CustomColor.neutralColor200)
+                )
+
+                AccountCustomBottom(
+                    "Language",
+                    R.drawable.language, {
+                        if (currentLocale.value == "en") updateLanguage("العربية") else updateLanguage(
+                            "English"
+                        )
+                    },
+                    additionalComponent = {
+                        Box {
+                            TextButton(onClick = {
+                                updateConditionValue(
+                                    isExpandLanguageValue = true
+                                )
+                            }) {
+                                Text(
+                                    if (currentLocale.value == "en") "English" else "العربية",
+                                    color = CustomColor.neutralColor950
+                                )
+                            }
+                            DropdownMenu(
+                                containerColor = Color.White,
+                                expanded = isExpandLanguage.value,
+                                onDismissRequest = {
+                                    updateConditionValue(
+                                        isExpandLanguageValue = false
+                                    )
+                                }
+                            ) {
+                                listOf("العربية", "English").forEach { lang ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                lang,
+                                                fontFamily = General.satoshiFamily,
+                                                fontSize = 18.sp
+                                            )
+                                        },
+                                        onClick = { updateLanguage(lang) }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                )
+                HorizontalDivider(
+                    Modifier
+                        .height(1.dp)
+                        .fillMaxWidth()
+                        .background(CustomColor.neutralColor200)
+                )
+
+                LogoutButton(
+                    stringResource(R.string.logout),
+                    R.drawable.logout
+                ) { logout() }
+            }
+        }
     }
 }

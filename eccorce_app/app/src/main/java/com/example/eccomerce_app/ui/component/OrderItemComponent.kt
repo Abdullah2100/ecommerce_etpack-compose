@@ -43,7 +43,6 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
 import com.example.e_commercompose.model.OrderItem
-import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.util.General
 import com.google.zxing.BarcodeFormat

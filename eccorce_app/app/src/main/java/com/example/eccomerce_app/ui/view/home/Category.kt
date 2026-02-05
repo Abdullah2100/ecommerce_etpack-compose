@@ -19,8 +19,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -35,23 +33,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.ui.Screens
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.ui.component.SharedAppBar
-import com.example.eccomerce_app.ui.component.SharedAppBarDetails
 import kotlinx.coroutines.launch
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun CategoryScreen(
-    nav: ThreePaneScaffoldNavigator<Any>,
+    nav: NavHostController,
     categoryViewModel: CategoryViewModel,
     productViewModel: ProductViewModel,
 ) {
@@ -65,8 +63,7 @@ fun CategoryScreen(
                 1,
                 id,
             )
-            nav.navigateTo(
-                ListDetailPaneScaffoldRole.Detail,
+            nav.navigate(
                 Screens.ProductCategory(
                     id.toString()
                 )
@@ -78,7 +75,7 @@ fun CategoryScreen(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBarDetails(title = stringResource(R.string.category), nav = nav)
+            SharedAppBar(title = stringResource(R.string.category), nav = nav)
 
         }
 

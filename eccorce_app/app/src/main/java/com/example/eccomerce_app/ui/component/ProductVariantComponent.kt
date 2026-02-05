@@ -33,7 +33,6 @@ import com.example.e_commercompose.R
 import com.example.eccomerce_app.model.ProductVariant
 import com.example.eccomerce_app.model.ProductVariantSelection
 import com.example.e_commercompose.model.VarirntModel
-import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.util.General
 

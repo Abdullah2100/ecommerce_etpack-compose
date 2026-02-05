@@ -1,7 +1,6 @@
 package com.example.eccomerce_app.ui.component
 
 import android.annotation.SuppressLint
-import android.app.LocaleConfig
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -37,7 +36,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.e_commercompose.R
-import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.util.General
 
@@ -52,7 +50,6 @@ fun HomeSearchComponent (
 
 
     val interactionSource = remember { MutableInteractionSource() }
-    val heightAnimation = animateDpAsState(if (isClickingSearch) (screenHeight-80).dp else 0.dp)
 
     Card(
         modifier = Modifier

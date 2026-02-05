@@ -11,8 +11,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.*
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -30,13 +28,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.e_commercompose.ui.component.CustomButton
-import com.example.e_commercompose.ui.component.LabelValueRow
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.LabelValueRow
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.PaymentTypeShape
 import com.example.eccomerce_app.ui.component.SharedAppBar
-import com.example.eccomerce_app.ui.component.SharedAppBarDetails
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.Secrets
 import com.stripe.android.PaymentConfiguration
@@ -56,7 +53,6 @@ fun CheckoutScreen(
     paymentViewModel: PaymentViewModel,
     paymentTypeViewModel: PaymentTypeViewModel,
     currencyViewModel: CurrencyViewModel,
-    navBack: ThreePaneScaffoldNavigator<Any>
 ) {
     val context = LocalContext.current
     val publicKey = rememberSaveable { mutableStateOf(Secrets.getStripKey()) }
@@ -201,9 +197,9 @@ fun CheckoutScreen(
             SnackbarHost(hostState = snackBarHostState)
         },
         topBar = {
-            SharedAppBarDetails(
+            SharedAppBar(
                 title = stringResource(R.string.checkout),
-                nav = navBack
+                nav = nav
             )
         },
         bottomBar = {
@@ -266,11 +262,8 @@ fun CheckoutScreen(
 
                             )
                             TextButton(onClick = {
-                                coroutine.launch {
-                                    navBack.navigateTo(
-                                        ListDetailPaneScaffoldRole.Detail
-                                        ,Screens.EditeOrAddNewAddress)
-                                }}) {
+                                 nav.navigate(Screens.EditeOrAddNewAddress) }
+                            ) {
                                 Text(
                                     "Change",
                                     fontFamily = General.satoshiFamily,

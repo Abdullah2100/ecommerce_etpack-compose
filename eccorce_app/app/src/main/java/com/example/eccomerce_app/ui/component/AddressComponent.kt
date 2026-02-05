@@ -13,8 +13,6 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,10 +24,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.e_commercompose.model.Address
 import com.example.e_commercompose.ui.component.LocationLoadingShape
-import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.util.General
@@ -43,7 +41,7 @@ fun HomeAddressComponent(
     isPassCondition: Boolean = false,
     screenWidth: Int,
     animatedComponentSize: Dp,
-    nav: ThreePaneScaffoldNavigator<Any>
+    nav: NavHostController
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val coroutine = rememberCoroutineScope()
@@ -67,12 +65,7 @@ fun HomeAddressComponent(
                                 interactionSource = interactionSource,
                                 indication = null,
                                 onClick = {
-                                    coroutine.launch {
-                                        nav.navigateTo(
-                                            ListDetailPaneScaffoldRole.Detail,
-                                            Screens.EditeOrAddNewAddress
-                                        )
-                                    }
+                                        nav.navigate(Screens.EditeOrAddNewAddress)
                                 }
                             )
                     ) {

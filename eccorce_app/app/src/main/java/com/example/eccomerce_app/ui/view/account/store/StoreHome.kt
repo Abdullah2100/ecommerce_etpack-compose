@@ -50,9 +50,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -83,6 +80,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
 import com.example.e_commercompose.model.SubCategory
@@ -90,14 +88,14 @@ import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.e_commercompose.model.enMapType
 import com.example.eccomerce_app.ui.component.BannerPage
 import com.example.e_commercompose.ui.component.CustomButton
-import com.example.e_commercompose.ui.component.CustomDropDownComponent
+import com.example.eccomerce_app.ui.component.CustomDropDownComponent
 import com.example.e_commercompose.ui.component.ProductLoading
 import com.example.eccomerce_app.ui.component.ProductShape
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.component.SharedAppBarDetails
+import com.example.eccomerce_app.ui.component.SharedAppBar
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.eccomerce_app.util.General.toCustomFil
@@ -124,11 +122,11 @@ enum class EnOperation { STORE }
 enum class EnBottomSheetType { SUPCATEGORY, BANNER }
 enum class EnDateTimeType { DATE, TIME }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun StoreScreen(
-    nav: ThreePaneScaffoldNavigator<Any>,
+    nav: NavHostController,
     copyStoreId: String?,
     isFromHome: Boolean?,
     bannerViewModel: BannerViewModel,
@@ -280,8 +278,7 @@ fun StoreScreen(
 
                             Log.d("LocationData", "$locationHolder \n $location ")
 
-                                nav.navigateTo(
-                                    ListDetailPaneScaffoldRole.Detail,
+                                nav.navigate(
                                     Screens.MapScreen(
                                         lognit = locationHolder?.longitude,
                                         latitt = locationHolder?.latitude,
@@ -1124,7 +1121,7 @@ fun StoreScreen(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBarDetails(
+            SharedAppBar(
                 title = stringResource(R.string.store),
                 nav = nav,
                 action = {
@@ -1176,11 +1173,7 @@ fun StoreScreen(
                         modifier = Modifier
                             .padding(bottom = 3.dp)
                             .size(50.dp), onClick = {
-                                coroutine.launch {
-                                    nav.navigateTo(
-                                        ListDetailPaneScaffoldRole.Detail,
-                                        Screens.DeliveriesList)
-                                }
+                                    nav.navigate(Screens.DeliveriesList)
                         }, containerColor = CustomColor.alertColor_2_700
                     ) {
                         Icon(
@@ -1192,16 +1185,12 @@ fun StoreScreen(
                     }
                     FloatingActionButton(
                         onClick = {
-                            coroutine.launch {
-                                nav.navigateTo(
-                                    ListDetailPaneScaffoldRole.Detail,
-                                    Screens.CreateProduct(
+                                nav.navigate(Screens.CreateProduct(
                                         (storeId.value ?: myInfo.value?.storeId
                                         ?: UUID.randomUUID()).toString(),
                                         null
                                     )
                                 )
-                            }
                         }, containerColor = CustomColor.alertColor_2_700
                     ) {
                         Icon(
@@ -1671,7 +1660,8 @@ fun StoreScreen(
                                     deleteBanner = if (isFromHome == true) null else { it ->
                                         onDeleteBanner(it)
                                     },
-                                    isShowTitle = false
+                                    isShowTitle = false,
+                                    nav = nav
                                 )
 
                         }
@@ -1919,15 +1909,12 @@ fun StoreScreen(
                                                         deleteProduct(it)
                                                     },
                                                     updFun = if (isFromHome == true) null else { it ->
-                                                        coroutine.launch {
-                                                            nav.navigateTo(
-                                                                ListDetailPaneScaffoldRole.Detail,
+                                                            nav.navigate(
                                                                 Screens.CreateProduct(
                                                                     storeId.toString(),
                                                                     it.toString()
                                                                 )
                                                             )
-                                                        }
                                                     })
                                             }
                                         }

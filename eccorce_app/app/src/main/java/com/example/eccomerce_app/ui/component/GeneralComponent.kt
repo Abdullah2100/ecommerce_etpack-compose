@@ -1,4 +1,4 @@
-package com.example.e_commercompose.ui.component
+package com.example.eccomerce_app.ui.component
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,11 +44,12 @@ import java.util.UUID
 
 
 @Composable
-fun Sizer(heigh:Int=0,width:Int=0){
+fun Sizer(heigh:Int=0,width:Int=0,color: Color=Color.White){
     Box(
       modifier = Modifier
           .height((heigh).dp)
           .width((width.dp))
+          .background(color)
     )
 }
 

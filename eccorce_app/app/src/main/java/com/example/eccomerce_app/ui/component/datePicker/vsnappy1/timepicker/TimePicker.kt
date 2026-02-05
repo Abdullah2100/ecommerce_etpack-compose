@@ -31,7 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.datePicker.vsnappy1.extension.noRippleClickable
 import com.example.eccomerce_app.ui.component.datePicker.vsnappy1.extension.toDp
 import com.vsnappy1.component.SwipeLazyColumn

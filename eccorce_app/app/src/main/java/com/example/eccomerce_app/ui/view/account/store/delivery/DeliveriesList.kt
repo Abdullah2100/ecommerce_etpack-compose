@@ -25,7 +25,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -47,13 +46,14 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.e_commercompose.ui.component.CustomAuthBottom
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.model.Delivery
-import com.example.eccomerce_app.ui.component.SharedAppBarDetails
+import com.example.eccomerce_app.ui.component.SharedAppBar
 import com.example.eccomerce_app.ui.component.StoreDeliveryComponent
 import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.eccomerce_app.viewModel.DeliveryViewModel
@@ -63,10 +63,10 @@ import java.util.UUID
 
 
 @SuppressLint("ConfigurationScreenWidthHeight", "LocalContextGetResourceValueCall")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeliveriesListScreen(
-    nav: ThreePaneScaffoldNavigator<Any>,
+    nav: NavHostController,
     deliveryViewModel: DeliveryViewModel
 ) {
 
@@ -160,7 +160,7 @@ fun DeliveriesListScreen(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBarDetails(
+            SharedAppBar(
                 title = stringResource(R.string.deliveries),
                 nav = nav,
                 scrollBehavior = scrollBehavior

@@ -3,6 +3,7 @@ package com.example.eccomerce_app.ui
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavHostController
@@ -15,15 +16,26 @@ import com.example.eccomerce_app.viewModel.CartViewModel
 import com.example.eccomerce_app.ui.view.OnBoarding.OnBoardingScreen
 import com.example.eccomerce_app.ui.view.Auth.LoginScreen
 import com.example.eccomerce_app.ui.view.Auth.SignUpPage
+import com.example.eccomerce_app.ui.view.address.EditOrAddLocationScreen
 import com.example.eccomerce_app.ui.view.account.AccountPage
+import com.example.eccomerce_app.ui.view.account.ProfileScreen
+import com.example.eccomerce_app.ui.view.account.store.CreateProductScreen
+import com.example.eccomerce_app.ui.view.account.store.ProductDetail
+import com.example.eccomerce_app.ui.view.account.store.StoreScreen
 import com.example.eccomerce_app.ui.view.checkout.CheckoutScreen
 import com.example.eccomerce_app.ui.view.home.CartScreen
 import com.example.eccomerce_app.ui.view.home.HomePage
 import com.example.eccomerce_app.ui.view.home.OrderScreen
+import com.example.eccomerce_app.ui.view.home.ProductCategoryScreen
+import com.example.eccomerce_app.ui.view.address.AddressHomeScreen
+import com.example.eccomerce_app.ui.view.address.PickCurrentAddressFromAddressScreen
 import com.example.eccomerce_app.ui.view.ReseatPassword.GenerateOtpScreen
 import com.example.eccomerce_app.ui.view.ReseatPassword.OtpVerificationScreen
 import com.example.eccomerce_app.ui.view.ReseatPassword.ReseatPasswordScreen
-import com.example.eccomerce_app.ui.view.address.AddressHomeScreen
+import com.example.eccomerce_app.ui.view.account.OrderForMyStoreScreen
+import com.example.eccomerce_app.ui.view.account.store.delivery.DeliveriesListScreen
+import com.example.eccomerce_app.ui.view.home.CategoryScreen
+import com.example.eccomerce_app.ui.view.address.MapHomeScreen
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.SubCategoryViewModel
@@ -61,8 +73,8 @@ fun NavController(
     deliveryViewModel: DeliveryViewModel = koinViewModel(),
     homeViewModel: HomeViewModel = koinViewModel(),
     currencyViewModel: CurrencyViewModel = koinViewModel(),
-    paymentViewModel: PaymentViewModel = koinViewModel(),
-    paymentTypeViewModel: PaymentTypeViewModel = koinViewModel(),
+    paymentViewModel:   PaymentViewModel= koinViewModel(),
+    paymentTypeViewModel: PaymentTypeViewModel= koinViewModel(),
     currentScreen: Int,
 ) {
 
@@ -74,6 +86,45 @@ fun NavController(
             else -> Screens.HomeGraph
         }, navController = nav
     ) {
+
+        composable<Screens.MapScreen>(
+            enterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(200)
+                ) + fadeIn(tween(200))
+            },
+
+            popEnterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(300)
+                ) + fadeIn(tween(200))
+
+            }, exitTransition = {
+                return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(300)
+                ) + fadeOut(tween(200))
+
+            }) { result ->
+            val data = result.toRoute<Screens.MapScreen>()
+
+            MapHomeScreen(
+                longitude = data.lognit,
+                latitude = data.latitt,
+                additionLong = data.additionLong,
+                additionLat = data.additionLat,
+                title = data.title,
+                id = data.id,
+                isFomLogin = data.isFromLogin,
+                mapType = data.mapType,
+                nav = nav,
+                userViewModel = userViewModel,
+                storeViewModel = storeViewModel,
+                mapViewModel = mapViewModel,
+                cartViewModel = cartViewModel
+            )
+
+        }
+
 
 
         composable<Screens.OnBoarding>(
@@ -92,12 +143,66 @@ fun NavController(
 
 
 
+        navigation<Screens.LocationHome>(
+            startDestination = Screens.LocationHome
+        )
+        {
+
+            composable<Screens.LocationHome>(
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                },
+
+                popEnterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }, exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }) {
+                AddressHomeScreen(
+                    nav = nav, userViewModel = userViewModel
+                )
+            }
+
+            composable<Screens.PickCurrentAddress>(
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+
+                popEnterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }, exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }) { value ->
+                PickCurrentAddressFromAddressScreen(
+                    nav = nav,
+                    userViewModel = userViewModel,
+                    orderViewModel = orderViewModel,
+                    generalSettingViewModel = generalSettingViewModel,
+                    bannerViewModel = bannerViewModel,
+                    productViewModel = productViewModel,
+                    variantViewModel = variantViewModel,
+                    categoryViewModel = categoryViewModel,
+                )
+            }
+
+        }
 
 
         navigation<Screens.ReseatPasswordGraph>(
             startDestination = Screens.GenerateOtp
-        )
-        {
+        ) {
 
             composable<Screens.GenerateOtp>(enterTransition = {
                 return@composable slideIntoContainer(
@@ -146,8 +251,7 @@ fun NavController(
 
         navigation<Screens.AuthGraph>(
             startDestination = Screens.Login
-        )
-        {
+        ) {
 
             composable<Screens.Login>(
                 enterTransition = {
@@ -191,10 +295,17 @@ fun NavController(
 
         navigation<Screens.HomeGraph>(
             startDestination = Screens.Home
-        )
-        {
+        ) {
 
-            composable<Screens.Home>() {
+            composable<Screens.Home>(enterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                )
+            }, exitTransition = {
+                return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                )
+            }) {
                 HomePage(
                     nav = nav,
                     bannerViewModel = bannerViewModel,
@@ -206,15 +317,55 @@ fun NavController(
                     orderViewModel = orderViewModel,
                     currencyViewModel = currencyViewModel,
                     homeViewModel = homeViewModel,
-                    paymentTypeViewModel = paymentTypeViewModel,
-                    cartViewModel = cartViewModel,
-                    storeViewModel = storeViewModel,
-                    subCategoryViewModel = subCategoryViewModel,
+                    paymentTypeViewModel = paymentTypeViewModel
+                )
+            }
+
+            composable<Screens.Category>(enterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                )
+            }, exitTransition = {
+                return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                )
+            }) {
+                CategoryScreen(
+                    nav = nav,
+                    categoryViewModel = categoryViewModel,
+                    productViewModel = productViewModel
+                )
+            }
+
+            composable<Screens.ProductCategory>(enterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                )
+            }, exitTransition = {
+                return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                )
+            }) { result ->
+                val data = result.toRoute<Screens.ProductCategory>()
+                ProductCategoryScreen(
+                    nav = nav,
+                    categoryId = data.categoryId,
+                    categoryViewModel = categoryViewModel,
+                    productViewModel = productViewModel
                 )
             }
 
 
-            composable<Screens.Account>() {
+
+            composable<Screens.Account>(enterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                )
+            }, exitTransition = {
+                return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                )
+            }) {
                 AccountPage(
                     nav = nav,
                     userViewModel = userViewModel,
@@ -222,78 +373,230 @@ fun NavController(
                     authViewModel = authViewModel,
                     productViewModel = productViewModel,
                     currencyViewModel = currencyViewModel,
-                    storeViewModel = storeViewModel,
+                )
+            }
+
+
+            composable<Screens.Profile>(enterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                )
+            }, exitTransition = {
+                return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                )
+            }) {
+                ProfileScreen(
+                    nav = nav, userViewModel = userViewModel
+                )
+            }
+
+            composable<Screens.Store>(
+
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }, exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }) { navRef ->
+                val storeId = navRef.toRoute<Screens.Store>()
+                StoreScreen(
+                    copyStoreId = storeId.storeId,
+                    isFromHome = storeId.isFromHome,
+                    nav = nav,
                     bannerViewModel = bannerViewModel,
                     categoryViewModel = categoryViewModel,
                     subCategoryViewModel = subCategoryViewModel,
-                    mapViewModel = mapViewModel,
-                    cartViewModel = cartViewModel,
-                    variantViewModel = variantViewModel,
+                    storeViewModel = storeViewModel,
+                    productViewModel = productViewModel,
+                    userViewModel = userViewModel,
+                )
+            }
+
+            composable<Screens.DeliveriesList>(
+
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }, exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }) { navRef ->
+                DeliveriesListScreen(
+                    nav = nav,
                     deliveryViewModel = deliveryViewModel
                 )
+            }
+            composable<Screens.CreateProduct>(
+
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }, exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }) { navRef ->
+
+                val store = navRef.toRoute<Screens.CreateProduct>()
+
+                CreateProductScreen(
+                    nav = nav,
+                    storeId = store.storeId,
+                    productId = store.productId,
+                    subCategoryViewModel = subCategoryViewModel,
+                    variantViewModel = variantViewModel,
+                    productViewModel = productViewModel,
+                    currencyViewModel = currencyViewModel
+                )
+
+            }
+
+            composable<Screens.ProductDetails>(
+
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }, exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }) { navRef ->
+
+                val store = navRef.toRoute<Screens.ProductDetails>()
+
+                ProductDetail(
+                    nav = nav,
+                    cartViewModel = cartViewModel,
+                    productID = store.productId,
+                    isFromHome = store.isFromHome,
+                    variantViewModel = variantViewModel,
+                    storeViewModel = storeViewModel,
+                    bannerViewModel = bannerViewModel,
+                    subCategoryViewModel = subCategoryViewModel,
+                    productViewModel = productViewModel,
+                    isCanNavigateToStore = store.isCanNavigateToStore,
+                    userViewModel = userViewModel,
+                    currencyViewModel = currencyViewModel
+                )
+
+            }
+
+            composable<Screens.Cart>(
+
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }, exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }) { navRef ->
+
+
+                CartScreen(
+                    nav = nav,
+                    cartViewModel = cartViewModel,
+                    variantViewModel = variantViewModel,
+                    userViewModel = userViewModel,
+                    storeViewModel = storeViewModel
+                )
+
+            }
+
+            composable<Screens.Checkout>(
+
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }, exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }) { navRef ->
+
+
+                CheckoutScreen(
+                    nav = nav,
+                    cartViewModel = cartViewModel,
+                    userViewModel = userViewModel,
+                    generalSettingViewModel = generalSettingViewModel,
+                    orderViewModel = orderViewModel,
+                    paymentViewModel = paymentViewModel,
+                    paymentTypeViewModel = paymentTypeViewModel,
+                    currencyViewModel = currencyViewModel,
+
+                )
+
+            }
+
+
+            composable<Screens.EditeOrAddNewAddress>(
+
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }, exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }) {
+                EditOrAddLocationScreen(
+                    nav = nav,
+                    userViewModel = userViewModel,
+                    cartViewModel = cartViewModel,
+                    storeViewModel = storeViewModel
+
+                )
+
+            }
+
+            composable<Screens.Order>(
+
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }, exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }) {
+                OrderScreen(orderViewModel = orderViewModel)
+
+            }
+
+            composable<Screens.OrderForMyStore>(
+
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }, exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }) {
+                OrderForMyStoreScreen(
+                    nav = nav,
+                    orderItemsViewModel = orderItemViewModel
+                )
+
             }
 
 
         }
 
-
-        composable<Screens.LocationHome>(
-            enterTransition = {
-                return@composable slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                )
-            },
-
-            popEnterTransition = {
-                return@composable slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                )
-            }, exitTransition = {
-                return@composable slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End, tween(750)
-                )
-            }) {
-            AddressHomeScreen(
-                nav = nav,
-                userViewModel = userViewModel,
-                orderViewModel = orderViewModel,
-                variantViewModel = variantViewModel,
-                generalSettingViewModel = generalSettingViewModel,
-                bannerViewModel = bannerViewModel,
-                categoryViewModel = categoryViewModel,
-                productViewModel = productViewModel,
-                cartViewModel = cartViewModel,
-                storeViewModel = storeViewModel,
-                mapViewModel = mapViewModel
-            )
-
-        }
-
-        composable<Screens.Cart>() {
-            CartScreen(
-                nav = nav,
-                cartViewModel = cartViewModel,
-                variantViewModel = variantViewModel,
-                userViewModel = userViewModel,
-                storeViewModel = storeViewModel,
-                currencyViewModel = currencyViewModel,
-                paymentTypeViewModel = paymentTypeViewModel,
-                paymentViewModel = paymentViewModel,
-                orderViewModel = orderViewModel,
-                generalSettingViewModel = generalSettingViewModel
-            )
-        }
-
-
-
-        composable<Screens.Order>()
-        {
-            OrderScreen(orderViewModel = orderViewModel)
-
-        }
-
-
     }
 
 }
-

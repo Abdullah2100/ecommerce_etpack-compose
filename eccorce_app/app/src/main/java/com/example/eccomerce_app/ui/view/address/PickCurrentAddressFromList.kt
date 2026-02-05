@@ -48,7 +48,7 @@ import com.example.e_commercompose.R
 import com.example.e_commercompose.model.Address
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.ui.Screens
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.component.SharedAppBar
 import com.example.eccomerce_app.viewModel.ProductViewModel

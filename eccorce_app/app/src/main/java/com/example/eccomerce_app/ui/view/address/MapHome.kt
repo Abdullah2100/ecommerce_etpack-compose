@@ -22,8 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -37,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -49,7 +48,7 @@ import androidx.navigation.NavHostController
 import com.example.e_commercompose.model.enMapType
 import com.example.e_commercompose.ui.component.CustomAuthBottom
 import com.example.e_commercompose.ui.component.CustomButton
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.Screens
@@ -80,14 +79,17 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberUpdatedMarkerState
+import kotlinx.coroutines.delay
 
 
-@SuppressLint("UnrememberedMutableState", "LocalContextGetResourceValueCall")
+@SuppressLint("UnrememberedMutableState", "LocalContextGetResourceValueCall",
+    "ConfigurationScreenWidthHeight"
+)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun MapHomeScreen(
-    nav: ThreePaneScaffoldNavigator<Any>?=null,
-    navToHome: NavHostController?=null,
+    nav: NavHostController? = null,
+    navToHome: NavHostController? = null,
     userViewModel: UserViewModel,
     storeViewModel: StoreViewModel,
     mapViewModel: MapViewModel,
@@ -104,6 +106,9 @@ fun MapHomeScreen(
     ) {
 
     val context = LocalContext.current
+    val config = LocalConfiguration.current
+
+    val screenHeigh = config.screenHeightDp
 
     val directions = mapViewModel.googlePlaceInfo.collectAsStateWithLifecycle()
 
@@ -121,6 +126,7 @@ fun MapHomeScreen(
     val isHasTitle = (mapType == enMapType.My)
     val isHasNavigationMap = (mapType == enMapType.Store || mapType == enMapType.TrackOrder)
 
+    val isComplatedNav = rememberSaveable { mutableStateOf(false) }
 
     val errorMessage = remember { mutableStateOf("") }
 
@@ -159,12 +165,18 @@ fun MapHomeScreen(
 
     fun handleMapClick(point: LatLng) {
         when (mapType) {
-            enMapType.My -> { updateMainLocation(point) }
-            enMapType.MyStore -> { coroutine.launch {
+            enMapType.My -> {
+                updateMainLocation(point)
+            }
+
+            enMapType.MyStore -> {
+                coroutine.launch {
                     storeViewModel.setStoreCreateData(point.longitude, point.latitude)
                     updateMainLocation(point)
                     isMyLocation.value = true
-                } }
+                }
+            }
+
             else -> {}
         }
     }
@@ -256,8 +268,10 @@ fun MapHomeScreen(
 
     LaunchedEffect(Unit) {
         if (isHasNavigationMap) {
-            Log.d("appPassingTheNavigation","Yes\n" +
-                    "${directions.value?.toString()}")
+            Log.d(
+                "appPassingTheNavigation", "Yes\n" +
+                        "${directions.value?.toString()}"
+            )
             mapViewModel.findPointBetweenTwoDestination(
                 mainLocation.position,
                 additionLocation.position,
@@ -275,6 +289,13 @@ fun MapHomeScreen(
         )
     }
 
+    LaunchedEffect(Unit) {
+        delay(300)
+        if (!isComplatedNav.value) {
+            isComplatedNav.value = true
+        }
+    }
+
     DisposableEffect(Unit)
     {
         onDispose {
@@ -283,160 +304,169 @@ fun MapHomeScreen(
         }
     }
 
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
-        snackbarHost = {
-            SnackbarHost(hostState = snackBarHostState)
-        },
-        floatingActionButton = {
-            if (isHasNavigationMap)
-                FloatingActionButton(
-                    modifier = Modifier
-                        .height(50.dp)
-                        .width(50.dp),
-                    onClick = {
-                        updateCameraToUser()
-                    },
-                    shape = RoundedCornerShape(8.dp),
-                    containerColor = Color.White
-                )
-                {
-                    Image(
-                        imageVector = ImageVector
-                            .vectorResource(id = R.drawable.current_location),
-                        contentDescription = "",
-                        modifier = Modifier.size(25.dp)
-                    )
-                }
+    if (!isComplatedNav.value) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    } else
 
-            if (isMyLocation.value)
-                FloatingActionButton(
-                    modifier = Modifier
-                        .height(50.dp)
-                        .width(50.dp),
-                    onClick = {
-                        coroutine.launch {
-                            nav!!.navigateBack()
-                        }
-                    },
-                    shape = RoundedCornerShape(8.dp),
-                    containerColor = CustomColor.alertColor_1_600
-                )
-                {
-                    Image(
-                        imageVector = ImageVector.vectorResource(R.drawable.arrow_back),
-                        contentDescription = "",
-                        modifier = Modifier.size(25.dp),
-                        colorFilter = ColorFilter.tint(Color.White)
-                    )
-                }
-
-        },
-        floatingActionButtonPosition = FabPosition.Start,
-        bottomBar = {
-            if (isOpenSheet.value) ModalBottomSheet(
-                onDismissRequest = {
-                    isOpenSheet.value = false
-                },
-                sheetState = sheetState,
-                containerColor = Color.White
-
-                )
-            {
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp)
-                        .fillMaxWidth()
-                )
-                {
-                    TextInputWithTitle(
-                        value = addressTitle,
-                        title = stringResource(R.string.address_title),
-                        placeHolder = addressTitle.value.text.ifEmpty { stringResource(R.string.write_address_name) },
-                        errorMessage = errorMessage.value,
-                        isHasError = isHasError.value,
-
-                        )
-                    Sizer(10)
-                    CustomAuthBottom(
-                        operation = {
-                            coroutine.launch {
-                                isLoading.value = true
-                                isOpenSheet.value = false
-
-                                val result = async {
-                                    if (id.isNullOrEmpty()) userViewModel.addUserAddress(
-                                        longitude = mainLocation.position.longitude,
-                                        latitude = mainLocation.position.latitude,
-                                        title = addressTitle.value.text
-                                    )
-                                    else userViewModel.updateUserAddress(
-                                        addressId = UUID.fromString(id),
-                                        addressTitle = addressTitle.value.text,
-                                        longitude = mainLocation.position.longitude,
-                                    latitude = mainLocation.position.latitude,
-
-                                        )
-                                }.await()
-
-                                cartViewModel.calculateOrderDistanceToUser(
-                                    stores = storeViewModel.stores.value,
-                                    currentAddress = userViewModel.userInfo.value?.address?.firstOrNull { it -> it.isCurrent }
-                                )
-                                isLoading.value = false
-                                if (!result.isNullOrEmpty()) {
-                                    snackBarHostState.showSnackbar(result)
-                                    return@launch
-                                }
-
-                                snackBarHostState.showSnackbar(
-                                    message = if (id.isNullOrEmpty()) context.getString(R.string.address_add_successfully)
-                                    else context.getString(R.string.address_updated_successfully)
-                                )
-
-                                if (!isFomLogin) {
-                                    nav!!.navigateBack()
-                                    return@launch
-                                }
-
-                                userViewModel.userPassLocation(true)
-                                navToHome?.navigate(Screens.HomeGraph) {
-                                    popUpTo(navToHome.graph.id) {
-                                        inclusive = true
-                                    }
-                                }
-
-
-                            }
-
-                        },
-                        buttonTitle = if (id.isNullOrEmpty()) stringResource(R.string.add) else stringResource(
-                            R.string.update
-                        ),
-                        validationFun = {
-                            validateUserAddressTitle()
-                        },
-                        isLoading = isLoading.value
-                    )
-                    Sizer(10)
-                }
-            }
-        })
-    { paddingValue ->
-        paddingValue.calculateTopPadding()
-        paddingValue.calculateBottomPadding()
-
-       // ConstraintLayout
-        Box(
+        Scaffold(
             modifier = Modifier
-                .background(Color.White)
                 .fillMaxSize()
-        ) {
+                .background(Color.White),
+            snackbarHost = {
+                SnackbarHost(hostState = snackBarHostState)
+            },
+            floatingActionButton = {
+                if (isHasNavigationMap)
+                    FloatingActionButton(
+                        modifier = Modifier
+                            .height(50.dp)
+                            .width(50.dp),
+                        onClick = {
+                            updateCameraToUser()
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        containerColor = Color.White
+                    )
+                    {
+                        Image(
+                            imageVector = ImageVector
+                                .vectorResource(id = R.drawable.current_location),
+                            contentDescription = "",
+                            modifier = Modifier.size(25.dp)
+                        )
+                    }
+
+                if (isMyLocation.value)
+                    FloatingActionButton(
+                        modifier = Modifier
+                            .height(50.dp)
+                            .width(50.dp),
+                        onClick = {
+                            coroutine.launch {
+                                nav!!.popBackStack()
+                            }
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        containerColor = CustomColor.alertColor_1_600
+                    )
+                    {
+                        Image(
+                            imageVector = ImageVector.vectorResource(R.drawable.arrow_back),
+                            contentDescription = "",
+                            modifier = Modifier.size(25.dp),
+                            colorFilter = ColorFilter.tint(Color.White)
+                        )
+                    }
+
+            },
+            floatingActionButtonPosition = FabPosition.Start,
+            bottomBar = {
+                if (isOpenSheet.value) ModalBottomSheet(
+                    onDismissRequest = {
+                        isOpenSheet.value = false
+                    },
+                    sheetState = sheetState,
+                    containerColor = Color.White
+
+                )
+                {
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
+                            .fillMaxWidth()
+                    )
+                    {
+                        TextInputWithTitle(
+                            value = addressTitle,
+                            title = stringResource(R.string.address_title),
+                            placeHolder = addressTitle.value.text.ifEmpty { stringResource(R.string.write_address_name) },
+                            errorMessage = errorMessage.value,
+                            isHasError = isHasError.value,
+
+                            )
+                        Sizer(10)
+                        CustomAuthBottom(
+                            operation = {
+                                coroutine.launch {
+                                    isLoading.value = true
+                                    isOpenSheet.value = false
+
+                                    val result = async {
+                                        if (id.isNullOrEmpty()) userViewModel.addUserAddress(
+                                            longitude = mainLocation.position.longitude,
+                                            latitude = mainLocation.position.latitude,
+                                            title = addressTitle.value.text
+                                        )
+                                        else userViewModel.updateUserAddress(
+                                            addressId = UUID.fromString(id),
+                                            addressTitle = addressTitle.value.text,
+                                            longitude = mainLocation.position.longitude,
+                                            latitude = mainLocation.position.latitude,
+
+                                            )
+                                    }.await()
+
+                                    cartViewModel.calculateOrderDistanceToUser(
+                                        stores = storeViewModel.stores.value,
+                                        currentAddress = userViewModel.userInfo.value?.address?.firstOrNull { it -> it.isCurrent }
+                                    )
+                                    isLoading.value = false
+                                    if (!result.isNullOrEmpty()) {
+                                        snackBarHostState.showSnackbar(result)
+                                        return@launch
+                                    }
+
+                                    snackBarHostState.showSnackbar(
+                                        message = if (id.isNullOrEmpty()) context.getString(R.string.address_add_successfully)
+                                        else context.getString(R.string.address_updated_successfully)
+                                    )
+
+                                    if (!isFomLogin) {
+                                        nav!!.popBackStack()
+                                        return@launch
+                                    }
+
+                                    userViewModel.userPassLocation(true)
+                                    navToHome?.navigate(Screens.HomeGraph) {
+                                        popUpTo(navToHome.graph.id) {
+                                            inclusive = true
+                                        }
+                                    }
+
+
+                                }
+
+                            },
+                            buttonTitle = if (id.isNullOrEmpty()) stringResource(R.string.add) else stringResource(
+                                R.string.update
+                            ),
+                            validationFun = {
+                                validateUserAddressTitle()
+                            },
+                            isLoading = isLoading.value
+                        )
+                        Sizer(10)
+                    }
+                }
+            })
+        { paddingValue ->
+            paddingValue.calculateTopPadding()
+            paddingValue.calculateBottomPadding()
+
+            // ConstraintLayout
+            Box(
+                modifier = Modifier
+                    .background(Color.White)
+                    .fillMaxSize()
+            ) {
+            }
+
+
             GoogleMap(
                 modifier = Modifier
-                    .padding(paddingValue  )
+                    .padding(paddingValue)
                     .fillMaxHeight(),
                 cameraPositionState = marker,
                 onMapClick = { latLng ->
@@ -493,8 +523,6 @@ fun MapHomeScreen(
             }
 
 
-
-
             if (isHasTitle) CustomButton(
                 buttonTitle = if (!id.isNullOrEmpty()) stringResource(R.string.edite_current_location) else stringResource(
                     R.string.add_new_address
@@ -502,16 +530,18 @@ fun MapHomeScreen(
                 color = CustomColor.primaryColor700,
                 isEnable = true,
                 customModifier = Modifier
-                    .padding(bottom = paddingValue.calculateBottomPadding() + 10.dp)
+                    .offset(y = (screenHeigh-(paddingValue.calculateBottomPadding().value + paddingValue.calculateTopPadding().value+80)).dp)
+
 
                     .height(50.dp)
-                    .fillMaxWidth(0.9f)
+                    .width((screenHeigh - 20).dp)
 //                    .constrainAs(bottomRef) {
 //                        bottom.linkTo(parent.bottom)
 //                        start.linkTo(parent.start)
 //                        end.linkTo(parent.end)
-//                    },
-,
+//                    }
+                ,
+
                 isLoading = false,
                 operation = {
                     when (isHasTitle) {
@@ -527,8 +557,9 @@ fun MapHomeScreen(
                 labelSize = 20
             )
 
+
         }
-    }
+
 
     if (isLoading.value) Dialog(
         onDismissRequest = {}) {

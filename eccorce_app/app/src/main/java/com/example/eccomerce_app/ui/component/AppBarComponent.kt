@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -76,57 +75,4 @@ fun SharedAppBar(
         scrollBehavior = scrollBehavior,
 
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
-@Composable
-fun SharedAppBarDetails(
-    title: String? =null,
-    nav: ThreePaneScaffoldNavigator<Any>,
-    action: @Composable (() -> Unit)? =null,
-    scrollBehavior: TopAppBarScrollBehavior? =null,
-) {
-    val fontScall = LocalDensity.current.fontScale
-    val coroutine = rememberCoroutineScope()
-    CenterAlignedTopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White
-        ),
-        title = {
-            if (title != null)
-                Text(
-                    title,
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Bold,
-                    color = CustomColor.neutralColor950,
-                    fontSize = (24 / fontScall).sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-
-                )
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = {
-                    coroutine.launch {
-                        nav.navigateBack()
-                    }
-                }
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    "",
-                    modifier = Modifier.size(30.dp),
-                    tint = CustomColor.neutralColor950
-                )
-            }
-        },
-
-        actions = {
-            if (action != null)
-                action()
-        },
-        scrollBehavior = scrollBehavior,
-
-        )
 }

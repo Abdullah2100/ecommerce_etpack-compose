@@ -18,10 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,11 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.Category
-import com.example.e_commercompose.ui.component.Sizer
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.ProductViewModel
@@ -50,25 +47,18 @@ import java.util.UUID
 fun CategoryShape(
     categories: List<Category>,
     productViewModel: ProductViewModel,
-    nav: ThreePaneScaffoldNavigator<Any>
+    nav: NavHostController
 ){
     val context = LocalContext.current
-    val coroutine = rememberCoroutineScope()
+
 
     fun getProductAndNavigateToProduct(id: UUID){
-        coroutine.launch {
-            productViewModel.getProductsByCategoryID(
-                pageNumber = 1,
-                categoryId = id
-            )
-            nav.navigateTo(
-                ListDetailPaneScaffoldRole.Detail,
+            productViewModel.getProductsByCategoryID( pageNumber = 1 , categoryId = id )
+            nav.navigate(
                 Screens.ProductCategory(
                     id.toString()
                 )
             )
-        }
-
     }
 
     Row(
@@ -85,22 +75,17 @@ fun CategoryShape(
             fontSize = 18.sp,
             color = CustomColor.neutralColor950,
             textAlign = TextAlign.Center
-
         )
-        if (categories.size > 4) Text(
+
+        if (categories.size > 4)
+            Text(
             stringResource(R.string.view_all),
             fontFamily = General.satoshiFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
             color = CustomColor.neutralColor950,
             textAlign = TextAlign.Center,
-            modifier = Modifier.clickable {
-                coroutine.launch {
-                    nav.navigateTo(
-                        ListDetailPaneScaffoldRole.Detail,
-                        Screens.Category)
-                }
-            }
+            modifier = Modifier.clickable { nav.navigate(Screens.Category) }
 
         )
     }

@@ -90,7 +90,6 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui)
     implementation(libs.androidx.junit.ktx)
-    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
@@ -203,9 +202,10 @@ dependencies {
     implementation(libs.stripe.android)
 
     //adapted ui lib
-    implementation(libs.androidx.compose.adaptive)
-    implementation(libs.androidx.compose.adaptive.layout)
-    implementation(libs.androidx.compose.adaptive.navigation)
+//    implementation(libs.androidx.compose.adaptive)
+//    implementation(libs.androidx.compose.adaptive.layout)
+    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.compose.material3.window.size.class1)
 
 }
 

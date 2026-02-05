@@ -1,6 +1,7 @@
 package com.example.eccomerce_app.ui.component
 
 import android.content.Context
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,6 +20,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,8 +37,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,46 +56,48 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.ProductModel
-import com.example.e_commercompose.ui.component.Sizer
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.util.General.toCustomFil
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-/**
- * this nice but need to be more clear
- * @constructor nice
- * @see Int
- */
+
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun ProductShape(
     product: List<ProductModel>,
     delFun: ((it: UUID) -> Unit)? = null,
     updFun: ((productId: UUID) -> Unit)? = null,
-    nav: ThreePaneScaffoldNavigator<Any>,
+    nav: NavHostController,
     isFromHome: Boolean = false,
     isCanNavigateToStore: Boolean = true
 ) {
     val context = LocalContext.current
     val coroutine = rememberCoroutineScope()
 
+    Log.d("ProductData",product.size.toString())
+
     FlowRow(
         modifier = Modifier
-
             .fillMaxWidth(),
-
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         repeat(product.size) { index ->
-            ConstraintLayout {
-                val (rightRef, leftRef) = createRefs()
+
+            ConstraintLayout(
+                modifier = Modifier
+                    .wrapContentSize()
+
+                )
+            {
+                val (rightRef, leftRef,cardRef) = createRefs()
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = Color.White
@@ -103,12 +106,12 @@ fun ProductShape(
                         defaultElevation = 58.dp
                     ),
                     modifier = Modifier
+                        .wrapContentHeight()
                         .width(160.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .clickable {
                             coroutine.launch {
-                                nav.navigateTo(
-                                    ListDetailPaneScaffoldRole.Detail,
+                                nav.navigate(
                                     Screens.ProductDetails(
                                         product[index].id.toString(),
                                         isFromHome = isFromHome,
@@ -122,20 +125,29 @@ fun ProductShape(
                             CustomColor.neutralColor200,
                             RoundedCornerShape(8.dp)
                         )
-                ) {
+                        .constrainAs(cardRef){
+                            start.linkTo(parent.start)
+                            top.linkTo(parent.top)
+                            end.linkTo(parent.end)
+                            bottom.linkTo(parent.bottom)
+                        }
+                )
+                {
 
                     Box(
                         modifier = Modifier
                             .height(150.dp)
                             .width(160.dp)
                             .background(
-                                CustomColor.primaryColor50,
+                                Color.White,
                                 RoundedCornerShape(8.dp)
-                            )
-                    ) {
+                            ),
+                        contentAlignment = Alignment.Center
+                    )
+                    {
 
                         SubcomposeAsyncImage(
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.Fit,
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .fillMaxWidth()
@@ -160,13 +172,21 @@ fun ProductShape(
                         )
 
                     }
+
+                    Sizer(
+                        heigh = 1,
+                        width = 160,
+                        CustomColor.neutralColor200
+                    )
+
                     Column(
                         modifier = Modifier
                             .padding(
                                 horizontal = 5.dp,
                                 vertical = 5.dp
                             )
-                    ) {
+                    )
+                    {
                         Sizer(10)
                         Text(
                             product[index].name,
@@ -192,7 +212,9 @@ fun ProductShape(
                             )
                         }
                     }
+
                 }
+
                 if (delFun != null)
                     Box(
                         modifier = Modifier
@@ -213,13 +235,15 @@ fun ProductShape(
                             },
                         contentAlignment = Alignment.Center
 
-                    ) {
+                    )
+                    {
                         Icon(
                             Icons.Default.Delete, "",
                             tint = Color.White,
                             modifier = Modifier.size(30.dp)
                         )
                     }
+
                 if (updFun != null)
                     Box(
                         modifier = Modifier
@@ -240,7 +264,8 @@ fun ProductShape(
                             },
                         contentAlignment = Alignment.Center
 
-                    ) {
+                    )
+                    {
                         Icon(
                             Icons.Default.Edit, "",
                             tint = Color.White,

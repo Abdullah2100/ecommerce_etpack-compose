@@ -1,7 +1,6 @@
 [versions]
 adaptive = "1.3.0-alpha06"
 adaptiveLayout = "1.3.0-alpha06"
-adaptiveNavigation = "1.3.0-alpha06"
 agp = "8.12.3"
 core = "3.5.4"
 coreSplashscreen = "1.2.0"
@@ -15,10 +14,11 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 kotlinxDatetime = "0.7.1"
 lifecycleRuntimeKtx = "2.10.0"
-activityCompose = "1.12.2"
-composeBom = "2026.01.00"
+activityCompose = "1.12.3"
+composeBom = "2026.01.01"
 lifecycleViewmodelKtx = "2.10.0"
-mapsCompose = "7.0.0"
+mapsCompose = "8.0.0"
+material3WindowSizeClass = "1.4.0"
 materialIconsExtended = "1.7.8"
 playServicesLocation = "21.3.0"
 room = "2.8.4"
@@ -29,35 +29,32 @@ koin = "4.1.1"
 kspVersion = "2.2.21-2.0.4"
 serialize-kotlin = '2.3.0'
 kotlinxSerializationJson = "1.10.0"
-ktor = "3.3.3"
+ktor = "3.4.0"
 kotlinxCoroutinesPlayServices = "1.10.2"
 coroutines = "1.10.2"
-nav_version = "2.9.6"
+nav_version = "2.9.7"
 constrain-compose = "1.1.1"
 coilCompose = "2.7.0"
 gms="4.4.4"
-mapsUtilsKtx = "5.2.2"
+mapsUtilsKtx = "6.0.0"
 playServicesMaps = "20.0.0"
 qrKit = "3.1.3"
-stripeAndroid = "22.6.1"
-stripeterminal = "5.1.1"
-stripeterminalKtx = "5.1.1"
-uiGraphics = "1.10.1"
-ui = "1.10.1"
+stripeAndroid = "22.7.0"
+stripeterminal = "5.2.0"
+stripeterminalKtx = "5.2.0"
+uiGraphics = "1.10.2"
+ui = "1.10.2"
 gradleSecret = "2.0.1"
 zxingAndroidEmbedded = "4.3.0"
 junitKtx = "1.3.0"
 mockk = "1.13.13"
 kotlinxCoroutinesTest = "1.10.2"
 coreTesting = "2.2.0"
-material3AdaptiveNavigationSuite = "1.4.0"
 
 
 [libraries]
-androidx-compose-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation", version.ref = "adaptiveNavigation" }
-androidx-compose-material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavigationSuite" }
-androidx-compose-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version.ref = "adaptiveLayout" }
-androidx-compose-adaptive = { module = "androidx.compose.material3.adaptive:adaptive", version.ref = "adaptive" }
+androidx-compose-material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
+androidx-compose-material3-window-size-class1 = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3WindowSizeClass" }
 core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }

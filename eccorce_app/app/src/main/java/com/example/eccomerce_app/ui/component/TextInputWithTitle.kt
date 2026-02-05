@@ -35,7 +35,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.e_commercompose.ui.component.Sizer
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.theme.CustomColor
 

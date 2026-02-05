@@ -21,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.General.toCustomFil
@@ -52,7 +52,7 @@ import com.example.eccomerce_app.ui.component.TextNumberInputWithTitle
 import com.example.eccomerce_app.ui.component.TextSecureInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.component.ProfileImage
-import com.example.eccomerce_app.ui.component.SharedAppBarDetails
+import com.example.eccomerce_app.ui.component.SharedAppBar
 import com.example.eccomerce_app.viewModel.UserViewModel
 import com.example.hotel_mobile.Util.Validation
 import kotlinx.coroutines.async
@@ -63,7 +63,7 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun ProfileScreen(
-    nav: ThreePaneScaffoldNavigator<Any>,
+    nav: NavHostController,
     userViewModel: UserViewModel
 ) {
     val context = LocalContext.current
@@ -173,7 +173,7 @@ fun ProfileScreen(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBarDetails(
+            SharedAppBar(
                 title = stringResource(R.string.my_profile),
                 nav = nav,
                 action = {

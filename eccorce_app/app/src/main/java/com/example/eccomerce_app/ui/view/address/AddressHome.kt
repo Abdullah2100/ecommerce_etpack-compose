@@ -11,11 +11,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,10 +27,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
-import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +53,7 @@ import com.example.e_commercompose.model.enMapType
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.CustomTitleButton
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.viewModel.BannerViewModel
 import com.example.eccomerce_app.viewModel.CartViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
@@ -74,29 +71,19 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AddressHomeScreen(
-    nav: NavHostController?=null,
+    nav: NavHostController? = null,
     userViewModel: UserViewModel,
-    storeViewModel: StoreViewModel,
-    mapViewModel: MapViewModel,
-    cartViewModel: CartViewModel,
-    productViewModel: ProductViewModel,
-    categoryViewModel: CategoryViewModel,
-    variantViewModel: VariantViewModel,
-    bannerViewModel: BannerViewModel,
-    orderViewModel: OrderViewModel,
-    generalSettingViewModel: GeneralSettingViewModel
-
-    ) {
+) {
     val context = LocalContext.current
     val fontScall = LocalDensity.current.fontScale
 
     val coroutine = rememberCoroutineScope()
-    val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
     val isNotEnablePermission = remember { mutableStateOf(false) }
 
     fun updateConditionValue(isNotEnablePermissionValue: Boolean? = null) {
-        if (isNotEnablePermissionValue != null) isNotEnablePermission.value = isNotEnablePermissionValue
+        if (isNotEnablePermissionValue != null) isNotEnablePermission.value =
+            isNotEnablePermissionValue
     }
 
     val snackBarHostState = remember { SnackbarHostState() }
@@ -127,9 +114,8 @@ fun AddressHomeScreen(
                             addOnSuccessListener { location ->
 
                                 if (location != null)
-                                    coroutine.launch {
-                                        navigator.navigateTo(
-                                            ListDetailPaneScaffoldRole.Detail,
+
+                                        nav!!.navigate(
                                             Screens.MapScreen(
                                                 lognit = location.longitude,
                                                 latitt = location.latitude,
@@ -137,7 +123,6 @@ fun AddressHomeScreen(
                                                 mapType = enMapType.My
                                             )
                                         )
-                                    }
                                 else
                                     coroutine.launch {
                                         snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
@@ -156,8 +141,10 @@ fun AddressHomeScreen(
                 }
 
             } else {
-                Toast.makeText(context,
-                    context.getString(R.string.location_permission_denied), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.location_permission_denied), Toast.LENGTH_SHORT
+                ).show()
             }
         }
     )
@@ -167,175 +154,127 @@ fun AddressHomeScreen(
         userViewModel.getMyInfo()
     }
 
-    BackHandler(enabled =navigator.canNavigateBack() ) {
-        coroutine.launch {
-            navigator.navigateBack()
-        }
-    }
 
-    NavigableListDetailPaneScaffold(
-        navigator = navigator,
-        listPane = {
-            Scaffold(
-                snackbarHost = {
-                    SnackbarHost(hostState = snackBarHostState)
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-            )
-            {
-                it.calculateTopPadding()
-                it.calculateBottomPadding()
 
-                Column(
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackBarHostState)
+        },
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    )
+    {paddingValues ->
+        paddingValues.calculateTopPadding()
+        paddingValues.calculateBottomPadding()
+
+        LazyColumn(
+            modifier = Modifier
+                .background(Color.White)
+                .padding(paddingValues)
+                .padding(horizontal = 10.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        )
+        {
+            item {
+
+                Box(
                     modifier = Modifier
-                        .background(Color.White)
-                        .padding(it)
-                        .padding(horizontal = 10.dp)
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .height(80.dp)
+                        .width(80.dp)
+                        .background(
+                            CustomColor.primaryColor50,
+                            RoundedCornerShape(40.dp),
+                        ),
+                    contentAlignment = Alignment.Center
                 )
                 {
-
-                    Box(
-                        modifier = Modifier
-                            .height(80.dp)
-                            .width(80.dp)
-                            .background(
-                                CustomColor.primaryColor50,
-                                RoundedCornerShape(40.dp),
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector
-                                .vectorResource(R.drawable.location), contentDescription = "",
-                            tint = CustomColor.primaryColor700
-                        )
-                    }
-
-                    Sizer(50)
-                    Text(
-                        stringResource(R.string.what_is_your_location),
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = (24 / fontScall).sp,
-                        color = CustomColor.neutralColor950,
-                        textAlign = TextAlign.Center
-
+                    Icon(
+                        imageVector = ImageVector
+                            .vectorResource(R.drawable.location),
+                        contentDescription = "",
+                        tint = CustomColor.primaryColor700
                     )
-                    Sizer(8)
-                    Text(
-                        stringResource(R.string.we_need_to_know_your_location_in_order_to_suggest_nearby_services),
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = (16 / fontScall).sp,
-                        color = CustomColor.neutralColor800,
-                        textAlign = TextAlign.Center
-                    )
-                    Sizer(50)
-                    CustomButton(
-                        operation = {
-                            requestPermission.launch(
-                                arrayOf(
-                                    Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.ACCESS_COARSE_LOCATION
-                                )
+                }
+
+                Sizer(50)
+                Text(
+                    stringResource(R.string.what_is_your_location),
+                    fontFamily = General.satoshiFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = (24 / fontScall).sp,
+                    color = CustomColor.neutralColor950,
+                    textAlign = TextAlign.Center
+
+                )
+                Sizer(8)
+                Text(
+                    stringResource(R.string.we_need_to_know_your_location_in_order_to_suggest_nearby_services),
+                    fontFamily = General.satoshiFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = (16 / fontScall).sp,
+                    color = CustomColor.neutralColor800,
+                    textAlign = TextAlign.Center
+                )
+                Sizer(50)
+                CustomButton(
+                    operation = {
+                        requestPermission.launch(
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
                             )
-                        },
-                        buttonTitle = stringResource(R.string.allow_location_access),
-                        color = CustomColor.primaryColor700
-                    )
-                    Sizer(20)
-                    CustomTitleButton(
-                        operation = {
-                            userViewModel.getMyInfo()
-                            coroutine.launch {
-                                navigator.navigateTo( ListDetailPaneScaffoldRole.Detail,Screens.PickCurrentAddress)
-                            }
-                        },
-                        buttonTitle = stringResource(R.string.enter_location_manually),
-                        color = CustomColor.primaryColor700
-                    )
+                        )
+                    },
+                    buttonTitle = stringResource(R.string.allow_location_access),
+                    color = CustomColor.primaryColor700
+                )
+                Sizer(20)
+                CustomTitleButton(
+                    operation = {
+                        userViewModel.getMyInfo()
+                            nav?.navigate(Screens.PickCurrentAddress)
+                    },
+                    buttonTitle = stringResource(R.string.enter_location_manually),
+                    color = CustomColor.primaryColor700
+                )
 
 
-                    if (isNotEnablePermission.value) {
-                        AlertDialog(
-                            onDismissRequest = {
-                                //Logic when dismiss happens
-                                updateConditionValue(isNotEnablePermissionValue = false)
-                            },
-                            title = {
-                                Text(stringResource(R.string.permission_required))
-                            },
-                            text = {
-                                Text(stringResource(R.string.you_need_to_approve_this_permission_in_order_to))
-                            },
-                            confirmButton = {
+                if (isNotEnablePermission.value) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            //Logic when dismiss happens
+                            updateConditionValue(isNotEnablePermissionValue = false)
+                        },
+                        title = {
+                            Text(stringResource(R.string.permission_required))
+                        },
+                        text = {
+                            Text(stringResource(R.string.you_need_to_approve_this_permission_in_order_to))
+                        },
+                        confirmButton = {
 //                        TextButton(onClick = {
 //                            Logic when user confirms to accept permissions
 //                        }) {
 //                            Text("Confirm")
 //                        }
-                            },
-                            dismissButton = {
-                                TextButton(onClick = {
-                                    //Logic when user denies to accept permissions
-                                }) {
-                                    updateConditionValue(isNotEnablePermissionValue = false)
-                                    Text(stringResource(R.string.deny))
-                                }
-                            })
-                    }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = {
+                                //Logic when user denies to accept permissions
+                            }) {
+                                updateConditionValue(isNotEnablePermissionValue = false)
+                                Text(stringResource(R.string.deny))
+                            }
+                        })
                 }
-
-
             }
 
-        },
-        detailPane = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                when (val content = navigator.currentDestination?.contentKey) {
-                    is Screens.MapScreen -> MapHomeScreen(
-                        nav = navigator,
-                        navToHome = nav,
-                        userViewModel = userViewModel,
-                        storeViewModel = storeViewModel,
-                        mapViewModel = mapViewModel,
-                        cartViewModel = cartViewModel,
-                        title = content.title,
-                        id = content.id,
-                        longitude = content.lognit,
-                        latitude = content.latitt,
-                        mapType = content.mapType,
-                        isFomLogin = content.isFromLogin,
-                        additionLat = content.additionLat,
-                        additionLong = content.additionLong,
-                    )
-                    is Screens.PickCurrentAddress ->{
-                        PickCurrentAddressFromAddressScreen(
-                            nav = nav,
-                            userViewModel = userViewModel,
-                            productViewModel = productViewModel,
-                            categoryViewModel = categoryViewModel,
-                            bannerViewModel = bannerViewModel,
-                            variantViewModel = variantViewModel,
-                            orderViewModel = orderViewModel,
-                            generalSettingViewModel = generalSettingViewModel,
-
-
-                        )
-                    }
-                }
-                }
         }
-    )
+    }
+
+
 }

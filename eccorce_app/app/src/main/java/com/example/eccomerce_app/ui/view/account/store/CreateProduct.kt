@@ -21,7 +21,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,20 +38,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.dto.ModelToDto.toListOfProductVariant
 import com.example.eccomerce_app.model.ProductVariantSelection
 import com.example.e_commercompose.ui.component.CustomButton
-import com.example.e_commercompose.ui.component.CustomDropDownComponent
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.CustomDropDownComponent
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.eccomerce_app.ui.component.TextNumberInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.component.CreateProductImage
 import com.example.eccomerce_app.ui.component.ProductVariantCreateComponent
 import com.example.eccomerce_app.ui.component.SharedAppBar
-import com.example.eccomerce_app.ui.component.SharedAppBarDetails
 import com.example.eccomerce_app.viewModel.CurrencyViewModel
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.SubCategoryViewModel
@@ -68,7 +67,7 @@ import java.util.UUID
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun CreateProductScreen(
-    nav: ThreePaneScaffoldNavigator<Any>,
+    nav: NavHostController,
     storeId: String,
     productId: String? = null,
     subCategoryViewModel: SubCategoryViewModel,
@@ -241,7 +240,7 @@ fun CreateProductScreen(
                     selectedSubCategoryId.value = null
                     productVariants.value = emptyList()
                     snackBarHostState.showSnackbar(context.getString(R.string.product_created_successfully))
-                    nav.navigateBack()
+                    nav.popBackStack()
                 }
 
             }
@@ -307,7 +306,7 @@ fun CreateProductScreen(
                 selectedSubCategoryId.value = null
                 productVariants.value = emptyList()
                 snackBarHostState.showSnackbar(context.getString(R.string.product_update_successfully))
-                nav.navigateBack()
+                nav.popBackStack()
             }
         }
     }
@@ -339,7 +338,7 @@ fun CreateProductScreen(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBarDetails(
+            SharedAppBar(
                 title = if (productId == null) stringResource(R.string.create_product) else stringResource(
                     R.string.update_product
                 ),

@@ -24,7 +24,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -44,14 +43,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.e_commercompose.ui.component.CustomButton
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.component.OrderItemShape
 import com.example.eccomerce_app.ui.component.SharedAppBar
-import com.example.eccomerce_app.ui.component.SharedAppBarDetails
 import com.example.eccomerce_app.viewModel.OrderItemsViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -63,7 +62,7 @@ import java.util.UUID
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun OrderForMyStoreScreen(
-    nav: ThreePaneScaffoldNavigator<Any>,
+    nav: NavHostController,
     orderItemsViewModel: OrderItemsViewModel
 ) {
     val context = LocalContext.current
@@ -158,7 +157,7 @@ fun OrderForMyStoreScreen(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBarDetails(
+            SharedAppBar(
                 title = stringResource(R.string.order_belong_to_my_store),
                 nav = nav,
             )

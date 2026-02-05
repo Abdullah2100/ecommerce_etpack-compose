@@ -104,7 +104,7 @@ object DtoToModel {
             isAvailable = this.isAvailable,
             thumbnail = if (this.thumbnail.isNullOrEmpty()) "" else this.thumbnail.replace(
                 "localhost",
-                "10.0.2.2"
+               Secrets.imageUrl
             ),
             address = this.address?.toAddress(),
             user = this.user.toDeliveryUserInfo()

@@ -13,7 +13,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -29,12 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.e_commercompose.ui.component.Sizer
+import androidx.navigation.NavHostController
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.e_commercompose.ui.component.ProductLoading
 import com.example.eccomerce_app.ui.component.ProductShape
 import com.example.eccomerce_app.ui.component.SharedAppBar
-import com.example.eccomerce_app.ui.component.SharedAppBarDetails
 import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
@@ -47,7 +46,7 @@ import java.util.UUID
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun ProductCategoryScreen(
-    nav: ThreePaneScaffoldNavigator<Any>,
+    nav: NavHostController,
     categoryId: String,
     categoryViewModel: CategoryViewModel,
     productViewModel: ProductViewModel
@@ -91,7 +90,7 @@ fun ProductCategoryScreen(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBarDetails(
+            SharedAppBar(
                 title = categories.value?.firstOrNull { it.id == categoryId }?.name ?: "",
                 nav = nav
             )

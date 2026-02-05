@@ -3,6 +3,7 @@ package com.example.eccomerce_app.ui.view.home
 import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,8 +20,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
-import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -31,6 +30,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.savedstate.savedState
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.component.BannerPage
 import com.example.e_commercompose.ui.component.CategoryLoadingShape
@@ -48,12 +48,9 @@ import com.example.e_commercompose.ui.component.ProductLoading
 import com.example.eccomerce_app.ui.component.ProductShape
 import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.e_commercompose.ui.component.BannerLoading
-import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.HomeAddressComponent
 import com.example.eccomerce_app.ui.component.HomeSearchComponent
 import com.example.eccomerce_app.ui.component.OpacityAndHideComponent
-import com.example.eccomerce_app.ui.view.account.store.ProductDetail
-import com.example.eccomerce_app.ui.view.account.store.StoreScreen
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.eccomerce_app.viewModel.BannerViewModel
@@ -86,11 +83,8 @@ fun HomePage(
     homeViewModel: HomeViewModel,
     currencyViewModel: CurrencyViewModel,
     paymentTypeViewModel: PaymentTypeViewModel,
-    cartViewModel: CartViewModel,
-    storeViewModel: StoreViewModel,
-    subCategoryViewModel: SubCategoryViewModel
 
-) {
+    ) {
     val configuration = LocalConfiguration.current
     val lazyState = rememberLazyListState()
     val state = rememberPullToRefreshState()
@@ -115,7 +109,6 @@ fun HomePage(
 
     val sizeAnimation = animateDpAsState(if (!isClickingSearch.value) 80.dp else 0.dp)
 
-    val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
     val requestPermission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -168,224 +161,168 @@ fun HomePage(
 
     }
 
-    BackHandler(enabled = !navigator.canNavigateBack()) {
-        coroutine.launch {
-            navigator.navigateBack()
+
+
+
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    )
+    { scaffoldState ->
+        scaffoldState.calculateTopPadding()
+        scaffoldState.calculateBottomPadding()
+
+
+        PullToRefreshBox(
+            isRefreshing = isRefresh.value,
+            onRefresh = {
+                initialDataLoad(true)
+            },
+            state = state,
+            indicator = {
+                Indicator(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    isRefreshing = isRefresh.value,
+                    containerColor = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    state = state
+                )
+            },
+        ) {
+            LazyColumn(
+                state = lazyState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .padding(scaffoldState)
+                    .padding(top = 20.dp, start = 10.dp, end = 10.dp)
+
+            ) {
+
+                //address info
+                item {
+                    HomeAddressComponent(
+                        isPassCondition = myInfo.value?.address == null && categories.value == null,
+                        screenWidth = configuration.screenWidthDp,
+                        animatedComponentSize = sizeAnimation.value,
+                        nav = nav,
+                        address = myInfo.value?.address?.firstOrNull { it.isCurrent }
+                    )
+
+                }
+
+                //this the search box
+                if (!products.value.isNullOrEmpty())
+                    item {
+                        HomeSearchComponent(
+                            isClickingSearch = isClickingSearch.value,
+                        ) { state ->
+                            isClickingSearch.value = state
+                        }
+                    }
+
+
+                item {
+                    OpacityAndHideComponent(
+                        isHideComponent = isClickingSearch.value,
+                        content = {
+                            when (categories.value == null) {
+                                true -> {
+                                    CategoryLoadingShape()
+                                }
+
+                                else -> {
+                                    when (categories.value!!.isEmpty()) {
+                                        true -> {}
+                                        else -> {
+                                            CategoryShape(
+                                                categories = categories.value!!.take(4),
+                                                productViewModel = productViewModel,
+                                                nav = nav
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        })
+                }
+
+                //banner section
+                item {
+                    OpacityAndHideComponent(
+                        isHideComponent = isClickingSearch.value,
+                        content = {
+                            when (banner.value == null) {
+                                true -> {
+                                    BannerLoading()
+                                }
+
+                                else -> {
+                                    if (!banner.value.isNullOrEmpty())
+                                        BannerPage(
+                                            banners = banner.value!!,
+                                            isMe = false,
+                                            nav = nav
+                                        )
+                                }
+                            }
+                        })
+
+
+                }
+
+
+                //product
+
+                item {
+                    OpacityAndHideComponent(
+                        isHideComponent = isClickingSearch.value,
+                        content = {
+                            Sizer(10)
+                            when (products.value == null) {
+                                true -> {
+                                    ProductLoading()
+                                }
+
+                                else -> {
+                                    if (!products.value.isNullOrEmpty()) {
+                                        ProductShape(products.value!!, nav = nav)
+                                    }
+                                }
+                            }
+                        })
+                }
+
+                if (isLoadingMore.value) {
+
+                    item {
+                        OpacityAndHideComponent(
+                            isHideComponent = isClickingSearch.value,
+                            content = {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(top = 15.dp)
+                                        .fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                )
+                                {
+                                    CircularProgressIndicator(color = CustomColor.primaryColor700)
+                                }
+                                Sizer(40)
+                            })
+                    }
+                }
+
+                item {
+                    Sizer(140)
+                }
+            }
+
         }
     }
 
 
-
-    NavigableListDetailPaneScaffold(
-        navigator = navigator,
-        listPane = {
-            Scaffold(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-            )
-            { scaffoldState ->
-                scaffoldState.calculateTopPadding()
-                scaffoldState.calculateBottomPadding()
-
-
-                PullToRefreshBox(
-                    isRefreshing = isRefresh.value,
-                    onRefresh = {
-                        initialDataLoad(true)
-                    },
-                    state = state,
-                    indicator = {
-                        Indicator(
-                            modifier = Modifier.align(Alignment.TopCenter),
-                            isRefreshing = isRefresh.value,
-                            containerColor = Color.White,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            state = state
-                        )
-                    },
-                ) {
-                    LazyColumn(
-                        state = lazyState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White)
-                            .padding(scaffoldState)
-                            .padding(top = 20.dp, start = 10.dp, end = 10.dp)
-
-                    ) {
-
-                        //address info
-                        item {
-                            HomeAddressComponent(
-                                isPassCondition = myInfo.value?.address == null && categories.value == null,
-                                screenWidth = configuration.screenWidthDp,
-                                animatedComponentSize = sizeAnimation.value,
-                                nav = navigator,
-                                address = myInfo.value?.address?.firstOrNull { it.isCurrent }
-                            )
-
-                        }
-
-                        //this the search box
-                        if (!products.value.isNullOrEmpty())
-                            item {
-                                HomeSearchComponent(
-                                    isClickingSearch = isClickingSearch.value,
-                                ) { state ->
-                                    isClickingSearch.value = state
-                                }
-                            }
-
-
-                        item {
-                            OpacityAndHideComponent(
-                                isHideComponent = isClickingSearch.value,
-                                content = {
-                                    when (categories.value == null) {
-                                        true -> {
-                                            CategoryLoadingShape()
-                                        }
-
-                                        else -> {
-                                            when (categories.value!!.isEmpty()) {
-                                                true -> {}
-                                                else -> {
-                                                    CategoryShape(
-                                                        categories = categories.value!!.take(4),
-                                                        productViewModel = productViewModel,
-                                                        nav = navigator
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                })
-                        }
-
-                        //banner section
-                        item {
-                            OpacityAndHideComponent(
-                                isHideComponent = isClickingSearch.value,
-                                content = {
-                                    when (banner.value == null) {
-                                        true -> {
-                                            BannerLoading()
-                                        }
-
-                                        else -> {
-                                            if (!banner.value.isNullOrEmpty())
-                                                BannerPage(
-                                                    banners = banner.value!!,
-                                                    isMe = false,
-                                                    nav = navigator
-                                                )
-                                        }
-                                    }
-                                })
-
-
-                        }
-
-
-                        //product
-
-                        item {
-                            OpacityAndHideComponent(
-                                isHideComponent = isClickingSearch.value,
-                                content = {
-                                    Sizer(10)
-                                    when (products.value == null) {
-                                        true -> {
-                                            ProductLoading()
-                                        }
-
-                                        else -> {
-                                            if (products.value!!.isNotEmpty()) {
-                                                ProductShape(products.value!!, nav = navigator)
-                                            }
-                                        }
-                                    }
-                                })
-                        }
-
-                        if (isLoadingMore.value) {
-
-                            item {
-                                OpacityAndHideComponent(
-                                    isHideComponent = isClickingSearch.value,
-                                    content = {
-                                        Box(
-                                            modifier = Modifier
-                                                .padding(top = 15.dp)
-                                                .fillMaxWidth(),
-                                            contentAlignment = Alignment.Center
-                                        )
-                                        {
-                                            CircularProgressIndicator(color = CustomColor.primaryColor700)
-                                        }
-                                        Sizer(40)
-                                    })
-                            }
-                        }
-
-                        item {
-                            Sizer(140)
-                        }
-                    }
-
-                }
-            }
-        },
-        detailPane = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                when (val content = navigator.currentDestination?.contentKey) {
-                    is Screens.ProductDetails -> ProductDetail(
-                        nav = navigator,
-                        cartViewModel = cartViewModel,
-                        productViewModel = productViewModel,
-                        isFromHome = content.isFromHome,
-                        userViewModel = userViewModel,
-                        variantViewModel = variantViewModel,
-                        storeViewModel = storeViewModel,
-                        currencyViewModel = currencyViewModel,
-                        subCategoryViewModel = subCategoryViewModel,
-                        bannerViewModel = bannerViewModel,
-                        isCanNavigateToStore = content.isCanNavigateToStore,
-                        productID = content.productId
-                    )
-
-                    is Screens.Store -> StoreScreen(
-                        nav = navigator,
-                        copyStoreId = content.storeId.toString(),
-                        isFromHome = content.isFromHome,
-                        bannerViewModel = bannerViewModel,
-                        categoryViewModel = categoryViewModel,
-                        subCategoryViewModel = subCategoryViewModel,
-                        storeViewModel = storeViewModel,
-                        productViewModel = productViewModel,
-                        userViewModel = userViewModel
-                    )
-                    is Screens.Category -> CategoryScreen(
-                        nav = navigator,
-                        categoryViewModel = categoryViewModel,
-                        productViewModel = productViewModel)
-
-                    is Screens.ProductCategory -> ProductCategoryScreen(
-                        nav = navigator,
-                        productViewModel = productViewModel,
-                        categoryViewModel = categoryViewModel,
-                        categoryId =  content.categoryId)
-                }
-            }
-        }
-    )
 }
 
 

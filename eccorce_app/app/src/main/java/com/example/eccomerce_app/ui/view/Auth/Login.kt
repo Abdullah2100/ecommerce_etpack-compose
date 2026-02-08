@@ -257,7 +257,7 @@ fun LoginScreen(
                                         },
                                     )
                                     if (result.isNullOrEmpty())
-                                        nav.navigate(Screens.Loc) {
+                                        nav.navigate(Screens.LocationGraph) {
                                             popUpTo(nav.graph.id) {
                                                 inclusive = true
                                             }

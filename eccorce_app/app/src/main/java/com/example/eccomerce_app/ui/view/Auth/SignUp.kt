@@ -382,7 +382,7 @@ fun SignUpPage(
                                     updateIsLoading = {value->isLoading.value = value}
                                 )
                                 if (result.isNullOrEmpty())
-                                    nav.navigate(Screens.LocationHome) {
+                                    nav.navigate(Screens.LocationGraph) {
                                         popUpTo(nav.graph.id) {
                                             inclusive = true
                                         }

@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,11 +40,10 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun ReseatPasswordScreen(
+fun OtpVerificationScreen(
     nav: NavHostController,
     authViewModel: AuthViewModel,
-    email: String,
-    otp: String
+    email: String
 ) {
 
 
@@ -51,22 +51,22 @@ fun ReseatPasswordScreen(
 
     val coroutine = rememberCoroutineScope()
 
-
     val snackBarHostState = remember { SnackbarHostState() }
 
-    val newPassword = remember { mutableStateOf(TextFieldValue("")) }
+    val otpValue = remember { mutableStateOf(TextFieldValue("")) }
 
 
-    val isSendingData = remember { mutableStateOf(false) }
-
-    fun updateConditionValue(isSendingDataValue: Boolean? = null) {
-        if (isSendingDataValue != null) isSendingData.value = isSendingDataValue
-    }
+    val isSendingData = rememberSaveable { mutableStateOf(false) }
 
 
 
-    Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) })
-    {
+
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackBarHostState)
+        }
+    ) {
 
         it.calculateTopPadding()
         it.calculateBottomPadding()
@@ -76,7 +76,7 @@ fun ReseatPasswordScreen(
             modifier = Modifier
                 .background(Color.White)
                 .padding(horizontal = 10.dp)
-                .padding( it )
+                .padding(it )
                 .fillMaxSize()
         ) {
 
@@ -88,9 +88,8 @@ fun ReseatPasswordScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-
                 Icon(
-                    ImageVector.vectorResource(R.drawable.password_icon),
+                    ImageVector.vectorResource(R.drawable.otp_verification),
                     "",
                     tint = CustomColor.primaryColor700,
                     modifier = Modifier.size(200.dp)
@@ -98,37 +97,31 @@ fun ReseatPasswordScreen(
                 Sizer(heigh = 5)
 
                 TextInputWithTitle(
-                    newPassword,
+                    otpValue,
                     title = "",
-                    placeHolder = stringResource(R.string.enter_your_new_password),
+                    placeHolder = stringResource(R.string.enter_your_otp),
                 )
-
 
 
                 CustomButton(
                     isLoading = isSendingData.value,
                     operation = {
                         keyboardController?.hide()
-                        updateConditionValue(isSendingDataValue = true)
                         coroutine.launch {
                             val result = async {
-                                authViewModel.reseatPassword(email, otp, newPassword.value.text)
+                                authViewModel.otpVerifying(email, otpValue.value.text, updateIsLoading = {
+                                    value->isSendingData.value= value
+                                })
                             }.await()
-                            updateConditionValue(isSendingDataValue = false)
-
                             if (!result.isNullOrEmpty()) {
                                 snackBarHostState.showSnackbar(result)
                             } else {
-                                nav.navigate(Screens.LocationGraph) {
-                                    popUpTo(nav.graph.id) {
-                                        inclusive = true
-                                    }
-                                }
+                                nav.navigate(Screens.ReseatPassword(email, otpValue.value.text))
                             }
                         }
                     },
-                    isEnable = newPassword.value.text.trim().isNotEmpty(),
-                    buttonTitle = stringResource(R.string.update),
+                    isEnable = otpValue.value.text.trim().isNotEmpty(),
+                    buttonTitle = stringResource(R.string.verifying),
 
                     )
 

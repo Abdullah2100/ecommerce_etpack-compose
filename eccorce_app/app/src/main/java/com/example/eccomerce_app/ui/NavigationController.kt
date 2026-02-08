@@ -82,7 +82,7 @@ fun NavController(
         startDestination = when (currentScreen) {
             1 -> Screens.OnBoarding
             2 -> Screens.AuthGraph
-            3 -> Screens.LocationHome
+            3 -> Screens.LocationGraph
             else -> Screens.HomeGraph
         }, navController = nav
     ) {

@@ -29,6 +29,10 @@ object Screens {
     @Serializable
     data class ReseatPassword(val email: String, val otp: String)
 
+
+    @Serializable
+    object LocationGraph
+
     @Serializable
     object LocationHome
 

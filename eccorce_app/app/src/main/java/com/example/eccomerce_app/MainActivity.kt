@@ -57,11 +57,11 @@ class MainActivity : ComponentActivity() {
         val authViewModel: AuthViewModel = getKoin().get()
 
 
-       lifecycleScope.launch{
-           currentLocal.collect { value->
-               whenLanguageUpdateDo(value?:"ar",this@MainActivity)
-           }
-       }
+        lifecycleScope.launch{
+            currentLocal.collect { value->
+                General.whenLanguageUpdateDo(value?:"ar",this@MainActivity)
+            }
+        }
 
 
 
@@ -77,116 +77,11 @@ class MainActivity : ComponentActivity() {
         setContent {
 
 
-            val nav = rememberNavController()
             val currentScreen = authViewModel.currentScreen.collectAsStateWithLifecycle()
-            val currentLocale = currentLocal.collectAsStateWithLifecycle()
-            val navBackStackEntry = nav.currentBackStackEntryAsState()
-            val isHasBottonSheet =   navBackStackEntry.value?.destination?.hasRoute(Screens.Home::class) == true ||
-                    navBackStackEntry.value?.destination?.hasRoute(Screens.Cart::class) == true ||
-                    navBackStackEntry.value?.destination?.hasRoute(Screens.Order::class) == true ||
-                    navBackStackEntry.value?.destination?.hasRoute(Screens.Account::class) == true||
-                    navBackStackEntry.value?.destination?.hasRoute(Screens.Home::class) == true
-
-
-            val buttonNavItemHolder = listOf(
-                ButtonNavItem(
-                    name = R.string.home,
-                    imageId = Icons.Outlined.Home,
-                    0
-                ),
-                ButtonNavItem(
-                    name = R.string.order,
-                    imageId = ImageVector.vectorResource(R.drawable.order),
-                    1
-                ),
-                ButtonNavItem(
-                    name = R.string.cart,
-                    imageId = Icons.Outlined.ShoppingCart,
-                    2
-                ),
-                ButtonNavItem(
-                    name = R.string.account,
-                    imageId = Icons.Outlined.Person,
-                    3
-                ),
-            )
-
-
-
-            val pages = listOf(
-                Screens.Home,
-                Screens.Order,
-                Screens.Cart,
-                Screens.Account,
-            )
-
-            val updateDirection = remember {
-                derivedStateOf {
-                    if (currentLocale.value == "ar") {
-                        LayoutDirection.Rtl
-
-                    } else {
-                        LayoutDirection.Ltr
-                    }
-                }
-            }
-
-
-
-
             if (currentScreen.value != null) {
                 keepSplash = false
             }
-
-            LaunchedEffect(navBackStackEntry.value?.destination) {
-                Log.d("currentNavName","${navBackStackEntry.value?.destination?.route?:"no route"} ${isHasBottonSheet.toString()}")
-            }
-
-            if (currentScreen.value != null)
-
-                CompositionLocalProvider(
-                    LocalLayoutDirection provides updateDirection.value,
-
-                ) {
-                    NavigationSuiteScaffold(
-                        navigationSuiteItems = {
-                            if (isHasBottonSheet) {
-                                buttonNavItemHolder.fastForEachIndexed { index,value->
-                                    val isSelectedItem =
-                                        navBackStackEntry.value?.destination?.hasRoute(
-                                            pages[index]::class
-                                        ) == true
-                                    item(
-                                        selected = isSelectedItem,
-                                        onClick = {nav.navigate(pages[index])} ,
-                                        icon = {Icon(value.imageId,"")},
-                                        label = {  Text(
-                                            text = stringResource(value.name),
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Normal,
-                                            fontSize = 12.sp,
-                                            textAlign = TextAlign.Center,
-                                            color = if (isSelectedItem) CustomColor.primaryColor950 else Color.Gray
-                                        )},
-
-                                    )
-                                }
-
-                            }
-
-                    }
-                    ,
-                        containerColor = Color.White,
-                        layoutType =
-                            if(!isHasBottonSheet) NavigationSuiteType.None
-                            else
-                                NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo()),
-                        )
-                {
-
-                    NavController(nav, currentScreen = currentScreen.value ?: 1)
-                }
-                }
+            App()
         }
     }
 

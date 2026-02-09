@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.ui.component
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import com.example.e_commercompose.R
 import androidx.compose.foundation.layout.Column
@@ -38,7 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.theme.CustomColor
 
-
+@SuppressLint("ModifierParameter")
 @Composable
 fun TextInputWithTitle(
     value: MutableState<TextFieldValue>,
@@ -53,13 +54,11 @@ fun TextInputWithTitle(
     fontWeight: FontWeight? = null,
     maxLines: Int?=null,
     trailIcon:@Composable (() -> Unit)?=null,
+    modifier: Modifier? = Modifier
+        .fillMaxWidth()
+        .padding(0.dp),
 
     ) {
-
-    val modifierWithFocus =
-        Modifier
-            .fillMaxWidth()
-            .padding(0.dp)
 
 
     val fontScall = LocalDensity.current.fontScale
@@ -92,7 +91,7 @@ fun TextInputWithTitle(
                     fontSize = (16 / fontScall).sp
                 )
             },
-            modifier = modifierWithFocus,
+            modifier = modifier!!,
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = if (isHasError != true) Color.Gray.copy(alpha = 0.46f) else CustomColor.alertColor_1_400,

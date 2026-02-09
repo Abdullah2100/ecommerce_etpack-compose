@@ -116,12 +116,12 @@ class AuthViewModel(
     }
 
 
-    suspend fun generateTokenNotification(): Pair<String?, String?> {
+    suspend fun generateTokenNotification(): String? {
         return try {
             val token = FirebaseMessaging.getInstance().token.await()
-            Pair(token, null)
+            token
         } catch (e: Exception) {
-            Pair(null, "Network should be connecting for some functionality")
+            null
         }
     }
 
@@ -180,11 +180,12 @@ class AuthViewModel(
     suspend fun loginUser(
         username: String,
         password: String,
-        token: String,
         updateStateLoading: (state: Boolean) -> Unit
 
     ): String? {
         updateStateLoading.invoke(true)
+        val token = generateTokenNotification() ?: return "Could not Get Device Info"
+
         val result = authRepository.login(
             LoginDto(
                 Username = username,
@@ -192,6 +193,7 @@ class AuthViewModel(
                 DeviceToken = token
             )
         )
+
         return when (result) {
             is NetworkCallHandler.Successful<*> -> {
                 updateStateLoading.invoke(false)

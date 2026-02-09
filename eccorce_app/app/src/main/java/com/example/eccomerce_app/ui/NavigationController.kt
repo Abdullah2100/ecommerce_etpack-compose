@@ -143,7 +143,7 @@ fun NavController(
 
 
 
-        navigation<Screens.LocationHome>(
+        navigation<Screens.LocationGraph>(
             startDestination = Screens.LocationHome
         )
         {

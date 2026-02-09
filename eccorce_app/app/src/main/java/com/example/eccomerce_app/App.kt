@@ -28,7 +28,6 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.e_commercompose.R
-import com.example.eccomerce_app.model.ButtonNavItem
 import com.example.eccomerce_app.ui.NavController
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
@@ -36,6 +35,8 @@ import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.viewModel.AuthViewModel
 import org.koin.compose.koinInject
 import androidx.compose.ui.res.vectorResource
+import com.example.e_commercompose.model.ButtonNavItem
+
 @Composable
 fun App() {
     val authViewModel: AuthViewModel = koinInject()

@@ -372,13 +372,13 @@ fun SignUpPage(
 //                                null
 //                            )
 
-                            if (token.first != null) {
+                            if (token != null) {
                                 val result = authKoin.signUpUser(
                                     phone = phone.value.text,
                                     email = email.value.text,
                                     password = password.value.text,
                                     name = name.value.text,
-                                    token = token.first!!,
+                                    token = token,
                                     updateIsLoading = {value->isLoading.value = value}
                                 )
                                 if (result.isNullOrEmpty())
@@ -393,7 +393,7 @@ fun SignUpPage(
                                 updateConditionValue(isLoadingValue = false)
                                 coroutine.launch {
                                     snackBarHostState.showSnackbar(
-                                        token.second
+                                        token
                                             ?: context.getString(R.string.network_must_be_connected_to_complete_operation)
                                     )
                                 }

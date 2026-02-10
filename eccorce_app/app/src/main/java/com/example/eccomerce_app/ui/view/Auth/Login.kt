@@ -3,7 +3,6 @@ package com.example.eccomerce_app.ui.view.Auth
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,15 +30,12 @@ import com.example.eccomerce_app.viewModel.AuthViewModel
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -96,149 +91,10 @@ fun LoginScreen(
         contentPadding.calculateTopPadding()
         contentPadding.calculateBottomPadding()
 
-
-        /* Box(modifier = Modifier.padding(bottom = 50.dp) )
-         {
-             Row(
-                 verticalAlignment = Alignment.CenterVertically,
-                 horizontalArrangement = Arrangement.Center
-             ) {
-                 Text(
-                     text = stringResource(R.string.don_t_have_any_account_yet),
-                     color = CustomColor.neutralColor800,
-                     fontFamily = General.satoshiFamily,
-                     fontWeight = FontWeight.Normal,
-                     fontSize = (16 / fontScall).sp
-                 )
-                 Box(
-                     modifier = Modifier
-                         .padding(start = 5.dp)
-                         .clickable {
-                             nav.navigate(Screens.Signup)
-                         }) {
-                     Text(
-                         text = stringResource(R.string.signup),
-                         color = CustomColor.primaryColor700,
-                         fontFamily = General.satoshiFamily,
-                         fontWeight = FontWeight.Normal,
-                         fontSize = (16 / fontScall).sp
-
-                     )
-
-                 }
-             }
-         }
-
-         Column(
-             modifier = Modifier
-                 .fillMaxHeight(0.9f)
-                 .fillMaxWidth()
-                 .padding(top = 50.dp)
-                 ,
-             horizontalAlignment = Alignment.Start,
-         )
-         {
-
-
-
-             Sizer(heigh = 50)
-             TextInputWithTitle(
-                 userNameOrEmail,
-                 title = stringResource(R.string.email),
-                 placeHolder = stringResource(R.string.enter_your_email),
-                 errorMessage = errorMessageValidation.value,
-                 isHasError = isEmailError.value,
-             )
-             TextSecureInputWithTitle(
-                 password,
-                 stringResource(R.string.password),
-                 isPasswordError.value,
-                 errorMessageValidation.value
-             )
-             Box(
-                 modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd
-             ) {
-                 Text(
-                     stringResource(R.string.forget_password),
-                     fontFamily = General.satoshiFamily,
-                     fontWeight = FontWeight.Medium,
-                     color = CustomColor.neutralColor950,
-                     fontSize = (16 / fontScall).sp,
-                     modifier = Modifier.clickable {
-                         nav.navigate(Screens.ReseatPasswordGraph)
-                     })
-             }
-
-             Sizer(heigh = 30)
-
-
-             CustomAuthBottom(
-                 isLoading = isSendingData.value,
-                 operation = {
-                     keyboardController?.hide()
-                     if (userNameOrEmail.value.text.isBlank() || password.value.text.isBlank()) {
-                         coroutine.launch {
-                             snackBarHostState.showSnackbar(context.getString(R.string.user_name_or_password_is_blank))
-                         }
-                     } else {
-                         coroutine.launch {
-                             updateConditionValue(isSendingDataValue = true)
-
-                             delay(10)
-
-                             val token =
-                                 async { authKoin.generateTokenNotification() }.await()
-
-//                                Pair(
-//                                    "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
-//                                    null
-//                                )
-
-                             if (!token.first.isNullOrEmpty()) {
-                                 val result = authKoin.loginUser(
-                                     userNameOrEmail.value.text,
-                                     password = password.value.text,
-                                     token = token.first!!,
-                                     updateStateLoading ={ value ->
-                                         isSendingData.value = value
-                                     },
-                                 )
-                                 if (result.isNullOrEmpty())
-                                     nav.navigate(Screens.LocationGraph) {
-                                         popUpTo(nav.graph.id) {
-                                             inclusive = true
-                                         }
-                                     }
-                                 else
-                                     snackBarHostState.showSnackbar(result)
-
-                             } else {
-                                 updateConditionValue(isSendingDataValue = false)
-                                 coroutine.launch {
-                                     snackBarHostState.showSnackbar(
-                                         token.second
-                                             ?: context.getString(R.string.network_must_be_connected_to_complete_operation)
-                                     )
-                                 }
-                             }
-                         }
-
-                     }
-                 },
-                 buttonTitle = stringResource(R.string.login),
-                 validationFun = {
-                     true
-                     validateLoginInput(
-                         username = userNameOrEmail.value.text, password = password.value.text
-                     )
-                 })
-         }
-     */
-
         when (sizeScreen.widthSizeClass) {
             WindowWidthSizeClass.Compact,
             WindowWidthSizeClass.Medium -> {
-                CompactToMediumLayout(
+                CompactToMediumLoginLayout(
                     nav = nav,
                     context = context,
                     authKoin = authKoin,
@@ -253,7 +109,7 @@ fun LoginScreen(
             }
 
             WindowWidthSizeClass.Expanded -> {
-                ExpandedLayout(
+                ExpandedLoginLayout(
                     nav = nav,
                     context = context,
                     authKoin = authKoin,
@@ -271,7 +127,7 @@ fun LoginScreen(
 
 
 @Composable
-fun CompactToMediumLayout(
+fun CompactToMediumLoginLayout(
     nav: NavHostController,
     context: Context,
     authKoin: AuthViewModel,
@@ -363,7 +219,10 @@ fun CompactToMediumLayout(
         modifier = Modifier
             .background(Color.White)
             .fillMaxWidth()
-            .padding(top = 50.dp)
+            .padding(
+                top = contentPadding.calculateTopPadding(),
+                bottom = contentPadding.calculateBottomPadding()
+            )
             .padding(horizontal = 15.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     )
@@ -456,7 +315,7 @@ fun CompactToMediumLayout(
 
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
-fun ExpandedLayout(
+fun ExpandedLoginLayout(
     nav: NavHostController,
     context: Context,
     authKoin: AuthViewModel,
@@ -469,7 +328,6 @@ fun ExpandedLayout(
 
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
-    val screenHeight = config.screenHeightDp
     val scrollState = rememberScrollState()
 
     val userNameOrEmail = rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -577,7 +435,10 @@ fun ExpandedLayout(
                 .background(Color.White)
                 .fillMaxHeight(1f)
                 .fillMaxWidth()
-                .padding(top = 50.dp)
+                .padding(
+                    top = contentPadding.calculateTopPadding() ,
+                    bottom = contentPadding.calculateBottomPadding()
+                )
                 .padding(horizontal = 15.dp)
                 .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally,

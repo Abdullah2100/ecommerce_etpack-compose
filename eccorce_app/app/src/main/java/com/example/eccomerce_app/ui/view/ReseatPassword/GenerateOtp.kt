@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.ui.view.ReseatPassword
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun GenerateOtpScreen(
     nav: NavHostController,
@@ -52,7 +54,6 @@ fun GenerateOtpScreen(
 
     val email = remember { mutableStateOf(TextFieldValue("")) }
     val isLoading = rememberSaveable { mutableStateOf(false) }
-
 
 
     val snackBarHostState = remember { SnackbarHostState() }
@@ -73,7 +74,7 @@ fun GenerateOtpScreen(
             modifier = Modifier
                 .background(Color.White)
                 .padding(horizontal = 10.dp)
-                .padding( it)
+                .padding(it)
                 .fillMaxSize()
         ) {
 
@@ -109,7 +110,7 @@ fun GenerateOtpScreen(
                         keyboardController?.hide()
                         coroutine.launch {
                             val result = async {
-                                authViewModel.getOtp(email.value.text, updateIsLoading = {value->
+                                authViewModel.getOtp(email.value.text, updateIsLoading = { value ->
                                     isLoading.value = value
                                 })
                             }.await()
@@ -124,13 +125,8 @@ fun GenerateOtpScreen(
                     },
                     isEnable = email.value.text.trim().isNotEmpty(),
                     buttonTitle = stringResource(R.string.check),
-
                     )
-
             }
         }
-
-
     }
-
 }

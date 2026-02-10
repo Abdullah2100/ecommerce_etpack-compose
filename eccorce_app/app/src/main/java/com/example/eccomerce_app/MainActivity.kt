@@ -57,9 +57,9 @@ class MainActivity : ComponentActivity() {
         val authViewModel: AuthViewModel = getKoin().get()
 
 
-        lifecycleScope.launch{
-            currentLocal.collect { value->
-                General.whenLanguageUpdateDo(value?:"ar",this@MainActivity)
+        lifecycleScope.launch {
+            currentLocal.collect { value ->
+                General.whenLanguageUpdateDo(value ?: "ar", this@MainActivity)
             }
         }
 
@@ -81,7 +81,9 @@ class MainActivity : ComponentActivity() {
             if (currentScreen.value != null) {
                 keepSplash = false
             }
-            App()
+
+            if (currentScreen.value!= null)
+                App()
         }
     }
 

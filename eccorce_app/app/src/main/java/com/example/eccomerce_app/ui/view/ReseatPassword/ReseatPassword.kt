@@ -64,7 +64,6 @@ fun ReseatPasswordScreen(
     }
 
 
-
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) })
     {
 
@@ -139,3 +138,4 @@ fun ReseatPasswordScreen(
     }
 
 }
+

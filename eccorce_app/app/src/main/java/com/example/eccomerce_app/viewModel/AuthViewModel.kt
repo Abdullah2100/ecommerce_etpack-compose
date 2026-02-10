@@ -130,9 +130,10 @@ class AuthViewModel(
         name: String,
         phone: String,
         password: String,
-        token: String,
         updateIsLoading: (state: Boolean) -> Unit
     ): String? {
+
+        val deviceToken = generateTokenNotification() ?: return  "Could not get the device token"
         updateIsLoading.invoke(true)
         val result = authRepository.signup(
             SignupDto(
@@ -140,7 +141,7 @@ class AuthViewModel(
                 Password = password,
                 Phone = phone,
                 Email = email,
-                DeviceToken = token
+                DeviceToken = deviceToken
             )
         )
 

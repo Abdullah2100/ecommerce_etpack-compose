@@ -91,7 +91,7 @@
     <string name="enter_location_manually">Chose Location Manually</string>
     <string name="deny">Deny</string>
     <string name="you_should_enable_location_services">you should enable location services</string>
-    <string name="location_permission_denied">Location permission denied</string>
+    <string name="location_permission_denied">Location Services Down Enable it First</string>
     <string name="edite_current_location">Edite Current Location</string>
     <string name="add_new_address">Add New Address</string>
     <string name="address_title">Address Title</string>
@@ -163,4 +163,5 @@
     <string name="create_banner">Create Banner</string>
     <string name="leftArrow">Left Arrow</string>
     <string name="exchange_currency">Exchange Currency</string>
+    <string name="you_must_enable_location_permission_to_app">You Must Enable Location Permission To App</string>
 </resources>

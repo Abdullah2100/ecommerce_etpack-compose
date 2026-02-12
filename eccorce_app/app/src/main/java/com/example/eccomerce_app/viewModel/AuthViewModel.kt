@@ -118,8 +118,10 @@ class AuthViewModel(
 
     suspend fun generateTokenNotification(): String? {
         return try {
-            val token = FirebaseMessaging.getInstance().token.await()
-            token
+//            val token = FirebaseMessaging.getInstance().token.await()
+//            token
+            "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4"
+
         } catch (e: Exception) {
             null
         }
@@ -133,15 +135,20 @@ class AuthViewModel(
         updateIsLoading: (state: Boolean) -> Unit
     ): String? {
 
-        val deviceToken = generateTokenNotification() ?: return  "Could not get the device token"
-        updateIsLoading.invoke(true)
+        val token = generateTokenNotification()
+
+        if (token == null) {
+            updateIsLoading.invoke(false)
+            return "Could not Get Device Info"
+        }
+
         val result = authRepository.signup(
             SignupDto(
                 Name = name,
                 Password = password,
                 Phone = phone,
                 Email = email,
-                DeviceToken = deviceToken
+                DeviceToken = token
             )
         )
 
@@ -182,10 +189,13 @@ class AuthViewModel(
         username: String,
         password: String,
         updateStateLoading: (state: Boolean) -> Unit
-
     ): String? {
         updateStateLoading.invoke(true)
-        val token = generateTokenNotification() ?: return "Could not Get Device Info"
+        val token = generateTokenNotification()
+        if (token == null) {
+            updateStateLoading.invoke(false)
+            return "Could not Get Device Info"
+        }
 
         val result = authRepository.login(
             LoginDto(

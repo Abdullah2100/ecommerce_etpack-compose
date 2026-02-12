@@ -2,7 +2,6 @@ package com.example.eccomerce_app.ui.view.Auth
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,11 +36,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.e_commercompose.R
 import com.example.e_commercompose.ui.component.CustomAuthBottom
 import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.eccomerce_app.model.LoginScreenDataHolder
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.SharedAppBar
 import com.example.eccomerce_app.ui.component.Sizer
@@ -59,6 +60,8 @@ fun LoginScreen(
     authKoin: AuthViewModel
 ) {
     val context = LocalContext.current
+    val layoutDirection = LocalLayoutDirection.current
+
     val activity = context as Activity
     val sizeScreen = calculateWindowSizeClass(activity)
 
@@ -69,8 +72,89 @@ fun LoginScreen(
 
     val coroutine = rememberCoroutineScope()
 
+    val scrollState = rememberScrollState()
+
     val snackBarHostState = remember { SnackbarHostState() }
 
+    val state = LoginScreenDataHolder(
+        userNameOrEmail = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+            mutableStateOf(
+                TextFieldValue("ali535@gmail.com")
+            )
+        },
+        password = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+            mutableStateOf(
+                TextFieldValue("12AS@#fs")
+            )
+        },
+        errorMessageValidation = rememberSaveable() { mutableStateOf("") },
+        isSendingData = rememberSaveable { mutableStateOf(false) },
+        isEmailError = rememberSaveable { mutableStateOf<Boolean?>(null) },
+    )
+
+
+    fun updateConditionValue(isEmailErrorValue: Boolean = false) {
+        when (isEmailErrorValue) {
+            true -> state.isEmailError.value = true
+            else -> state.isEmailError.value = false
+        }
+    }
+
+    fun isValidateInput(
+        username: String, password: String
+    ): Boolean {
+        when {
+            username.trim().isEmpty() -> {
+                state.errorMessageValidation.value =
+                    context.getString(R.string.email_must_not_be_empty)
+                updateConditionValue(isEmailErrorValue = true)
+                return false
+            }
+
+            password.trim().isEmpty() -> {
+                state.errorMessageValidation.value =
+                    context.getString(R.string.password_must_not_be_empty)
+                updateConditionValue(isEmailErrorValue = false)
+                return false
+            }
+
+            else -> return true
+        }
+    }
+
+
+    fun loginFun() {
+        keyboardController?.hide()
+        coroutine.launch {
+        if (state.userNameOrEmail.value.text.isBlank() || state.password.value.text.isBlank()) {
+                snackBarHostState.showSnackbar(context.getString(R.string.user_name_or_password_is_blank))
+
+        } else {
+
+                delay(10)
+
+                val result = authKoin.loginUser(
+                    state.userNameOrEmail.value.text,
+                    password = state.password.value.text,
+                    updateStateLoading = { value ->
+                        state.isSendingData.value = value
+                    },
+                )
+
+                if (result.isNullOrEmpty())
+                    nav.navigate(Screens.LocationGraph) {
+                        popUpTo(nav.graph.id) {
+                            inclusive = true
+                        }
+                    }
+                else
+                    snackBarHostState.showSnackbar(result)
+
+            }
+
+
+        }
+    }
 
 
     LaunchedEffect(errorMessage.value) {
@@ -96,28 +180,27 @@ fun LoginScreen(
             WindowWidthSizeClass.Medium -> {
                 CompactToMediumLoginLayout(
                     nav = nav,
-                    context = context,
-                    authKoin = authKoin,
                     contentPadding = contentPadding,
                     fontScall = fontScall,
-                    coroutine = coroutine,
-                    keyboardController = keyboardController,
-                    snackBarHostState = snackBarHostState
-
-                )
+                    state=state,
+                    scrollState= scrollState,
+                    isValidateInput = {isValidateInput(state.userNameOrEmail.value.text,state.password.value.text)},
+                    loginFun = {loginFun()},
+                    layoutDirection = layoutDirection
+                    )
 
             }
 
             WindowWidthSizeClass.Expanded -> {
                 ExpandedLoginLayout(
                     nav = nav,
-                    context = context,
-                    authKoin = authKoin,
                     contentPadding = contentPadding,
                     fontScall = fontScall,
-                    coroutine = coroutine,
-                    keyboardController = keyboardController,
-                    snackBarHostState = snackBarHostState
+                    state=state,
+                    scrollState= scrollState,
+                    isValidateInput = {isValidateInput(state.userNameOrEmail.value.text,state.password.value.text)},
+                    loginFun = {loginFun()},
+                    layoutDirection = layoutDirection
                 )
             }
         }
@@ -129,101 +212,26 @@ fun LoginScreen(
 @Composable
 fun CompactToMediumLoginLayout(
     nav: NavHostController,
-    context: Context,
-    authKoin: AuthViewModel,
     contentPadding: PaddingValues,
     fontScall: Float,
-    coroutine: CoroutineScope,
-    keyboardController: SoftwareKeyboardController?,
-    snackBarHostState: SnackbarHostState,
+    state: LoginScreenDataHolder,
+    isValidateInput: () -> Boolean,
+    loginFun: () -> Unit,
+    scrollState: ScrollState,
+    layoutDirection: LayoutDirection
 ) {
-
-
-    val userNameOrEmail =
-        rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("ali535@gmail.com")) }
-    val password =
-        rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("12AS@#fs")) }
-
-    val errorMessageValidation = rememberSaveable { mutableStateOf("") }
-
-    val isSendingData = rememberSaveable { mutableStateOf(false) }
-    val isEmailError = rememberSaveable { mutableStateOf<Boolean?>(null) }
-
-
-    fun updateConditionValue(isEmailErrorValue: Boolean = false) {
-        when (isEmailErrorValue) {
-            true -> isEmailError.value = true
-            else -> isEmailError.value = false
-        }
-    }
-
-    fun validateLoginInput(
-        username: String, password: String
-    ): Boolean {
-        updateConditionValue(isEmailErrorValue = false)
-        when {
-            username.trim().isEmpty() -> {
-                errorMessageValidation.value = context.getString(R.string.email_must_not_be_empty)
-                updateConditionValue(isEmailErrorValue = true)
-                return false
-            }
-
-            password.trim().isEmpty() -> {
-                errorMessageValidation.value =
-                    context.getString(R.string.password_must_not_be_empty)
-                updateConditionValue(isEmailErrorValue = false)
-                return false
-            }
-
-            else -> return true
-        }
-    }
-
-
-    fun loginFun() {
-        keyboardController?.hide()
-        if (userNameOrEmail.value.text.isBlank() || password.value.text.isBlank()) {
-            coroutine.launch {
-                snackBarHostState.showSnackbar(context.getString(R.string.user_name_or_password_is_blank))
-            }
-        } else {
-            coroutine.launch {
-
-                delay(10)
-
-
-                val result = authKoin.loginUser(
-                    userNameOrEmail.value.text,
-                    password = password.value.text,
-                    updateStateLoading = { value ->
-                        isSendingData.value = value
-                    },
-                )
-                if (result.isNullOrEmpty())
-                    nav.navigate(Screens.LocationGraph) {
-                        popUpTo(nav.graph.id) {
-                            inclusive = true
-                        }
-                    }
-                else
-                    snackBarHostState.showSnackbar(result)
-
-            }
-
-
-        }
-    }
-
 
     Column(
         modifier = Modifier
+            .fillMaxSize()
             .background(Color.White)
-            .fillMaxWidth()
             .padding(
-                top = contentPadding.calculateTopPadding(),
-                bottom = contentPadding.calculateBottomPadding()
+                start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
+                end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
+                top = 5.dp+contentPadding.calculateTopPadding(),
+                bottom = 5.dp+contentPadding.calculateBottomPadding()
             )
-            .padding(horizontal = 15.dp),
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
     )
     {
@@ -231,17 +239,17 @@ fun CompactToMediumLoginLayout(
 
         Sizer(heigh = 50)
         TextInputWithTitle(
-            userNameOrEmail,
+            state.userNameOrEmail,
             title = stringResource(R.string.email),
             placeHolder = stringResource(R.string.enter_your_email),
-            errorMessage = errorMessageValidation.value,
-            isHasError = isEmailError.value,
+            errorMessage = state.errorMessageValidation.value,
+            isHasError = state.isEmailError.value,
         )
         TextSecureInputWithTitle(
-            password,
+            state.password,
             stringResource(R.string.password),
-            (isEmailError.value == false),
-            errorMessageValidation.value
+            (state.isEmailError.value == false),
+            state.errorMessageValidation.value
         )
         Box(
             modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd
@@ -261,23 +269,20 @@ fun CompactToMediumLoginLayout(
 
 
         CustomAuthBottom(
-            isLoading = isSendingData.value,
+            isLoading = state.isSendingData.value,
             operation = {
                 loginFun()
             },
 
             buttonTitle = stringResource(R.string.login),
             validationFun = {
-                validateLoginInput(
-                    userNameOrEmail.value.text,
-                    password.value.text
-                )
+                isValidateInput()
             })
 
         Box(
             modifier = Modifier.weight(1f)
         )
-        Box(modifier = Modifier.padding(bottom = 50.dp + contentPadding.calculateBottomPadding()))
+        Box()
         {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -317,105 +322,34 @@ fun CompactToMediumLoginLayout(
 @Composable
 fun ExpandedLoginLayout(
     nav: NavHostController,
-    context: Context,
-    authKoin: AuthViewModel,
     contentPadding: PaddingValues,
     fontScall: Float,
-    coroutine: CoroutineScope,
-    keyboardController: SoftwareKeyboardController?,
-    snackBarHostState: SnackbarHostState,
+    state: LoginScreenDataHolder,
+    isValidateInput: () -> Boolean,
+    loginFun: () -> Unit,
+    scrollState: ScrollState,
+    layoutDirection: LayoutDirection
 ) {
-
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
-    val scrollState = rememberScrollState()
-
-    val userNameOrEmail = rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue("ali535@gmail.com"))
-    }
-    val password = rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue("12AS@#fs"))
-    }
-
-    val errorMessageValidation = rememberSaveable { mutableStateOf("") }
-
-    val isSendingData = rememberSaveable { mutableStateOf(false) }
-    val isEmailError = rememberSaveable { mutableStateOf<Boolean?>(null) }
 
 
-    fun updateConditionValue(isEmailErrorValue: Boolean = false) {
-        when (isEmailErrorValue) {
-            true -> isEmailError.value = true
-            else -> isEmailError.value = false
-        }
-    }
-
-    fun validateLoginInput(
-        username: String, password: String
-    ): Boolean {
-        updateConditionValue(isEmailErrorValue = false)
-        when {
-            username.trim().isEmpty() -> {
-                errorMessageValidation.value = context.getString(R.string.email_must_not_be_empty)
-                updateConditionValue(isEmailErrorValue = true)
-                return false
-            }
-
-            password.trim().isEmpty() -> {
-                errorMessageValidation.value =
-                    context.getString(R.string.password_must_not_be_empty)
-                updateConditionValue(isEmailErrorValue = false)
-                return false
-            }
-
-            else -> return true
-        }
-    }
-
-
-    fun loginFun() {
-        keyboardController?.hide()
-        if (userNameOrEmail.value.text.isBlank() || password.value.text.isBlank()) {
-            coroutine.launch {
-                snackBarHostState.showSnackbar(context.getString(R.string.user_name_or_password_is_blank))
-            }
-        } else {
-            coroutine.launch {
-
-                delay(10)
-
-
-                val result = authKoin.loginUser(
-                    userNameOrEmail.value.text,
-                    password = password.value.text,
-                    updateStateLoading = { value ->
-                        isSendingData.value = value
-                    },
-                )
-                if (result.isNullOrEmpty())
-                    nav.navigate(Screens.LocationGraph) {
-                        popUpTo(nav.graph.id) {
-                            inclusive = true
-                        }
-                    }
-                else
-                    snackBarHostState.showSnackbar(result)
-
-            }
-
-
-        }
-    }
 
 
     Row(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
+            .padding(
+                start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
+                end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
+                top = 5.dp+contentPadding.calculateTopPadding(),
+                bottom = 5.dp+contentPadding.calculateBottomPadding()
+            )
     ) {
         Box(
             modifier = Modifier
-                .width(((screenWidth / 2) - 20).dp)
+                .width(((screenWidth / 3) - 20).dp)
                 .padding(
                     top = contentPadding.calculateTopPadding(),
                     bottom = contentPadding.calculateBottomPadding()
@@ -436,7 +370,7 @@ fun ExpandedLoginLayout(
                 .fillMaxHeight(1f)
                 .fillMaxWidth()
                 .padding(
-                    top = contentPadding.calculateTopPadding() ,
+                    top = contentPadding.calculateTopPadding(),
                     bottom = contentPadding.calculateBottomPadding()
                 )
                 .padding(horizontal = 15.dp)
@@ -449,17 +383,17 @@ fun ExpandedLoginLayout(
             Box(modifier = Modifier.weight(1f))
 
             TextInputWithTitle(
-                userNameOrEmail,
+                state.userNameOrEmail,
                 title = stringResource(R.string.email),
                 placeHolder = stringResource(R.string.enter_your_email),
-                errorMessage = errorMessageValidation.value,
-                isHasError = isEmailError.value,
+                errorMessage = state.errorMessageValidation.value,
+                isHasError = state.isEmailError.value,
             )
             TextSecureInputWithTitle(
-                password,
+                state.password,
                 stringResource(R.string.password),
-                (isEmailError.value == false),
-                errorMessageValidation.value
+                (state.isEmailError.value == false),
+                state.errorMessageValidation.value
             )
             Box(
                 modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd
@@ -479,23 +413,20 @@ fun ExpandedLoginLayout(
 
 
             CustomAuthBottom(
-                isLoading = isSendingData.value,
+                isLoading = state.isSendingData.value,
                 operation = {
                     loginFun()
                 },
 
                 buttonTitle = stringResource(R.string.login),
                 validationFun = {
-                    validateLoginInput(
-                        userNameOrEmail.value.text,
-                        password.value.text
-                    )
+                    isValidateInput()
                 })
 
             Box(
                 modifier = Modifier.weight(1f)
             )
-            Box(modifier = Modifier.padding(bottom = 10.dp + contentPadding.calculateBottomPadding()))
+            Box(modifier = Modifier.padding(bottom = 5.dp + contentPadding.calculateBottomPadding()))
             {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

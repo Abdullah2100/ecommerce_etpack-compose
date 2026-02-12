@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -74,8 +75,10 @@ fun PickCurrentAddressFromAddressScreen(
     userViewModel: UserViewModel,
     generalSettingViewModel: GeneralSettingViewModel,
     orderViewModel: OrderViewModel,
+    isShowBackIcon:Boolean=true
 ) {
     val fontScall = LocalDensity.current.fontScale
+    val layoutDirection = LocalLayoutDirection.current
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val locations = userViewModel.userInfo.collectAsStateWithLifecycle()
@@ -138,13 +141,14 @@ fun PickCurrentAddressFromAddressScreen(
         topBar = {
             SharedAppBar(
                 title = stringResource(R.string.enter_your_location),
-                nav = nav,
+                nav =if(isShowBackIcon) nav else null,
                 scrollBehavior = scrollBehavior
             )
         }
-    ) {
-        it.calculateTopPadding()
-        it.calculateBottomPadding()
+    )
+    { contentPadding ->
+        contentPadding.calculateTopPadding()
+        contentPadding.calculateBottomPadding()
 
         when (locations.value?.address.isNullOrEmpty()) {
             true -> {
@@ -152,7 +156,11 @@ fun PickCurrentAddressFromAddressScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.White)
-                        .padding(it),
+                        .padding(  start =if(!isShowBackIcon)0.dp else  15.dp + contentPadding.calculateLeftPadding(layoutDirection),
+                            end =if(!isShowBackIcon)0.dp else  15.dp + contentPadding.calculateRightPadding(layoutDirection),
+                            top =if(!isShowBackIcon)0.dp else  5.dp + contentPadding.calculateTopPadding(),
+                            bottom =if(!isShowBackIcon)0.dp else  5.dp + contentPadding.calculateBottomPadding()
+                        ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -181,7 +189,7 @@ fun PickCurrentAddressFromAddressScreen(
                 LazyColumn(
                     modifier = Modifier
                         .background(Color.White)
-                        .padding(it)
+                        .padding(contentPadding)
                         .padding(horizontal = 15.dp)
                         .fillMaxHeight()
                         .fillMaxWidth()

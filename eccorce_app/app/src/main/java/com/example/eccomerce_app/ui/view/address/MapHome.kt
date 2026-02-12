@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -82,17 +83,17 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 import kotlinx.coroutines.delay
 
 
-@SuppressLint("UnrememberedMutableState", "LocalContextGetResourceValueCall",
+@SuppressLint(
+    "UnrememberedMutableState", "LocalContextGetResourceValueCall",
     "ConfigurationScreenWidthHeight"
 )
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun MapHomeScreen(
     nav: NavHostController? = null,
-    navToHome: NavHostController? = null,
     userViewModel: UserViewModel,
     storeViewModel: StoreViewModel,
-    mapViewModel: MapViewModel,
+    mapViewModel: MapViewModel? = null,
     cartViewModel: CartViewModel,
     title: String? = null,
     id: String? = null,
@@ -102,15 +103,16 @@ fun MapHomeScreen(
     additionLat: Double? = null,
     mapType: enMapType = enMapType.My,
     isFomLogin: Boolean = true,
-
-    ) {
+    isShowBackNavIcon: Boolean = true
+) {
 
     val context = LocalContext.current
     val config = LocalConfiguration.current
+    val layoutDirection = LocalLayoutDirection.current
 
     val screenHeigh = config.screenHeightDp
 
-    val directions = mapViewModel.googlePlaceInfo.collectAsStateWithLifecycle()
+    val directions = mapViewModel?.googlePlaceInfo?.collectAsStateWithLifecycle()
 
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
@@ -126,7 +128,7 @@ fun MapHomeScreen(
     val isHasTitle = (mapType == enMapType.My)
     val isHasNavigationMap = (mapType == enMapType.Store || mapType == enMapType.TrackOrder)
 
-    val isComplatedNav = rememberSaveable { mutableStateOf(false) }
+    val isComplateNav = rememberSaveable { mutableStateOf(false) }
 
     val errorMessage = remember { mutableStateOf("") }
 
@@ -268,11 +270,8 @@ fun MapHomeScreen(
 
     LaunchedEffect(Unit) {
         if (isHasNavigationMap) {
-            Log.d(
-                "appPassingTheNavigation", "Yes\n" +
-                        "${directions.value?.toString()}"
-            )
-            mapViewModel.findPointBetweenTwoDestination(
+
+            mapViewModel?.findPointBetweenTwoDestination(
                 mainLocation.position,
                 additionLocation.position,
                 context.getString(R.string.google_map_token),
@@ -291,8 +290,8 @@ fun MapHomeScreen(
 
     LaunchedEffect(Unit) {
         delay(300)
-        if (!isComplatedNav.value) {
-            isComplatedNav.value = true
+        if (!isComplateNav.value) {
+            isComplateNav.value = true
         }
     }
 
@@ -304,7 +303,7 @@ fun MapHomeScreen(
         }
     }
 
-    if (!isComplatedNav.value) {
+    if (!isComplateNav.value) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
@@ -312,8 +311,7 @@ fun MapHomeScreen(
 
         Scaffold(
             modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
+                .fillMaxSize(),
             snackbarHost = {
                 SnackbarHost(hostState = snackBarHostState)
             },
@@ -387,6 +385,7 @@ fun MapHomeScreen(
 
                             )
                         Sizer(10)
+
                         CustomAuthBottom(
                             operation = {
                                 coroutine.launch {
@@ -429,8 +428,8 @@ fun MapHomeScreen(
                                     }
 
                                     userViewModel.userPassLocation(true)
-                                    navToHome?.navigate(Screens.HomeGraph) {
-                                        popUpTo(navToHome.graph.id) {
+                                    nav?.navigate(Screens.HomeGraph) {
+                                        popUpTo(nav.graph.id) {
                                             inclusive = true
                                         }
                                     }
@@ -451,129 +450,128 @@ fun MapHomeScreen(
                     }
                 }
             })
-        { paddingValue ->
-            paddingValue.calculateTopPadding()
-            paddingValue.calculateBottomPadding()
+        { contentPadding ->
+            contentPadding.calculateTopPadding()
+            contentPadding.calculateBottomPadding()
 
-            // ConstraintLayout
+
             Box(
                 modifier = Modifier
-                    .background(Color.White)
                     .fillMaxSize()
             ) {
-            }
+                GoogleMap(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                       ,
+                    cameraPositionState = marker,
+                    onMapClick = { latLng ->
+                        handleMapClick(latLng)
+                    },
+                    uiSettings = MapUiSettings(
+                        myLocationButtonEnabled = true,
+                        indoorLevelPickerEnabled = true,
 
-
-            GoogleMap(
-                modifier = Modifier
-                    .padding(paddingValue)
-                    .fillMaxHeight(),
-                cameraPositionState = marker,
-                onMapClick = { latLng ->
-                    handleMapClick(latLng)
-                },
-                uiSettings = MapUiSettings(
-                    myLocationButtonEnabled = true,
-                    indoorLevelPickerEnabled = true,
-
-                    ),
-                properties = MapProperties(isMyLocationEnabled = if (isHasNavigationMap) true else false)
-            )
-            {
-                if (isHasNavigationMap == false)
-                    Marker(
-                        state = MarkerState(position = mainLocation.position),
-                        title = title,
-                    )
-                else {
-
-
-                    Marker(
-                        state = MarkerState(position = additionLocation.position),
-                        title = "My Place",
-                    )
-
-                    if (mapType == enMapType.Store)
-                        MarkerComposable(
+                        ),
+                    properties = MapProperties(isMyLocationEnabled = if (isHasNavigationMap) true else false)
+                )
+                {
+                    if (isHasNavigationMap == false)
+                        Marker(
                             state = MarkerState(position = mainLocation.position),
-
                             title = title,
-                            onClick = {
-                                true
-                            }
-                        ) {
-                            Image(
-                                imageVector = ImageVector
-                                    .vectorResource(id = R.drawable.store_icon),
-                                contentDescription = "",
-                                modifier = Modifier.size(20.dp)
-                            )
+                        )
+                    else {
 
-                        }
+
+                        Marker(
+                            state = MarkerState(position = additionLocation.position),
+                            title = "My Place",
+                        )
+
+                        if (mapType == enMapType.Store)
+                            MarkerComposable(
+                                state = MarkerState(position = mainLocation.position),
+
+                                title = title,
+                                onClick = {
+                                    true
+                                }
+                            ) {
+                                Image(
+                                    imageVector = ImageVector
+                                        .vectorResource(id = R.drawable.store_icon),
+                                    contentDescription = "",
+                                    modifier = Modifier.size(20.dp)
+                                )
+
+                            }
+                    }
+
+                    if (!directions?.value.isNullOrEmpty() && isHasNavigationMap)
+                        Polyline(
+                            directions.value!!,
+                            color = Color.Red,
+                            pattern = listOf(
+                                Dash(15f), Gap(2f)
+                            )
+                        )
                 }
 
-                if (!directions.value.isNullOrEmpty() && isHasNavigationMap)
-                    Polyline(
-                        directions.value!!,
-                        color = Color.Red,
-                        pattern = listOf(
-                            Dash(15f), Gap(2f)
-                        )
-                    )
+
+                if (isHasTitle) CustomButton(
+                    buttonTitle = if (!id.isNullOrEmpty()) stringResource(R.string.edite_current_location) else stringResource(
+                        R.string.add_new_address
+                    ),
+                    color = CustomColor.primaryColor700,
+                    isEnable = true,
+                    customModifier = Modifier
+                        .offset(y = (screenHeigh - (contentPadding.calculateTopPadding().value+10+(
+                                if(!isShowBackNavIcon) 40 else 0))).dp)
+                        .padding(
+                            start = if (!isShowBackNavIcon) 2.dp else 15.dp + contentPadding.calculateLeftPadding(
+                                layoutDirection
+                            ),
+                            end = if (!isShowBackNavIcon) 2.dp else 15.dp + contentPadding.calculateRightPadding(
+                                layoutDirection
+                            ))
+                        .height(50.dp)
+                        .fillMaxWidth(),
+
+                    isLoading = false,
+                    operation = {
+                        when (isHasTitle) {
+                            true -> {
+                                isOpenSheet.value = true
+                            }
+
+                            else -> {
+
+                            }
+                        }
+                    },
+                    labelSize = 20
+                )
+
+
             }
 
 
-            if (isHasTitle) CustomButton(
-                buttonTitle = if (!id.isNullOrEmpty()) stringResource(R.string.edite_current_location) else stringResource(
-                    R.string.add_new_address
-                ),
-                color = CustomColor.primaryColor700,
-                isEnable = true,
-                customModifier = Modifier
-                    .offset(y = (screenHeigh-(paddingValue.calculateBottomPadding().value + paddingValue.calculateTopPadding().value+80)).dp)
 
-
-                    .height(50.dp)
-                    .width((screenHeigh - 20).dp)
-//                    .constrainAs(bottomRef) {
-//                        bottom.linkTo(parent.bottom)
-//                        start.linkTo(parent.start)
-//                        end.linkTo(parent.end)
-//                    }
-                ,
-
-                isLoading = false,
-                operation = {
-                    when (isHasTitle) {
-                        true -> {
-                            isOpenSheet.value = true
-                        }
-
-                        else -> {
-
-                        }
-                    }
-                },
-                labelSize = 20
-            )
-
-
+            if (isLoading.value) Dialog(
+                onDismissRequest = {}) {
+                Box(
+                    modifier = Modifier
+                        .height(90.dp)
+                        .width(90.dp)
+                        .background(
+                            Color.White, RoundedCornerShape(15.dp)
+                        ), contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = CustomColor.primaryColor700, modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
         }
-
-
-    if (isLoading.value) Dialog(
-        onDismissRequest = {}) {
-        Box(
-            modifier = Modifier
-                .height(90.dp)
-                .width(90.dp)
-                .background(
-                    Color.White, RoundedCornerShape(15.dp)
-                ), contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                color = CustomColor.primaryColor700, modifier = Modifier.size(40.dp)
-            )
-        }
-    }
 }

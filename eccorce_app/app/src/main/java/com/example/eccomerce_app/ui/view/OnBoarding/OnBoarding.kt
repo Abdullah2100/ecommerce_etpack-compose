@@ -3,6 +3,7 @@ package com.example.eccomerce_app.ui.view.OnBoarding
 import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,10 +35,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -49,7 +52,6 @@ import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.viewModel.UserViewModel
 
 
-
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @SuppressLint("ContextCastToActivity")
 @Composable
@@ -58,8 +60,11 @@ fun OnBoardingScreen(
 ) {
     val fontScall = LocalDensity.current.fontScale
     val context = LocalContext.current
+    val layoutDirection = LocalLayoutDirection.current
+
     val activity = context as Activity
     val sizeClass = calculateWindowSizeClass(activity)
+    val scrollState = rememberScrollState()
 
 
     fun navToHome() {
@@ -80,15 +85,22 @@ fun OnBoardingScreen(
         contentPadding.calculateTopPadding()
         contentPadding.calculateBottomPadding()
         when (sizeClass.widthSizeClass) {
-            WindowWidthSizeClass.Compact -> CompactToMediumLayout(fontScall, contentPadding) {
+            WindowWidthSizeClass.Compact,
+            WindowWidthSizeClass.Medium -> CompactToMediumLayout(
+                fontScall,
+                contentPadding,
+                scrollState,
+                layoutDirection
+            ) {
                 navToHome()
             }
 
-            WindowWidthSizeClass.Medium -> CompactToMediumLayout(fontScall, contentPadding) {
-                navToHome()
-            }
-
-            WindowWidthSizeClass.Expanded -> ExpandedLayout(fontScall, contentPadding) {
+            WindowWidthSizeClass.Expanded -> ExpandedLayout(
+                fontScall,
+                contentPadding,
+                scrollState,
+                layoutDirection
+            ) {
                 navToHome()
             }
         }
@@ -98,13 +110,21 @@ fun OnBoardingScreen(
 
 @Composable
 fun CompactToMediumLayout(
-    fontScall: Float, contentPadding: PaddingValues, nav: () -> Unit
+    fontScall: Float,
+    contentPadding: PaddingValues,
+    scrollState: ScrollState,
+    layoutDirection: LayoutDirection,
+    nav: () -> Unit
 ) {
 
-    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
-            .padding(horizontal = 15.dp)
+            .padding(
+                start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
+                end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
+                top = 5.dp+contentPadding.calculateTopPadding(),
+                bottom = 5.dp+contentPadding.calculateBottomPadding()
+            )
             .fillMaxSize()
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -142,7 +162,7 @@ fun CompactToMediumLayout(
         Button(
             modifier = Modifier
                 .padding(
-                    top = 10.dp, bottom = contentPadding.calculateBottomPadding() + 10.dp
+                    top = 10.dp,
                 )
                 .height(50.dp)
                 .fillMaxWidth(),
@@ -170,21 +190,31 @@ fun CompactToMediumLayout(
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun ExpandedLayout(
-    fontScall: Float, contentPadding: PaddingValues, nav: () -> Unit
+    fontScall: Float,
+    contentPadding: PaddingValues,
+    scrollState: ScrollState,
+    layoutDirection: LayoutDirection,
+    nav: () -> Unit
 ) {
 
-    val scrollState = rememberScrollState()
     val config = LocalConfiguration.current
-    val screenWidth = config.screenWidthDp
+
+
+    val screenWidth =  config.screenWidthDp.dp
+    val halfWidth = ((screenWidth / 2) - 20.dp)
     val screenHeight = config.screenHeightDp
 
 
     Row(
         modifier = Modifier
             .padding(
-                horizontal = 15.dp, vertical = contentPadding.calculateBottomPadding()
+                start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
+                end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
+                top = 5.dp+contentPadding.calculateTopPadding(),
+                bottom = 5.dp+contentPadding.calculateBottomPadding()
             )
-            .fillMaxSize()
+            .width(screenWidth)
+            .fillMaxHeight()
             .verticalScroll(scrollState),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -192,8 +222,13 @@ fun ExpandedLayout(
 
         Box(
             modifier = Modifier
-                .width(((screenWidth / 2) - 20).dp)
-                .padding(top = contentPadding.calculateTopPadding(), bottom = contentPadding.calculateBottomPadding())
+                .fillMaxHeight()
+                .width(halfWidth)
+                .padding(
+                    top = contentPadding.calculateTopPadding(),
+                    bottom = contentPadding.calculateBottomPadding()
+                ),
+            contentAlignment = Alignment.Center
         ) {
             Image(
                 imageVector = ImageVector.vectorResource(R.drawable.onboarding_log),
@@ -208,16 +243,15 @@ fun ExpandedLayout(
 
         Sizer(width = 5)
         Column(
-            verticalArrangement = Arrangement.Bottom,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .width(((screenWidth / 2)-20).dp)
-                .height((screenHeight.dp-contentPadding.calculateBottomPadding()-contentPadding.calculateTopPadding()))
+                .width(halfWidth)
+                .height((screenHeight.dp - contentPadding.calculateBottomPadding() - contentPadding.calculateTopPadding()))
 
         )
         {
 
-            Box(modifier = Modifier.weight(1f))
 
             Text(
                 stringResource(R.string.welcome_to_shopzen),

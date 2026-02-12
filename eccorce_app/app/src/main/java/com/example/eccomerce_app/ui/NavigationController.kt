@@ -165,7 +165,18 @@ fun NavController(
                     )
                 }) {
                 AddressHomeScreen(
-                    nav = nav, userViewModel = userViewModel
+                    nav = nav,
+                    userViewModel = userViewModel,
+                    //this for expanded screen
+                    cartViewModel = cartViewModel,
+                    storeViewModel = storeViewModel,
+                    orderViewModel = orderViewModel,
+                    productViewModel = productViewModel,
+                    bannerViewModel = bannerViewModel,
+                    variantViewModel = variantViewModel,
+                    categoryViewModel = categoryViewModel,
+                    generalSettingViewModel = generalSettingViewModel
+
                 )
             }
 

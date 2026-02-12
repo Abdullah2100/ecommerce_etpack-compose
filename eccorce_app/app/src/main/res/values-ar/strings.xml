@@ -91,7 +91,7 @@
     <string name="enter_location_manually">اختر الموقع يدويًا</string>
     <string name="deny">رفض</string>
     <string name="you_should_enable_location_services">يجب عليك تفعيل خدمات الموقع</string>
-    <string name="location_permission_denied">تم رفض إذن الموقع</string>
+    <string name="location_permission_denied">لابد من تفعيل خدمة الموقع في الجهاز</string>
     <string name="edite_current_location">تعديل الموقع الحالي</string>
     <string name="add_new_address">إضافة عنوان جديد</string>
     <string name="address_title">اسم العنوان</string>
@@ -163,4 +163,6 @@
     <string name="create_banner">انشاء لوحة اعلانية</string>
     <string name="leftArrow">Left Arrow</string>
     <string name="exchange_currency">تغير العملة</string>
+    <string name="you_must_enable_location_permission_to_app">لا بد من اعطاء التطبيق صلاحيات المنطقة</string>
+
 </resources>

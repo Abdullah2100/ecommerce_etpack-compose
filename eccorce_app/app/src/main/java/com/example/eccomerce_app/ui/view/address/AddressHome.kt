@@ -3,6 +3,7 @@ package com.example.eccomerce_app.ui.view.address
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
@@ -15,11 +16,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeGestures
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,11 +41,11 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.retain.retain
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -77,11 +81,14 @@ import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
 import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@SuppressLint("LocalContextGetResourceValueCall")
+@SuppressLint("LocalContextGetResourceValueCall", "MissingPermission")
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class,
     ExperimentalMaterial3WindowSizeClassApi::class
@@ -115,7 +122,8 @@ fun AddressHomeScreen(
 
 
     val currentLocation = retain { mutableStateOf<Location?>(null) }
-    val isExpandedScree = windowSize.widthSizeClass == WindowWidthSizeClass.Expanded ||windowSize.widthSizeClass == WindowWidthSizeClass.Medium
+    val isExpandedScree =
+        windowSize.widthSizeClass == WindowWidthSizeClass.Expanded || windowSize.widthSizeClass == WindowWidthSizeClass.Medium
 
 
     val snackBarHostState = remember { SnackbarHostState() }
@@ -125,62 +133,45 @@ fun AddressHomeScreen(
     val requestPermission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permissions ->
-            val arePermissionsGranted = permissions.values.reduce { acc, next -> acc && next }
+            val arePermissionsGranted = permissions.values.all { it }
 
-            if (arePermissionsGranted) {
-                if (ActivityCompat.checkSelfPermission(
-                        activity,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        activity,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.you_must_enable_location_permission_to_app),
-                        Toast.LENGTH_SHORT
-                    ).show()
+            if (arePermissionsGranted && General.isLocationServiceEnable(context) ) {
+                val cts = CancellationTokenSource()
+                locationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
+                    .addOnSuccessListener { location ->
+                        if (!isExpandedScree) {
+                            if (location != null)
 
-                    return@rememberLauncherForActivityResult
-                }
-
-                locationClient.lastLocation
-                    .apply {
-                        addOnSuccessListener { location ->
-                            if (!isExpandedScree) {
-                                if (location != null)
-
-                                    nav!!.navigate(
-                                        Screens.MapScreen(
-                                            lognit = location.longitude,
-                                            latitt = location.latitude,
-                                            isFromLogin = true,
-                                            mapType = enMapType.My
-                                        )
+                                nav!!.navigate(
+                                    Screens.MapScreen(
+                                        lognit = location.longitude,
+                                        latitt = location.latitude,
+                                        isFromLogin = true,
+                                        mapType = enMapType.My
                                     )
-                                else
-                                    coroutine.launch {
-                                        snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
-                                    }
-                            } else currentLocation.value = location
+                                )
+                            else
+                                coroutine.launch {
+                                    snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
+                                }
+                        } else currentLocation.value = location
 
-                        }
+                    }
+                    .addOnCanceledListener {
+                        Log.d("contextError", "this from cancel")
                     }
                     .addOnFailureListener { fail ->
-                        Log.d(
-                            "contextError",
-                            "the current location is null ${fail.stackTrace}"
-                        )
+                        Log.d("contextError", "this from fail ${fail.message}")
 
+                        coroutine.launch {
+                            fail.message?.let { snackBarHostState.showSnackbar(it) }
+                        }
                     }
 
-
             } else {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.location_permission_denied), Toast.LENGTH_SHORT
-                ).show()
+                coroutine.launch {
+                    snackBarHostState.showSnackbar(context.getString(R.string.location_permission_denied))
+                }
             }
         }
     )
@@ -199,10 +190,6 @@ fun AddressHomeScreen(
         userViewModel.getMyInfo()
     }
 
-    LaunchedEffect(Unit) {
-        if (isExpandedScree)
-            requestLocationFun()
-    }
 
 
 
@@ -212,27 +199,21 @@ fun AddressHomeScreen(
             SnackbarHost(hostState = snackBarHostState)
         },
         modifier = Modifier
-            .fillMaxSize()
             .background(Color.White)
+            .fillMaxSize()
     )
     { paddingValues ->
         paddingValues.calculateTopPadding()
         paddingValues.calculateBottomPadding()
 
-         when (windowSize.widthSizeClass) {
-               WindowWidthSizeClass.Compact->
+        when (windowSize.widthSizeClass) {
+            WindowWidthSizeClass.Compact ->
                 CompactToMediumAddressHomeLayout(
                     contentPadding = paddingValues,
                     fontScall = fontScall,
                     navToMapScreen = {
-//                        requestLocationFun()
-                        requestPermission.launch(
-                            arrayOf(
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
-                            )
-                        )
-                                     },
+                        requestLocationFun()
+                    },
                     navToUserAddressList = {
                         userViewModel.getMyInfo()
                         nav?.navigate(Screens.PickCurrentAddress)
@@ -241,7 +222,7 @@ fun AddressHomeScreen(
 
                 )
 
-             WindowWidthSizeClass.Medium,    WindowWidthSizeClass.Expanded ->
+            WindowWidthSizeClass.Medium, WindowWidthSizeClass.Expanded ->
                 ExpandedAddressHomeLayout(
                     nav = nav!!,
                     contentPadding = paddingValues,
@@ -260,7 +241,8 @@ fun AddressHomeScreen(
                     },
                     userViewModel = userViewModel,
                     coroutine = coroutine,
-                    layoutDirection = layoutDirection
+                    layoutDirection = layoutDirection,
+                    context = context
                 )
 
 
@@ -283,8 +265,8 @@ fun CompactToMediumAddressHomeLayout(
             .padding(
                 start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
                 end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
-                top = 5.dp+contentPadding.calculateTopPadding(),
-                bottom = 5.dp+contentPadding.calculateBottomPadding()
+                top = 5.dp + contentPadding.calculateTopPadding(),
+                bottom = 5.dp + contentPadding.calculateBottomPadding()
             )
             .padding(horizontal = 10.dp)
             .fillMaxSize(),
@@ -377,51 +359,56 @@ fun ExpandedAddressHomeLayout(
     storeViewModel: StoreViewModel,
     requestLocationPermission: () -> Unit,
     coroutine: CoroutineScope,
-    layoutDirection: LayoutDirection
-
+    layoutDirection: LayoutDirection,
+    context: Context
 ) {
     val config = LocalConfiguration.current
     val scrollState = rememberScrollState()
 
     val screenWidth = config.screenWidthDp
-    val screenHeight = config.screenHeightDp.dp
+    val activity = context as Activity
 
-    val halfScreenWidth = (screenWidth.dp / 2) - 20.dp
+    val halfScreenWidth = (screenWidth.dp / 3) - 20.dp
 
-    val isMapScreen = retain { mutableStateOf<enSideType?>(null) }
+    val enScreenType = retain { mutableStateOf<enSideType?>(null) }
 
-    val isSwitchScreen = remember() { mutableStateOf(false) }
+    val isSwitchScreen = retain { mutableStateOf(false) }
 
 
     fun switchToMapScreen(isMapScreenBotton: Boolean = true) {
-        when (userLocation == null) {
-            true -> {
-                requestLocationPermission()
+
+        when (isMapScreenBotton) {
+            false -> {
+                isSwitchScreen.value = true
+                enScreenType.value = enSideType.ListAddress
+
             }
 
             else -> {
-                //this to apply dialog effect between switch component
-                isSwitchScreen.value = true
 
-                //this to decided the type of
-                when (isMapScreenBotton) {
-                    true -> {
-                        isMapScreen.value = enSideType.MapScreen
-                    }
+                if ((ActivityCompat.checkSelfPermission(
+                        activity,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED ||
+                            ActivityCompat.checkSelfPermission(
+                                activity,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            ) != PackageManager.PERMISSION_GRANTED) || !General.isLocationServiceEnable(context)
+                ) {
 
-                    else -> {
-                        isMapScreen.value = enSideType.ListAddress
-                    }
+                requestLocationPermission()
+                } else {
+                    enScreenType.value = enSideType.MapScreen
                 }
+
             }
         }
     }
 
-
     LaunchedEffect(isSwitchScreen.value) {
         if (isSwitchScreen.value)
-            coroutine.launch {
-                delay(20)
+            coroutine.launch(Dispatchers.Default) {
+                delay(50)
                 isSwitchScreen.value = false
 
             }
@@ -433,11 +420,10 @@ fun ExpandedAddressHomeLayout(
             .padding(
                 start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
                 end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
-                top = 5.dp+contentPadding.calculateTopPadding(),
-                bottom = 5.dp+contentPadding.calculateBottomPadding()
+                top = 5.dp + contentPadding.calculateTopPadding(),
+                bottom = 5.dp + contentPadding.calculateBottomPadding()
             )
             .padding(horizontal = 10.dp)
-            .height(screenHeight)
             .fillMaxSize(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
@@ -446,7 +432,6 @@ fun ExpandedAddressHomeLayout(
 
         Column(
             modifier = Modifier
-                .height(screenHeight)
                 .width(halfScreenWidth - 14.dp)
                 .fillMaxHeight()
                 .verticalScroll(scrollState),
@@ -508,6 +493,9 @@ fun ExpandedAddressHomeLayout(
                 buttonTitle = stringResource(R.string.enter_location_manually),
                 color = CustomColor.primaryColor700
             )
+
+            Sizer(50)
+
         }
 
 
@@ -516,51 +504,46 @@ fun ExpandedAddressHomeLayout(
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .height(screenHeight)
-                .width(screenWidth.dp-((screenWidth.dp/3) - 10.dp))
-            ,
+                .width(screenWidth.dp - ((screenWidth.dp / 3) - 10.dp)),
             contentAlignment = Alignment.Center
         ) {
-            when (isSwitchScreen.value) {
-                true -> {
-                    CircularProgressIndicator()
-                }
-
-                false -> {
-                    when (isMapScreen.value) {
-                        enSideType.MapScreen -> {
-                            MapHomeScreen(
-                                nav = nav,
-                                userViewModel = userViewModel,
-                                longitude = userLocation?.longitude,
-                                latitude = userLocation?.latitude,
-                                cartViewModel = cartViewModel,
-                                storeViewModel = storeViewModel,
-                                isShowBackNavIcon = false
-                            )
-                        }
-
-                        enSideType.ListAddress -> {
-                            PickCurrentAddressFromAddressScreen(
-                                nav = nav,
-                                bannerViewModel = bannerViewModel,
-                                categoryViewModel = categoryViewModel,
-                                variantViewModel = variantViewModel,
-                                generalSettingViewModel = generalSettingViewModel,
-                                orderViewModel = orderViewModel,
-                                productViewModel = productViewModel,
-                                userViewModel = userViewModel,
-                                isShowBackIcon = false
-                            )
-                        }
-
-                        else -> {
-                            Text("No Item Selected , or No Permission is Appalled")
-                        }
+            if (isSwitchScreen.value) {
+                CircularProgressIndicator()
+            } else {
+                when (enScreenType.value) {
+                    enSideType.MapScreen -> {
+                        MapHomeScreen(
+                            nav = nav,
+                            userViewModel = userViewModel,
+                            longitude = userLocation?.longitude,
+                            latitude = userLocation?.latitude,
+                            cartViewModel = cartViewModel,
+                            storeViewModel = storeViewModel,
+                            isShowBackNavIcon = false
+                        )
                     }
 
+                    enSideType.ListAddress -> {
+                        PickCurrentAddressFromAddressScreen(
+                            nav = nav,
+                            bannerViewModel = bannerViewModel,
+                            categoryViewModel = categoryViewModel,
+                            variantViewModel = variantViewModel,
+                            generalSettingViewModel = generalSettingViewModel,
+                            orderViewModel = orderViewModel,
+                            productViewModel = productViewModel,
+                            userViewModel = userViewModel,
+                            isShowBackIcon = false
+                        )
+                    }
+
+                    else -> {
+//                            Text("No Item Selected , or No Permission is Appalled")
+                    }
                 }
+
             }
+
 
         }
 

@@ -88,7 +88,7 @@ fun CustomButton(
 ) {
 
     val modifier = if (customModifier == null) Modifier
-        .height(50.dp)
+        .padding(vertical = 5.dp, horizontal = 5.dp)
         .fillMaxWidth() else customModifier
     Button(
         enabled = isEnable!!,
@@ -136,7 +136,7 @@ fun CustomTitleButton(
 
     TextButton(
         modifier = Modifier
-            .height(50.dp)
+            .padding(horizontal = 5.dp, vertical = 5.dp)
             .fillMaxWidth(),
         onClick = {  operation()  },
         shape = RoundedCornerShape(8.dp),
@@ -153,7 +153,8 @@ fun CustomTitleButton(
             fontFamily = General.satoshiFamily,
             fontWeight = FontWeight.Bold,
             fontSize = (16 / fontScall).sp,
-            color = color ?: CustomColor.primaryColor700
+            color = color ?: CustomColor.primaryColor700,
+            textAlign = TextAlign.Center
         )
     }
 

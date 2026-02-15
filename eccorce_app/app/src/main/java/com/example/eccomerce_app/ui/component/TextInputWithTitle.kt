@@ -16,6 +16,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -64,72 +65,75 @@ fun TextInputWithTitle(
     val fontScall = LocalDensity.current.fontScale
     Column {
         if (title.trim().isNotEmpty())
-            Text(
-                title,
-                fontFamily = General.satoshiFamily,
-                fontWeight = fontWeight ?: FontWeight.Bold,
-                color = if (isHasError == true) CustomColor.alertColor_1_400 else CustomColor.neutralColor950,
-                fontSize = fontTitle ?: (16 / fontScall).sp
-            )
-        Sizer(heigh = 5)
-        OutlinedTextField(
-            singleLine = false,
-            enabled = isEnable == true,
-            maxLines = maxLines?:1,
-            value = value.value,
-            onValueChange = {
-                value.value = it
-                if (onChange != null)
-                    onChange(it.text)
-            },
-            placeholder = {
+            key(title) {
                 Text(
-                    placeHolder,
-                    color = CustomColor.neutralColor500,
+                    title,
+                    fontFamily = General.satoshiFamily,
+                    fontWeight = fontWeight ?: FontWeight.Bold,
+                    color = if (isHasError == true) CustomColor.alertColor_1_400 else CustomColor.neutralColor950,
+                    fontSize = fontTitle ?: (16 / fontScall).sp
+                )
+            }
+
+        Sizer(heigh = 5)
+        key(value.value) {
+            OutlinedTextField(
+                singleLine = false,
+                enabled = isEnable == true,
+                maxLines = maxLines ?: 1,
+                value = value.value,
+                onValueChange = {
+                    value.value = it
+                    if (onChange != null)
+                        onChange(it.text)
+                },
+                placeholder = {
+                    Text(
+                        placeHolder,
+                        color = CustomColor.neutralColor500,
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = (16 / fontScall).sp
+                    )
+                },
+                modifier = modifier!!,
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = if (isHasError != true) Color.Gray.copy(alpha = 0.46f) else CustomColor.alertColor_1_400,
+                    focusedBorderColor = if (isHasError != true) Color.Black else CustomColor.alertColor_1_400
+                ),
+                supportingText = {
+                    if (isHasError == true && errorMessage != null)
+                        Text(
+                            errorMessage,
+                            color = CustomColor.alertColor_1_400,
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = (14 / fontScall).sp,
+                            modifier = Modifier.offset(x = -15.dp)
+                        )
+                },
+                textStyle = TextStyle(
                     fontFamily = General.satoshiFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = (16 / fontScall).sp
-                )
-            },
-            modifier = modifier!!,
-            shape = RoundedCornerShape(8.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = if (isHasError != true) Color.Gray.copy(alpha = 0.46f) else CustomColor.alertColor_1_400,
-                focusedBorderColor = if (isHasError != true) Color.Black else CustomColor.alertColor_1_400
-            ),
-            supportingText = {
-                if (isHasError == true && errorMessage != null)
-                    Text(
-                        errorMessage,
-                        color = CustomColor.alertColor_1_400,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = (14 / fontScall).sp,
-                        modifier = Modifier.offset(x = -15.dp)
-                    )
-            },
-            textStyle = TextStyle(
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = (16 / fontScall).sp,
-                color = CustomColor.neutralColor950
-            ),
-            trailingIcon = {
-                if (isHasError == true) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.allert),
-                        contentDescription = "",
-                        tint = CustomColor.alertColor_1_400
-                    )
-                }
-                else if (trailIcon!=null)
-                {
-                    trailIcon()
-                }
-            },
-            keyboardOptions = keyboardOptions,
+                    fontSize = (16 / fontScall).sp,
+                    color = CustomColor.neutralColor950
+                ),
+                trailingIcon = {
+                    if (isHasError == true) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.allert),
+                            contentDescription = "",
+                            tint = CustomColor.alertColor_1_400
+                        )
+                    } else if (trailIcon != null) {
+                        trailIcon()
+                    }
+                },
+                keyboardOptions = keyboardOptions,
 
-            )
+                )
+        }
     }
 
 }

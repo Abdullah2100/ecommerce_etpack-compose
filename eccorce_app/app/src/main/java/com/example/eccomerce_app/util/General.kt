@@ -1,6 +1,8 @@
 package com.example.eccomerce_app.util
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.location.LocationManager
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.compose.foundation.lazy.LazyListState
@@ -12,7 +14,6 @@ import androidx.core.graphics.toColorInt
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.example.e_commercompose.R
-import com.example.eccomerce_app.data.Room.Model.AuthModelEntity
 import com.example.eccomerce_app.data.Room.Model.Currency
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDateTime
@@ -20,7 +21,6 @@ import kotlinx.datetime.number
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
 import java.io.File
-import java.util.Locale
 import java.util.Properties
 
 
@@ -81,6 +81,12 @@ object General {
 //        context.resources.updateConfiguration(config, context.resources.displayMetrics)
     }
 
+    @SuppressLint("ServiceCast")
+    fun isLocationServiceEnable(context:Context):Boolean{
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+    }
     fun convertPriceToAnotherCurrency(price: Int,productSymbol:String,selectedCurrency: Currency?,currencies:List<Currency>?): Int{
         if(currencies.isNullOrEmpty())return price
         if(selectedCurrency==null)return price

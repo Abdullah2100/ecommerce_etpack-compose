@@ -34,6 +34,13 @@ android {
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
+        
+        externalNativeBuild {
+            cmake {
+                arguments += "-DREBUILD_DUMMY=1"
+            }
+        }
+
         val mapboxToken = localProperties.getProperty("GOOGLE_MAP_KEY") ?: ""
         resValue("string", "google_map_token", mapboxToken)
     }

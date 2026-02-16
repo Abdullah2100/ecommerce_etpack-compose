@@ -21,6 +21,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 
@@ -40,21 +41,18 @@ class ProductViewModel(
     val products = _products.asStateFlow()
 
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
-        Log.d("ErrorMessageIs", message.message.toString())
-    }
 
-    fun setDefaultCurrency(symbol: String, onCompleteUpdateValue: (value: Boolean) -> Unit) {
-        scop.launch(Dispatchers.IO + SupervisorJob()) {
+
+  suspend  fun setDefaultCurrency(symbol: String, onCompleteUpdateValue: (value: Boolean) -> Unit)=
+        withContext(Dispatchers.IO) {
             delay(100)
             currencyDao.setSelectedCurrency(symbol)
             async { convertProductCurrencyToSavedCurrency() }.await()
             onCompleteUpdateValue.invoke(false);
         }
-    }
 
     //this if user change the currency from setting
-    private suspend fun convertProductCurrencyToSavedCurrency(): Boolean {
+    private suspend fun convertProductCurrencyToSavedCurrency(): Boolean = withContext(Dispatchers.IO) {
         val currencyList = currencyDao.getSavedCurrencies()
         if (!_products.value.isNullOrEmpty() && currencyList.isNotEmpty()) {
             val targetCurrency = currencyList.firstOrNull { it -> it.isSelected }
@@ -73,16 +71,17 @@ class ProductViewModel(
 
             _products.emit(null)
             _products.emit(productToNewCurrency)
-            return true
+            return@withContext true
 
         }
-        return false
+        return@withContext false
     }
 
 
     //this if the user is select the currency then for api  comming will use this
     // to convert them to local currency saved
-    private suspend fun convertProductCurrencyToSavedCurrency(products: List<ProductModel>? = null): List<ProductModel>? {
+    private suspend fun convertProductCurrencyToSavedCurrency(products: List<ProductModel>? = null): List<ProductModel>?  = withContext(
+        Dispatchers.IO){
         val currencyList = currencyDao.getSavedCurrencies()
         val targetCurrency = currencyList.firstOrNull { it -> it.isSelected }
         if (!products.isNullOrEmpty() && targetCurrency != null) {
@@ -101,10 +100,10 @@ class ProductViewModel(
 
             }
 
-            return productToNewCurrency
+            return@withContext productToNewCurrency
 
         }
-        return null
+        return@withContext null
     }
 
 
@@ -155,7 +154,7 @@ class ProductViewModel(
         updatePageNumber: ((value: Int) -> Unit)? = null,
         updateLoadingState: ((value: Boolean) -> Unit)? = null,
         ) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch {
             if (isLoading != null) updateLoadingState?.invoke(true)
             delay(500)
 
@@ -214,7 +213,7 @@ class ProductViewModel(
         updatePageNumber: ((value: Int) -> Unit)? = null,
         updateLoadingState: ((value: Boolean) -> Unit)? = null,
     ) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch {
             if (isLoading != null) updateLoadingState?.invoke(true)
             when (val result = productRepository.getProduct(storeId, pageNumber)) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -267,7 +266,7 @@ class ProductViewModel(
         updatePageNumber: ((value: Int) -> Unit)? = null,
         updateLoadingState: ((value: Boolean) -> Unit)? = null,
     ) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch {
             if (isLoading != null) updateLoadingState?.invoke(true)
             val result = productRepository
                 .getProductByCategoryId(
@@ -329,7 +328,7 @@ class ProductViewModel(
         updatePageNumber: ((value: Int) -> Unit)? = null,
         updateLoadingState: ((value: Boolean) -> Unit)? = null,
     ) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch {
             if (isLoading != null) updateLoadingState?.invoke(true)
             val result = productRepository.getProduct(
                 storeId,

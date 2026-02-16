@@ -20,13 +20,11 @@ class PaymentTypeViewModel(private val paymentTypeRepository: PaymentTypeReposit
 
     private val _pageNum = MutableStateFlow<Int>(1)
     val pageNum = _pageNum.asStateFlow()
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
-        Log.d("ErrorMessageIs", message.message.toString())
-    }
+
 
 
     fun getPaymentType(pageNumber: Int = 1) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch {
             when (val result = paymentTypeRepository.getPaymentTypes(pageNumber)) {
                 is NetworkCallHandler.Successful<*> -> {
                     val paymentTypesDto = result.data as List<PaymentTypeDto>

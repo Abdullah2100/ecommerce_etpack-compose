@@ -18,14 +18,12 @@ class CategoryViewModel(val categoryRepository: CategoryRepository) : ViewModel(
       private  val _categories = MutableStateFlow<MutableList<Category>?>(null)
     val categories = _categories.asStateFlow()
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
-        Log.d("ErrorMessageIs", message.message.toString())
-    }
+
 
 
     fun getCategories(pageNumber: Int = 1) {
         if (pageNumber == 1 && !_categories.value.isNullOrEmpty()) return
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch {
             when (val result = categoryRepository.getCategory(pageNumber)) {
                 is NetworkCallHandler.Successful<*> -> {
                     val categoriesHolder = result.data as List<CategoryDto>

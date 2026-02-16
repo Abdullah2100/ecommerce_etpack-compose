@@ -13,6 +13,7 @@ import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.data.repository.StoreRepository
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +25,8 @@ import javax.inject.Named
 
 class StoreViewModel(
     val storeRepository: StoreRepository,
-    @Named("storeHub")  val webSocket: HubConnection?
+    @Named("storeHub")  val webSocket: HubConnection?,
+    val coroutineSccop : CoroutineScope
 ) : ViewModel() {
 
    private val _hub = MutableStateFlow<HubConnection?>(null)
@@ -45,14 +47,14 @@ class StoreViewModel(
     fun connection() {
 
         if (webSocket != null) {
-            viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+            coroutineSccop.launch(Dispatchers.IO+_coroutineException) {
 
                 _hub.emit(webSocket)
                 _hub.value?.on(
                     "storeStatus",
                     { result ->
 
-                        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+                        coroutineSccop.launch(Dispatchers.IO+_coroutineException) {
                             if (result.Status == true) {
                                 val storeWithoutCurrentId =
                                     _stores.value?.filter { it.id != result.StoreId }
@@ -74,7 +76,7 @@ class StoreViewModel(
     }
 
     override fun onCleared() {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch(_coroutineException) {
             if (_hub.value != null)
                 _hub.value!!.stop()
             storeCreateData.emit(null)
@@ -84,7 +86,7 @@ class StoreViewModel(
 
     fun getStoreData(storeId: UUID?) {
         if (storeId == null) return
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch {
             val result = storeRepository.getStoreById(storeId)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -259,4 +261,3 @@ class StoreViewModel(
 
 
 }
-

@@ -17,6 +17,7 @@ import com.example.eccomerce_app.data.repository.OrderRepository
 import com.example.eccomerce_app.dto.OrderUpdateStatusDto
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,8 @@ import javax.inject.Named
 
 class OrderViewModel(
     val orderRepository: OrderRepository,
-    @Named("orderHub") val webSocket: HubConnection?
+    @Named("orderHub") val webSocket: HubConnection?,
+    val scop: CoroutineScope
 
 ) : ViewModel() {
     private val _orderSocket = MutableStateFlow<HubConnection?>(null)
@@ -43,7 +45,7 @@ class OrderViewModel(
     fun connection() {
 
         if (webSocket != null) {
-            viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+            scop.launch(Dispatchers.IO + _coroutineException) {
 
                 _orderSocket.emit(webSocket)
                 _orderSocket.value?.start()?.blockingAwait()
@@ -58,7 +60,7 @@ class OrderViewModel(
                         }
 
 
-                        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+                        scop.launch(Dispatchers.IO + _coroutineException) {
                             _orders.emit(orderUpdateData)
                         }
                     },
@@ -85,7 +87,7 @@ class OrderViewModel(
                             else it
                         }
 
-                        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+                        scop.launch(Dispatchers.IO + _coroutineException) {
                             _orders.emit(userOrderList)
                         }
                     },
@@ -103,7 +105,7 @@ class OrderViewModel(
     }
 
     override fun onCleared() {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        scop.launch(_coroutineException) {
             if (_orderSocket.value != null)
                 _orderSocket.value!!.stop()
         }
@@ -117,7 +119,7 @@ class OrderViewModel(
         clearCartData: () -> Unit,
         symbol: String,
         paymentType: UUID,
-        stripIntentId: String?=null
+        stripIntentId: String? = null
     ): String? {
         val result = orderRepository.submitOrder(
             CreateOrderDto(
@@ -129,10 +131,10 @@ class OrderViewModel(
                 TotalPrice = cartItems.totalPrice,
                 Symbol = symbol,
                 PaymentTypeId = paymentType,
-                PaymentId=stripIntentId
+                PaymentId = stripIntentId
             )
         )
-        return  when (result) {
+        return when (result) {
             is NetworkCallHandler.Successful<*> -> {
                 val data = result.data as OrderDto
                 val orderList = mutableListOf<Order>()
@@ -143,12 +145,12 @@ class OrderViewModel(
                 _orders.emit(orderList)
                 clearCartData()
 
-                 null
+                null
             }
 
             is NetworkCallHandler.Error -> {
                 val errorMessage = result.data as String
-                 errorMessage
+                errorMessage
             }
         }
 
@@ -161,7 +163,7 @@ class OrderViewModel(
 
         ) {
         if (isLoading != null) isLoading.value = true
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch(_coroutineException) {
             if (isLoading != null)
                 delay(500)
             when (val result = orderRepository.getMyOrders(pageNumber.value)) {
@@ -213,6 +215,5 @@ class OrderViewModel(
         }
 
     }
-
 
 }

@@ -17,6 +17,7 @@ import com.example.eccomerce_app.util.General.currentLocal
 import com.example.eccomerce_app.util.GeneralValue
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,21 +46,7 @@ class AuthViewModel(
         errorMessage.emit(null)
     }
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
-        Log.d("ErrorMessageIs", message.message.toString())
-        viewModelScope.launch(Dispatchers.IO) {
-            when (message.message?.contains("java.net.ConnectException")) {
-                true -> {
-                    errorMessage.update { "لا بد من تفعيل الانترنت لاكمال العملية" }
-                }
 
-                else -> {
-                    errorMessage.update { "المستخدم غير موجود" }
-
-                }
-            }
-        }
-    }
 
     init {
         getCurrentLocalization()
@@ -67,7 +54,7 @@ class AuthViewModel(
     }
 
     fun getCurrentLocalization() {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch {
             val dbLocale = localDao.getCurrentLocal()
             Log.d("CurrentLocalization", dbLocale?.name ?: "no data")
 
@@ -79,7 +66,7 @@ class AuthViewModel(
     }
 
     fun getStartedScreen() {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch {
             val authData = authDao.getAuthData()
             val isPassOnBoard = authDao.isPassOnBoarding()
             val isLocation = authDao.isPassLocationScreen()
@@ -238,6 +225,7 @@ class AuthViewModel(
         email: String,
         updateIsLoading: (state: Boolean) -> Unit
     ): String? {
+
         updateIsLoading.invoke(true)
         when (val result = authRepository.getOtp(email)) {
             is NetworkCallHandler.Successful<*> -> {
@@ -262,6 +250,7 @@ class AuthViewModel(
         otp: String,
         updateIsLoading: (state: Boolean) -> Unit
     ): String? {
+
         updateIsLoading.invoke(true)
 
         when (val result = authRepository.verifyingOtp(email, otp)) {
@@ -290,7 +279,6 @@ class AuthViewModel(
         newPassword: String
 
     ): String? {
-
         when (val result = authRepository.resetPassword(email, otp, newPassword)) {
             is NetworkCallHandler.Successful<*> -> {
                 val authData = result.data as AuthDto
@@ -320,7 +308,7 @@ class AuthViewModel(
     }
 
     fun logout() {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        CoroutineScope(Dispatchers.IO).launch {
             authDao.nukeAuthTable()
             authDao.nukeIsPassAddressTable()
         }

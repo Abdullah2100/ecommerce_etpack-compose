@@ -8,10 +8,12 @@ import com.example.eccomerce_app.model.CardProductModel
 import com.example.e_commercompose.model.CartModel
 import com.example.eccomerce_app.model.StoreModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.Math.toRadians
 import java.util.UUID
 import kotlin.math.asin
@@ -39,13 +41,13 @@ class CartViewModel() : ViewModel() {
     val distance = _distance.asStateFlow()
 
 
- private    val _coroutineException = CoroutineExceptionHandler { _, message ->
-        Log.d("ErrorMessageIs", message.message.toString())
-    }
+// private    val _coroutineException = CoroutineExceptionHandler { _, message ->
+//        Log.d("ErrorMessageIs", message.message.toString())
+//    }
 
 
     fun addToCart(product: CardProductModel) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        CoroutineScope(Dispatchers.IO).launch {
             val cardProducts = mutableListOf<CardProductModel>()
 
             cardProducts.add(product)
@@ -71,7 +73,7 @@ class CartViewModel() : ViewModel() {
 
 
     fun increaseCardItem(productId: UUID) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        CoroutineScope(Dispatchers.IO).launch {
             var copyProduct: CardProductModel? = null
             val productHolders = cartItems.value.cartProducts.map { product ->
                 if (product.id == productId) {
@@ -85,7 +87,7 @@ class CartViewModel() : ViewModel() {
 
 
             copyProduct.productVariants.forEach { it ->
-                variantProduct = variantProduct * it.percentage
+                variantProduct *= it.percentage
             }
             val price = (cartItems.value.totalPrice) + (variantProduct)
 
@@ -100,7 +102,7 @@ class CartViewModel() : ViewModel() {
 
 
     fun decreaseCardItem(productId: UUID) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        CoroutineScope(Dispatchers.IO).launch {
             var productList = cartItems.value.cartProducts
             val firstProduct = productList.first { it.id == productId }
             var variantPrice = firstProduct.price
@@ -137,7 +139,7 @@ class CartViewModel() : ViewModel() {
     }
 
     fun removeItemFromCard(productId: UUID) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        CoroutineScope(Dispatchers.IO).launch {
             var productList = cartItems.value.cartProducts
             val firstProduct = productList.first { it.id == productId }
             var variantPrice = firstProduct.price
@@ -186,9 +188,9 @@ class CartViewModel() : ViewModel() {
     suspend fun calculateOrderDistanceToUser(
         stores: List<StoreModel>?,
         currentAddress: Address?
-    ) {
+    )= withContext(Dispatchers.IO) {
 
-        if (stores == null || currentAddress == null) return
+        if (stores == null || currentAddress == null) return@withContext
         var copyDistance = 0.0
         cartItems.value.cartProducts.distinctBy { it.storeId }.forEach { product ->
 
@@ -202,4 +204,3 @@ class CartViewModel() : ViewModel() {
 
 
 }
-

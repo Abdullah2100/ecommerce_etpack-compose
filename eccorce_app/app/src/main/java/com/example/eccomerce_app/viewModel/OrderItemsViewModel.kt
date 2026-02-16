@@ -14,6 +14,7 @@ import com.example.eccomerce_app.data.repository.OrderItemRepository
 import com.example.eccomerce_app.dto.OrderUpdateStatusDto
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,7 @@ class OrderItemsViewModel(
     val orderItemRepository: OrderItemRepository,
     @Named("orderItemHub") val orderItmeHub: HubConnection?,
     @Named("orderHub") val orderHub: HubConnection?,
+    val scop: CoroutineScope
 ) : ViewModel() {
 
     private val _orderItemSocket = MutableStateFlow<HubConnection?>(null)
@@ -43,7 +45,7 @@ class OrderItemsViewModel(
     fun connection() {
 
         if (orderItmeHub != null) {
-            viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+            scop.launch(Dispatchers.IO + _coroutineException) {
 
                 _orderItemSocket.emit(orderItmeHub)
                 _orderSocket.emit(orderHub)
@@ -61,7 +63,7 @@ class OrderItemsViewModel(
                         }
 
 
-                        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+                        scop.launch(Dispatchers.IO + _coroutineException) {
                             _orderItemForMyStore.emit(orderUpdateData)
                         }
                     },
@@ -77,7 +79,7 @@ class OrderItemsViewModel(
                         if (_orderItemForMyStore.value != null) {
                             orderItemList.addAll(_orderItemForMyStore.value!!)
                         }
-                        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+                        scop.launch(Dispatchers.IO + _coroutineException) {
                             _orderItemForMyStore.emit(orderItemList.distinctBy { it.id }.toList())
                         }
                     },
@@ -94,7 +96,7 @@ class OrderItemsViewModel(
                         }
 
 
-                        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+                        scop.launch(Dispatchers.IO + _coroutineException) {
                             if (myStoreOrderItemHolder?.isNotEmpty() == true)
                                 _orderItemForMyStore.emit(myStoreOrderItemHolder)
                         }
@@ -114,7 +116,7 @@ class OrderItemsViewModel(
     }
 
     override fun onCleared() {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        scop.launch(Dispatchers.IO + _coroutineException) {
             if (_orderItemSocket.value != null) {
                 _orderItemSocket.value?.stop()
                 _orderSocket.value?.stop()
@@ -130,7 +132,7 @@ class OrderItemsViewModel(
         updateLoadingState: ((state: Boolean) -> Unit)? = null
     ) {
 
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch {
             if (isLoading != null) {
                 updateLoadingState?.invoke(true)
                 delay(500)

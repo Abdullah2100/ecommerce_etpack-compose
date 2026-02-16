@@ -10,7 +10,7 @@ class HomeViewModel: ViewModel(){
     val accessHomeScreenCounter=MutableStateFlow<Int>(0)
 
     fun increaseAccessHomeScreenCounter(){
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
           val result =    accessHomeScreenCounter.value++
             accessHomeScreenCounter.emit(result);
 

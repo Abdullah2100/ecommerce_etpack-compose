@@ -47,7 +47,7 @@ class DeliveryViewModel(
         updatePageNumber: ((value: Int) -> Unit)? = null
     ) {
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             when (val result = deliveryRepository.getDeliveriesBelongToStore(pageNumber)) {
                 is NetworkCallHandler.Successful<*> -> {
                     val data = result.data as? List<DeliveryDto>

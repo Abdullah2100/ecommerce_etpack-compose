@@ -315,13 +315,13 @@ fun CompactHomePageLayout(
             state = lazyState,
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color.White)
                 .padding(
                     start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
                     end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
                     top = 5.dp + contentPadding.calculateTopPadding(),
                     bottom = 5.dp + contentPadding.calculateBottomPadding()
                 )
-                .background(Color.White)
 
         ) {
 

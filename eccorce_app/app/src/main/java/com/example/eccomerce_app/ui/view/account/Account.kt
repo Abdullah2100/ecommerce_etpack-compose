@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
@@ -137,10 +138,14 @@ fun AccountPage(
     }
 
     fun updateProductCurrency(symbol: String) {
-        updateConditionValue(isChangingLanguageValue = true)
-        productViewModel.setDefaultCurrency(symbol) { value ->
-            updateConditionValue(isChangingLanguageValue = value)
+        coroutine.launch {
+            updateConditionValue(isChangingLanguageValue = true)
+
+            productViewModel.setDefaultCurrency(symbol) { value ->
+                updateConditionValue(isChangingLanguageValue = value)
+            }
         }
+
     }
 
     fun logout() {
@@ -193,7 +198,7 @@ fun AccountPage(
                 AccountCustomBottom(
                     stringResource(R.string.your_profile),
                     R.drawable.user, {
-                            nav.navigate(Screens.Profile)
+                        nav.navigate(Screens.Profile)
                     })
                 HorizontalDivider(
                     Modifier
@@ -205,7 +210,7 @@ fun AccountPage(
                 AccountCustomBottom(
                     stringResource(R.string.address),
                     R.drawable.location_address_list, {
-                            nav.navigate(Screens.EditeOrAddNewAddress)
+                        nav.navigate(Screens.EditeOrAddNewAddress)
                     })
                 HorizontalDivider(
                     Modifier
@@ -217,7 +222,7 @@ fun AccountPage(
                 AccountCustomBottom(
                     stringResource(R.string.my_store),
                     R.drawable.store, {
-                            nav.navigate(Screens.Store(storeId.toString(), false))
+                        nav.navigate(Screens.Store(storeId.toString(), false))
                     })
                 HorizontalDivider(
                     Modifier
@@ -230,8 +235,8 @@ fun AccountPage(
                     AccountCustomBottom(
                         stringResource(R.string.order_for_my_store),
                         R.drawable.order_belong_to_store, {
-                                orderItemsViewModel.getMyOrderItemBelongToMyStore(1, false)
-                                nav.navigate(Screens.OrderForMyStore)
+                            orderItemsViewModel.getMyOrderItemBelongToMyStore(1, false)
+                            nav.navigate(Screens.OrderForMyStore)
                         })
                     HorizontalDivider(
                         Modifier

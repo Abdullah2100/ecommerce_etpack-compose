@@ -328,7 +328,10 @@ fun NavController(
                     orderViewModel = orderViewModel,
                     currencyViewModel = currencyViewModel,
                     homeViewModel = homeViewModel,
-                    paymentTypeViewModel = paymentTypeViewModel
+                    paymentTypeViewModel = paymentTypeViewModel ,
+                    cartViewModel = cartViewModel,
+                    subCategoryViewModel = subCategoryViewModel,
+                    storeViewModel = storeViewModel
                 )
             }
 

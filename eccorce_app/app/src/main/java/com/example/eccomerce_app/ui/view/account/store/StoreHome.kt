@@ -134,7 +134,8 @@ fun StoreScreen(
     subCategoryViewModel: SubCategoryViewModel,
     storeViewModel: StoreViewModel,
     productViewModel: ProductViewModel,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    isShowArrowBackIcon: Boolean = true
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -227,7 +228,7 @@ fun StoreScreen(
 
     val locationClient = LocationServices.getFusedLocationProviderClient(context)
 
-    fun handlingLocation( currentLocation: Location): LatLng? {
+    fun handlingLocation(currentLocation: Location): LatLng? {
 
 
         return when {
@@ -267,16 +268,16 @@ fun StoreScreen(
                     addOnSuccessListener { location ->
                         location?.toString()
                         coroutine.launch {
-                        if (location != null) {
-                            val type =
-                                when ((myStoreId == storeId.value || myStoreId == null) && isFromHome == false) {
-                                    true -> enMapType.MyStore
-                                    else -> enMapType.Store
-                                }
+                            if (location != null) {
+                                val type =
+                                    when ((myStoreId == storeId.value || myStoreId == null) && isFromHome == false) {
+                                        true -> enMapType.MyStore
+                                        else -> enMapType.Store
+                                    }
 
-                            val locationHolder = handlingLocation(location)
+                                val locationHolder = handlingLocation(location)
 
-                            Log.d("LocationData", "$locationHolder \n $location ")
+                                Log.d("LocationData", "$locationHolder \n $location ")
 
                                 nav.navigate(
                                     Screens.MapScreen(
@@ -290,8 +291,8 @@ fun StoreScreen(
                                     )
                                 )
 
-                        } else
-                            snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
+                            } else
+                                snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
                         }
                     }
                     addOnFailureListener { fail ->
@@ -749,6 +750,7 @@ fun StoreScreen(
             )
         }
     }
+
     LaunchedEffect(Unit) {
         getStoreInfoByStoreId(storeId.value ?: UUID.randomUUID())
     }
@@ -1161,7 +1163,8 @@ fun StoreScreen(
                     }
 
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                isShowArrowBackIcon = isShowArrowBackIcon
             )
 
         },
@@ -1173,7 +1176,7 @@ fun StoreScreen(
                         modifier = Modifier
                             .padding(bottom = 3.dp)
                             .size(50.dp), onClick = {
-                                    nav.navigate(Screens.DeliveriesList)
+                            nav.navigate(Screens.DeliveriesList)
                         }, containerColor = CustomColor.alertColor_2_700
                     ) {
                         Icon(
@@ -1185,12 +1188,13 @@ fun StoreScreen(
                     }
                     FloatingActionButton(
                         onClick = {
-                                nav.navigate(Screens.CreateProduct(
-                                        (storeId.value ?: myInfo.value?.storeId
-                                        ?: UUID.randomUUID()).toString(),
-                                        null
-                                    )
+                            nav.navigate(
+                                Screens.CreateProduct(
+                                    (storeId.value ?: myInfo.value?.storeId
+                                    ?: UUID.randomUUID()).toString(),
+                                    null
                                 )
+                            )
                         }, containerColor = CustomColor.alertColor_2_700
                     ) {
                         Icon(
@@ -1661,7 +1665,7 @@ fun StoreScreen(
                                         onDeleteBanner(it)
                                     },
                                     isShowTitle = false,
-                                    nav = nav
+                                    onPressDo = {}
                                 )
 
                         }
@@ -1904,17 +1908,26 @@ fun StoreScreen(
                                                 ProductShape(
                                                     isCanNavigateToStore = false,
                                                     product = productFilterBySubCategory,
-                                                    nav = nav,
+                                                    onPressDo = { id, isFromHome, isCanNavigateToStore ->
+
+                                                        nav.navigate(
+                                                            Screens.ProductDetails(
+                                                                id.toString(),
+                                                                isFromHome = isFromHome,
+                                                                isCanNavigateToStore = isCanNavigateToStore
+                                                            )
+                                                        )
+                                                    },
                                                     delFun = if (isFromHome == true) null else { it ->
                                                         deleteProduct(it)
                                                     },
                                                     updFun = if (isFromHome == true) null else { it ->
-                                                            nav.navigate(
-                                                                Screens.CreateProduct(
-                                                                    storeId.toString(),
-                                                                    it.toString()
-                                                                )
+                                                        nav.navigate(
+                                                            Screens.CreateProduct(
+                                                                storeId.toString(),
+                                                                it.toString()
                                                             )
+                                                        )
                                                     })
                                             }
                                         }

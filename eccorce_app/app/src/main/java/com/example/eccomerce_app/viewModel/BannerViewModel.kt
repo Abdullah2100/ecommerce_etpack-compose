@@ -11,6 +11,7 @@ import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.data.repository.BannerRepository
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +22,8 @@ import javax.inject.Named
 
 class BannerViewModel(
     @Named("bannerHub")   val bannerRepository: BannerRepository,
-    val webSocket: HubConnection?
+    val webSocket: HubConnection?,
+    val coroutineScop: CoroutineScope
 
 ) : ViewModel() {
     private    val _hub = MutableStateFlow<HubConnection?>(null)
@@ -41,7 +43,7 @@ class BannerViewModel(
     fun connection() {
 
         if (webSocket != null) {
-            viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+            coroutineScop.launch(Dispatchers.IO) {
 
                 _hub.emit(webSocket)
                 _hub.value?.start()?.blockingAwait()
@@ -55,7 +57,7 @@ class BannerViewModel(
                             banners.add(result.toBanner())
                             banners.addAll(_banners.value!!)
                         }
-                        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+                        CoroutineScope(Dispatchers.IO).launch(_coroutineException) {
                             Log.d("bannerCreationData", banners.toString())
 
                             _banners.emit(banners)
@@ -75,7 +77,7 @@ class BannerViewModel(
 
 
     override fun onCleared() {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        coroutineScop.launch(_coroutineException) {
             if (_hub.value != null)
                 _hub.value!!.stop()
         }
@@ -84,7 +86,7 @@ class BannerViewModel(
 
 
     fun getStoresBanner() {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch {
             when (val result = bannerRepository.getRandomBanner()) {
                 is NetworkCallHandler.Successful<*> -> {
                     val data = result.data as List<BannerDto>
@@ -173,7 +175,7 @@ class BannerViewModel(
 
 
     fun getStoreBanner(storeId: UUID, pageNumber: Int = 1) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch {
             when (val result = bannerRepository.getBannerByStoreId(storeId, pageNumber)) {
                 is NetworkCallHandler.Successful<*> -> {
                     val data = result.data as List<BannerDto>

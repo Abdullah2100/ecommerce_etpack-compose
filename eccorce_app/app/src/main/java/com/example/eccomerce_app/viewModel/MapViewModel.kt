@@ -13,13 +13,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MapViewModel(private val mapRepository: MapRepository) : ViewModel() {
 
     private val _googlePlaceInfo = MutableStateFlow<List<LatLng>?>(null)
     val googlePlaceInfo = _googlePlaceInfo.asStateFlow()
-    fun findPointBetweenTwoDestination(origin: LatLng, destination: LatLng, key: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+    suspend fun findPointBetweenTwoDestination(origin: LatLng, destination: LatLng, key: String) =
+        withContext(Dispatchers.IO) {
             when (val result = mapRepository.getDistanceBetweenTwoPoint(origin, destination, key)) {
                 is NetworkCallHandler.Successful<*> -> {
                     val info = result.data as? GooglePlacesInfo
@@ -36,6 +37,5 @@ class MapViewModel(private val mapRepository: MapRepository) : ViewModel() {
             }
 
         }
-    }
-
 }
+

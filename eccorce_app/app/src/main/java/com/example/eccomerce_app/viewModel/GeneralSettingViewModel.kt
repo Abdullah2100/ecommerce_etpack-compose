@@ -21,13 +21,9 @@ class GeneralSettingViewModel(
    private  val _generalSetting = MutableStateFlow<List<GeneralSetting>?>(null)
     val generalSetting = _generalSetting.asStateFlow()
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
-        Log.d("ErrorMessageIs", message.message.toString())
-    }
-
 
     fun getGeneral(pageNumber: Int = 1) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch {
             when (val result = generalSettingRepository.getGeneral(pageNumber)) {
                 is NetworkCallHandler.Successful<*> -> {
                     val generalSettings = result.data as List<GeneralSettingDto>

@@ -26,9 +26,7 @@ class SubCategoryViewModel(val subCategoryRepository: SubCategoryRepository) : V
    private  val _SubCategories = MutableStateFlow<List<SubCategory>?>(null)
     val subCategories = _SubCategories.asStateFlow()
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
-        Log.d("ErrorMessageIs", message.message.toString())
-    }
+
 
 
     suspend fun createSubCategory(name: String, categoryId: UUID): String? {
@@ -132,7 +130,7 @@ class SubCategoryViewModel(val subCategoryRepository: SubCategoryRepository) : V
 
 
     fun getStoreSubCategories(storeId: UUID, pageNumber: Int = 1) {
-        viewModelScope.launch(Dispatchers.Main + _coroutineException) {
+        viewModelScope.launch {
             when (val result = subCategoryRepository.getStoreSubCategory(storeId, pageNumber)) {
                 is NetworkCallHandler.Successful<*> -> {
                     val data = result.data as List<SubCategoryDto>

@@ -1,6 +1,7 @@
 package com.example.eccomerce_app.ui.view.account.store
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -60,7 +61,7 @@ import java.util.UUID
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetail(
-    nav: NavHostController,
+    nav: NavHostController? = null,
     cartViewModel: CartViewModel,
     productID: String?,
     isFromHome: Boolean,
@@ -72,8 +73,8 @@ fun ProductDetail(
     isCanNavigateToStore: Boolean,
     userViewModel: UserViewModel,
     currencyViewModel: CurrencyViewModel,
-
-    ) {
+    isShowArrowBackIcon: Boolean = true,
+) {
 
     val context = LocalContext.current
 
@@ -139,6 +140,7 @@ fun ProductDetail(
     }
 
     fun getStoreInfoByStoreId(id: UUID? = UUID.randomUUID()) {
+        Log.d("thisTheGetStoreInfo", "this the id $id")
         if (id == null) return
         storeViewModel.getStoreData(storeId = id)
         bannerViewModel.getStoreBanner(id, 1)
@@ -157,30 +159,29 @@ fun ProductDetail(
 
     fun getStoreData() {
         coroutine.launch {
-        if (productData != null)
-            productViewModel
-                .getProducts(
-                    pageNumber = 1,
-                    storeId = productData.storeId
+            if (productData != null)
+                productViewModel
+                    .getProducts(
+                        pageNumber = 1,
+                        storeId = productData.storeId
+                    )
+            nav?.navigate(
+                Screens.Store(
+                    storeId = storeData?.id.toString(),
+                    isFromHome = true
                 )
-
-        nav.navigate(
-            Screens.Store(
-                storeId = storeData?.id.toString(),
-                isFromHome = true
             )
+        }
+    }
+    //if (!isFromHome) {
+    LaunchedEffect(Unit) {
+        getStoreInfoByStoreId(
+            id = productData?.storeId ?: UUID.randomUUID()
         )
-        }
-    }
-    if (!isFromHome) {
-        LaunchedEffect(Unit) {
-            getStoreInfoByStoreId(
-                id = productData?.storeId ?: UUID.randomUUID()
-            )
-            delay(3000)
+        delay(3000)
 
-        }
     }
+    // }
 
     Scaffold(
         snackbarHost = {
@@ -199,6 +200,7 @@ fun ProductDetail(
             SharedAppBar(
                 title = stringResource(R.string.product_detail),
                 nav = nav,
+                isShowArrowBackIcon = isShowArrowBackIcon
             )
         },
         bottomBar = {
@@ -301,7 +303,7 @@ fun ProductDetail(
                         storeData = storeData,
                         context = context,
                         isCanNavigateToStore = isCanNavigateToStore,
-                        getStoreData = {getStoreData()}
+                        getStoreData = { getStoreData() }
                     )
                 }
             item {

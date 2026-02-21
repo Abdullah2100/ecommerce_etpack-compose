@@ -270,7 +270,6 @@ fun MapHomeScreen(
 
     LaunchedEffect(Unit) {
         if (isHasNavigationMap) {
-
             mapViewModel?.findPointBetweenTwoDestination(
                 mainLocation.position,
                 additionLocation.position,

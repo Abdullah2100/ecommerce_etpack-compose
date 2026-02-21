@@ -28,7 +28,7 @@ class VariantViewModel(val variantRepository: VariantRepository) : ViewModel() {
 
     fun getVariants(pageNumber: Int = 1) {
         if (pageNumber == 1 && _variants.value != null) return
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+        viewModelScope.launch(_coroutineException) {
 
             when (val result = variantRepository.getVariant(pageNumber)) {
                 is NetworkCallHandler.Successful<*> -> {

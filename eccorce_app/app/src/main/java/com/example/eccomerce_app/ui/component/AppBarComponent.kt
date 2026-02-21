@@ -32,6 +32,7 @@ fun SharedAppBar(
     nav: NavHostController?=null,
     action:(@Composable ()->Unit)?=null,
     scrollBehavior: TopAppBarScrollBehavior?=null,
+    isShowArrowBackIcon:Boolean = true
 ){
     val fontScall = LocalDensity.current.fontScale
 
@@ -53,7 +54,7 @@ fun SharedAppBar(
             )
         },
         navigationIcon = {
-           if(nav!=null)
+           if(nav!=null && isShowArrowBackIcon)
             IconButton(
                 onClick = {
                     nav.popBackStack()

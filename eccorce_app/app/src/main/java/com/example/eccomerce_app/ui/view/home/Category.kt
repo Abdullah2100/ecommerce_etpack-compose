@@ -52,6 +52,7 @@ fun CategoryScreen(
     nav: NavHostController,
     categoryViewModel: CategoryViewModel,
     productViewModel: ProductViewModel,
+    isShowArrowBackNavIcon : Boolean = true
 ) {
     val category = categoryViewModel.categories.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -75,7 +76,10 @@ fun CategoryScreen(
             .fillMaxSize()
             .background(Color.White),
         topBar = {
-            SharedAppBar(title = stringResource(R.string.category), nav = nav)
+            SharedAppBar(
+                title = stringResource(R.string.category),
+                nav = nav,
+                isShowArrowBackIcon = isShowArrowBackNavIcon)
 
         }
 

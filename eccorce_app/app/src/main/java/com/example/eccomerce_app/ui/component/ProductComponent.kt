@@ -74,14 +74,12 @@ fun ProductShape(
     product: List<ProductModel>,
     delFun: ((it: UUID) -> Unit)? = null,
     updFun: ((productId: UUID) -> Unit)? = null,
-    nav: NavHostController,
+    onPressDo: (value: UUID, isFromHome:Boolean, isCanNavigateToStore:Boolean) -> Unit,
     isFromHome: Boolean = false,
     isCanNavigateToStore: Boolean = true
 ) {
     val context = LocalContext.current
-    val coroutine = rememberCoroutineScope()
 
-    Log.d("ProductData",product.size.toString())
 
     FlowRow(
         modifier = Modifier
@@ -95,9 +93,9 @@ fun ProductShape(
                 modifier = Modifier
                     .wrapContentSize()
 
-                )
+            )
             {
-                val (rightRef, leftRef,cardRef) = createRefs()
+                val (rightRef, leftRef, cardRef) = createRefs()
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = Color.White
@@ -110,22 +108,14 @@ fun ProductShape(
                         .width(160.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .clickable {
-                            coroutine.launch {
-                                nav.navigate(
-                                    Screens.ProductDetails(
-                                        product[index].id.toString(),
-                                        isFromHome = isFromHome,
-                                        isCanNavigateToStore = isCanNavigateToStore
-                                    )
-                                )
-                            }
+                            onPressDo(product[index].id,isFromHome,isCanNavigateToStore)
                         }
                         .border(
                             (0.7).dp,
                             CustomColor.neutralColor200,
                             RoundedCornerShape(8.dp)
                         )
-                        .constrainAs(cardRef){
+                        .constrainAs(cardRef) {
                             start.linkTo(parent.start)
                             top.linkTo(parent.top)
                             end.linkTo(parent.end)
@@ -287,7 +277,7 @@ fun ProductShape(
     product: ProductModel,
     context: Context,
     selectedImage: String,
-    updateSelectIndex: (value: String) -> Unit
+    updateSelectIndex: (value: String) -> Unit,
 ) {
     val productImages = remember { mutableStateOf(product.productImages + product.thumbnail) }
 

@@ -39,13 +39,9 @@ class UserViewModel(
     val _userInfo = MutableStateFlow<UserModel?>(null)
     val userInfo = _userInfo.asStateFlow()
 
-    val _coroutineException = CoroutineExceptionHandler { _, message ->
-        Log.d("ErrorMessageIs", message.message.toString())
-    }
-
 
     fun setIsPassOnBoardingScreen() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             var isPassOnBoarding = IsPassOnBoardingScreen()
             isPassOnBoarding.condition = true;
             val result = dao.savePassingOnBoarding(isPassOnBoarding)
@@ -78,9 +74,8 @@ class UserViewModel(
 
     fun getMyInfo() {
         if (_userInfo.value != null) return
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
-            val result = userRepository.getMyInfo()
-            when (result) {
+        viewModelScope.launch {
+            when (val result = userRepository.getMyInfo()) {
                 is NetworkCallHandler.Successful<*> -> {
                     val data = result.data as UserDto
                     _userInfo.emit(data.toUser())

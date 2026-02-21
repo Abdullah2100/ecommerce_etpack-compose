@@ -2,6 +2,7 @@ package com.example.eccomerce_app.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.data.Room.Dao.CurrencyDao
@@ -42,13 +43,10 @@ class CurrencyViewModel(
         )
 
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
-        Log.d("ErrorMessageIs", message.message.toString())
-    }
 
 
     fun getCurrencies(pageNumber: Int) {
-        scop.launch(Dispatchers.IO + _coroutineException) {
+        CoroutineScope(Dispatchers.IO).launch {
             when (val result = currencyRepository.getStoreCurrencies(pageNumber = pageNumber)) {
                 is NetworkCallHandler.Successful<*> -> {
                     val data = result.data as List<CurrencyDto>

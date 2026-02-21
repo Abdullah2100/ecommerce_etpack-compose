@@ -23,17 +23,17 @@ import org.koin.dsl.module
 
 val viewModelModel = module {
     single { AuthViewModel(get(), get(),get()) }
-    single { BannerViewModel(get(), get(named("bannerHub"))) }
+    single { BannerViewModel(get(), get(named("bannerHub")),get()) }
     single { CartViewModel() }
     single { CategoryViewModel(get()) }
     single { SubCategoryViewModel(get()) }
     single { VariantViewModel(get()) }
-    single { StoreViewModel(get(), get(named("storeHub"))) }
+    single { StoreViewModel(get(), get(named("storeHub")),get()) }
     single { ProductViewModel(get(),get(),get()) }
     single { UserViewModel(get(), get(), get(),get()) }
     single { GeneralSettingViewModel(get()) }
-    single { OrderViewModel(get(), get(named("orderHub"))) }
-    single { OrderItemsViewModel(get(), get(named("orderItemHub")),get(named("orderHub"))) }
+    single { OrderViewModel(get(), get(named("orderHub")),get()) }
+    single { OrderItemsViewModel(get(), get(named("orderItemHub")),get(named("orderHub")),get()) }
     single { MapViewModel(get()) }
     single { DeliveryViewModel(get()) }
     single { CurrencyViewModel(get(),get(),get()) }

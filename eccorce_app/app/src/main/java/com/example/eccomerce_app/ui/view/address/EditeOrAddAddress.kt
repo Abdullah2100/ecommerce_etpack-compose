@@ -84,7 +84,8 @@ fun EditOrAddLocationScreen(
     nav: NavHostController,
     userViewModel: UserViewModel,
     storeViewModel: StoreViewModel,
-    cartViewModel: CartViewModel
+    cartViewModel: CartViewModel?=null ,
+    isShowArrowBackIcon : Boolean = true
 ) {
     val context = LocalContext.current
     val userInfo = userViewModel.userInfo.collectAsStateWithLifecycle()
@@ -176,7 +177,7 @@ fun EditOrAddLocationScreen(
             isLoading.value = false
             val message = result
                 ?: context.getString(R.string.update_current_address_successfully)
-            cartViewModel.calculateOrderDistanceToUser(stores.value,userInfo.value?.address?.firstOrNull() { value->value.isCurrent })
+            cartViewModel?.calculateOrderDistanceToUser(stores.value,userInfo.value?.address?.firstOrNull() { value->value.isCurrent })
             snackBarHostState.showSnackbar(message)
         }
     }
@@ -191,7 +192,8 @@ fun EditOrAddLocationScreen(
             SharedAppBar(
                 title =stringResource(R.string.address_list) ,
                 nav=nav,
-                scrollBehavior=scrollBehavior
+                scrollBehavior=scrollBehavior ,
+                isShowArrowBackIcon = isShowArrowBackIcon
             )
 
         },

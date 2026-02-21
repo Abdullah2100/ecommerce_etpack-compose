@@ -26,12 +26,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.eccomerce_app.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.e_commercompose.ui.component.ProductLoading
+import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.ProductShape
 import com.example.eccomerce_app.ui.component.SharedAppBar
 import com.example.eccomerce_app.util.General.reachedBottom
@@ -46,10 +48,11 @@ import java.util.UUID
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun ProductCategoryScreen(
-    nav: NavHostController,
+    nav: NavHostController?=null,
     categoryId: String,
     categoryViewModel: CategoryViewModel,
-    productViewModel: ProductViewModel
+    productViewModel: ProductViewModel ,
+    isShowArrowBackIcon : Boolean = true
 ) {
     val categories = categoryViewModel.categories.collectAsStateWithLifecycle()
     val products = productViewModel.products.collectAsStateWithLifecycle()
@@ -60,6 +63,8 @@ fun ProductCategoryScreen(
     val coroutine = rememberCoroutineScope()
     val lazyState = rememberLazyListState()
     val state = rememberPullToRefreshState()
+
+    val layoutDirection = LocalLayoutDirection.current
 
 
     val reachedBottom = remember { derivedStateOf { lazyState.reachedBottom() } }
@@ -92,14 +97,15 @@ fun ProductCategoryScreen(
         topBar = {
             SharedAppBar(
                 title = categories.value?.firstOrNull { it.id == categoryId }?.name ?: "",
-                nav = nav
+                nav = nav ,
+                isShowArrowBackIcon = isShowArrowBackIcon
             )
         }
 
 
-    ) { paddingValue ->
-        paddingValue.calculateTopPadding()
-        paddingValue.calculateBottomPadding()
+    ) { contentPadding ->
+        contentPadding.calculateTopPadding()
+        contentPadding.calculateBottomPadding()
 
 
         PullToRefreshBox(
@@ -126,7 +132,7 @@ fun ProductCategoryScreen(
             indicator = {
                 Indicator(
                     modifier = Modifier
-                        .padding(top = paddingValue.calculateTopPadding())
+                        .padding(top = contentPadding.calculateTopPadding())
                         .align(Alignment.TopCenter),
                     isRefreshing = isRefresh.value,
                     containerColor = Color.White,
@@ -138,10 +144,16 @@ fun ProductCategoryScreen(
             LazyColumn(
                 state = lazyState,
                 modifier = Modifier
-                    .padding(paddingValue)
-                    .fillMaxSize()
                     .background(Color.White)
-                    .padding(horizontal = 15.dp)
+                    .fillMaxSize()
+                    .padding(
+                        start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
+                        end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
+                        top = 5.dp + contentPadding.calculateTopPadding(),
+                        bottom = 5.dp + contentPadding.calculateBottomPadding()
+                    )
+
+
             ) {
 
 
@@ -155,7 +167,15 @@ fun ProductCategoryScreen(
 
                         else -> {
                             if (productsByCategory.isNotEmpty()) {
-                                ProductShape(products.value!!, nav = nav)
+                                ProductShape(products.value!!, onPressDo = {id , isFromHome, isCanNavToStore->
+                                    nav?.navigate(
+                                        Screens.ProductDetails(
+                                            id.toString(),
+                                            isFromHome = isFromHome ,
+                                            isCanNavigateToStore = isCanNavToStore
+                                        )
+                                    )
+                                })
                             }
                         }
                     }
@@ -178,6 +198,7 @@ fun ProductCategoryScreen(
                 item {
                     Sizer(40)
                 }
+
             }
         }
 

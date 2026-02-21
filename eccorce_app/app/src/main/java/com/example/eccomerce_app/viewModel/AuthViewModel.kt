@@ -66,7 +66,7 @@ class AuthViewModel(
     }
 
     fun getStartedScreen() {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             val authData = authDao.getAuthData()
             val isPassOnBoard = authDao.isPassOnBoarding()
             val isLocation = authDao.isPassLocationScreen()

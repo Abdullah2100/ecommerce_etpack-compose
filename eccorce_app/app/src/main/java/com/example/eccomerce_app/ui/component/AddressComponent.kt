@@ -41,7 +41,7 @@ fun HomeAddressComponent(
     isPassCondition: Boolean = false,
     screenWidth: Int,
     animatedComponentSize: Dp,
-    nav: NavHostController
+    onPressDo:()->Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val coroutine = rememberCoroutineScope()
@@ -65,7 +65,7 @@ fun HomeAddressComponent(
                                 interactionSource = interactionSource,
                                 indication = null,
                                 onClick = {
-                                        nav.navigate(Screens.EditeOrAddNewAddress)
+                                    onPressDo()
                                 }
                             )
                     ) {

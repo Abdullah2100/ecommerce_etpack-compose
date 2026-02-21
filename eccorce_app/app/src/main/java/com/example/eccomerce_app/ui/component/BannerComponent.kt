@@ -58,7 +58,7 @@ fun BannerPage(
 
     banners: List<BannerModel>,
     isMe: Boolean? = false,
-    nav: NavHostController,
+    onPressDo: (id: UUID)->Unit,
     deleteBanner: ((id: UUID) -> Unit)? =null,
     isShowTitle: Boolean =true
 ) {
@@ -146,8 +146,7 @@ if(isShowTitle)
                                 shape = RoundedCornerShape(8.dp)
                             )
                             .clickable {
-                                    nav.navigate(
-                                        Screens.Store(banners[page].storeId.toString()))
+                                onPressDo(banners[page].storeId)
                             }
                             .constrainAs(imageRef) {
                                 top.linkTo(parent.top)

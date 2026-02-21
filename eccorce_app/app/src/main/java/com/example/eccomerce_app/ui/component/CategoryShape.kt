@@ -38,7 +38,6 @@ import com.example.e_commercompose.model.Category
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.ProductViewModel
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 
@@ -47,18 +46,14 @@ import java.util.UUID
 fun CategoryShape(
     categories: List<Category>,
     productViewModel: ProductViewModel,
-    nav: NavHostController
+    onPressDo:(categoryId: UUID)-> Unit,
+    onPressViewAlDo:()->Unit
 ){
     val context = LocalContext.current
 
 
     fun getProductAndNavigateToProduct(id: UUID){
-            productViewModel.getProductsByCategoryID( pageNumber = 1 , categoryId = id )
-            nav.navigate(
-                Screens.ProductCategory(
-                    id.toString()
-                )
-            )
+            onPressDo(id)
     }
 
     Row(
@@ -85,7 +80,9 @@ fun CategoryShape(
             fontSize = 14.sp,
             color = CustomColor.neutralColor950,
             textAlign = TextAlign.Center,
-            modifier = Modifier.clickable { nav.navigate(Screens.Category) }
+            modifier = Modifier.clickable {
+                onPressViewAlDo()
+            }
 
         )
     }

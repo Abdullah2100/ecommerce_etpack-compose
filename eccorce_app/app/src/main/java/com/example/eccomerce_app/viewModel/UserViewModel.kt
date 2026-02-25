@@ -22,8 +22,6 @@ import com.example.eccomerce_app.data.Room.Model.IsPassOnBoardingScreen
 import com.example.eccomerce_app.data.repository.AddressRepository
 import com.example.eccomerce_app.data.repository.UserRepository
 import com.example.eccomerce_app.util.General.currentLocal
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -98,7 +96,7 @@ class UserViewModel(
 
 
     suspend fun updateMyInfo(userData: UpdateMyInfoDto): String? {
-        val result = userRepository.UpdateMyInfo(
+        val result = userRepository.updateMyInfo(
             userData
         )
         when (result) {

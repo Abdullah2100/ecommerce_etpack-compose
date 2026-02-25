@@ -49,61 +49,64 @@ class OrderItemsViewModel(
 
                 _orderItemSocket.emit(orderItmeHub)
                 _orderSocket.emit(orderHub)
+               try {
+                   _orderItemSocket.value?.start()?.blockingAwait()
+                   _orderSocket.value?.start()?.blockingAwait()
+                   _orderSocket.value?.on(
+                       "orderStatus",
+                       { response ->
 
-                _orderItemSocket.value?.start()?.blockingAwait()
-                _orderSocket.value?.start()?.blockingAwait()
-                _orderSocket.value?.on(
-                    "orderStatus",
-                    { response ->
-
-                        val orderUpdateData = _orderItemForMyStore.value?.map { data ->
-                            if (data.orderId == response.id) {
-                                data.copy(orderStatusName = response.status)
-                            } else data
-                        }
-
-
-                        scop.launch(Dispatchers.IO + _coroutineException) {
-                            _orderItemForMyStore.emit(orderUpdateData)
-                        }
-                    },
-                    OrderUpdateStatusDto::class.java
-                )
-
-                _orderItemSocket.value?.on(
-                    "orderExceptedByAdmin",
-                    { response ->
-                        val orderItemList = mutableListOf<OrderItem>()
+                           val orderUpdateData = _orderItemForMyStore.value?.map { data ->
+                               if (data.orderId == response.id) {
+                                   data.copy(orderStatusName = response.status)
+                               } else data
+                           }
 
 
-                        if (_orderItemForMyStore.value != null) {
-                            orderItemList.addAll(_orderItemForMyStore.value!!)
-                        }
-                        scop.launch(Dispatchers.IO + _coroutineException) {
-                            _orderItemForMyStore.emit(orderItemList.distinctBy { it.id }.toList())
-                        }
-                    },
-                    OrderDto::class.java
-                )
-                _orderItemSocket.value?.on(
-                    "orderItemsStatusChange",
-                    { response ->
-                        val myStoreOrderItemHolder = _orderItemForMyStore.value?.map {
-                            if (it.id == response.orderItemId) {
-                                it.copy(orderItemStatus = response.status)
-
-                            } else it
-                        }
+                           scop.launch(Dispatchers.IO + _coroutineException) {
+                               _orderItemForMyStore.emit(orderUpdateData)
+                           }
+                       },
+                       OrderUpdateStatusDto::class.java
+                   )
+                   _orderItemSocket.value?.on(
+                       "orderExceptedByAdmin",
+                       { response ->
+                           val orderItemList = mutableListOf<OrderItem>()
 
 
-                        scop.launch(Dispatchers.IO + _coroutineException) {
-                            if (myStoreOrderItemHolder?.isNotEmpty() == true)
-                                _orderItemForMyStore.emit(myStoreOrderItemHolder)
-                        }
-                    },
-                    OrderItemsStatusEvent::class.java
-                )
+                           if (_orderItemForMyStore.value != null) {
+                               orderItemList.addAll(_orderItemForMyStore.value!!)
+                           }
+                           scop.launch(Dispatchers.IO + _coroutineException) {
+                               _orderItemForMyStore.emit(orderItemList.distinctBy { it.id }
+                                   .toList())
+                           }
+                       },
+                       OrderDto::class.java
+                   )
+                   _orderItemSocket.value?.on(
+                       "orderItemsStatusChange",
+                       { response ->
+                           val myStoreOrderItemHolder = _orderItemForMyStore.value?.map {
+                               if (it.id == response.orderItemId) {
+                                   it.copy(orderItemStatus = response.status)
 
+                               } else it
+                           }
+
+
+                           scop.launch(Dispatchers.IO + _coroutineException) {
+                               if (myStoreOrderItemHolder?.isNotEmpty() == true)
+                                   _orderItemForMyStore.emit(myStoreOrderItemHolder)
+                           }
+                       },
+                       OrderItemsStatusEvent::class.java
+                   )
+               }  catch (ex: Exception) {
+                Log.d("ErrorMessageIs", ex.message.toString())
+
+            }
 
             }
 

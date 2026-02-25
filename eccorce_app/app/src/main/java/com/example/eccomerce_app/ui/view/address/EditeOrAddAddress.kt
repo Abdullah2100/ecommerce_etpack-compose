@@ -2,11 +2,13 @@ package com.example.eccomerce_app.ui.view.address
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -34,7 +36,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -42,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,17 +79,19 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 
+@OptIn(
+    ExperimentalMaterial3Api::class
+)
 @SuppressLint("LocalContextGetResourceValueCall")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun EditOrAddLocationScreen(
     nav: NavHostController,
     userViewModel: UserViewModel,
     storeViewModel: StoreViewModel,
-    cartViewModel: CartViewModel?=null ,
-    isShowArrowBackIcon : Boolean = true
+    cartViewModel: CartViewModel? = null,
 ) {
     val context = LocalContext.current
+
     val userInfo = userViewModel.userInfo.collectAsStateWithLifecycle()
 
 
@@ -193,7 +197,6 @@ fun EditOrAddLocationScreen(
                 title =stringResource(R.string.address_list) ,
                 nav=nav,
                 scrollBehavior=scrollBehavior ,
-                isShowArrowBackIcon = isShowArrowBackIcon
             )
 
         },

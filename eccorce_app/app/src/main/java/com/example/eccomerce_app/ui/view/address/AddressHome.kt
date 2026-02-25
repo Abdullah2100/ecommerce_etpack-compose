@@ -2,8 +2,6 @@ package com.example.eccomerce_app.ui.view.address
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
@@ -21,9 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -31,21 +27,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -85,8 +75,7 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("LocalContextGetResourceValueCall", "MissingPermission")
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class,
-    ExperimentalMaterial3WindowSizeClassApi::class
+    ExperimentalMaterial3Api::class
 )
 @Composable
 fun AddressHomeScreen(
@@ -94,32 +83,14 @@ fun AddressHomeScreen(
     userViewModel: UserViewModel,
 
 
-    bannerViewModel: BannerViewModel,
-    categoryViewModel: CategoryViewModel,
-    variantViewModel: VariantViewModel,
-    productViewModel: ProductViewModel,
-    generalSettingViewModel: GeneralSettingViewModel,
-    orderViewModel: OrderViewModel,
-    cartViewModel: CartViewModel,
-    storeViewModel: StoreViewModel
-
-
 ) {
-    val context = LocalContext.current
     val layoutDirection = LocalLayoutDirection.current
-
-    val activity = context as Activity
-    val windowSize = calculateWindowSizeClass(activity)
 
     val fontScall = LocalDensity.current.fontScale
 
     val coroutine = rememberCoroutineScope()
 
-
-    val currentLocation = retain { mutableStateOf<Location?>(null) }
-    val isExpandedScree =
-        windowSize.widthSizeClass == WindowWidthSizeClass.Expanded || windowSize.widthSizeClass == WindowWidthSizeClass.Medium
-
+    val context = LocalContext.current
 
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -134,7 +105,6 @@ fun AddressHomeScreen(
                 val cts = CancellationTokenSource()
                 locationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
                     .addOnSuccessListener { location ->
-                        if (!isExpandedScree) {
                             if (location != null)
 
                                 nav!!.navigate(
@@ -149,7 +119,6 @@ fun AddressHomeScreen(
                                 coroutine.launch {
                                     snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
                                 }
-                        } else currentLocation.value = location
 
                     }
                     .addOnCanceledListener {
@@ -198,352 +167,85 @@ fun AddressHomeScreen(
             .fillMaxSize()
     )
     { paddingValues ->
-        paddingValues.calculateTopPadding()
-        paddingValues.calculateBottomPadding()
+        LazyColumn(
+            modifier = Modifier
+                .background(Color.White)
+                .padding(
+                    start = 15.dp + paddingValues.calculateLeftPadding(layoutDirection),
+                    end = 15.dp + paddingValues.calculateRightPadding(layoutDirection),
+                    top = 5.dp + paddingValues.calculateTopPadding(),
+                    bottom = 5.dp + paddingValues.calculateBottomPadding()
+                )
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        )
+        {
+            item {
 
-        when (windowSize.widthSizeClass) {
-            WindowWidthSizeClass.Compact ->
-                CompactToMediumAddressHomeLayout(
-                    contentPadding = paddingValues,
-                    fontScall = fontScall,
-                    navToMapScreen = {
+                Box(
+                    modifier = Modifier
+                        .height(80.dp)
+                        .width(80.dp)
+                        .background(
+                            CustomColor.primaryColor50,
+                            RoundedCornerShape(40.dp),
+                        ),
+                    contentAlignment = Alignment.Center
+                )
+                {
+                    Icon(
+                        imageVector = ImageVector
+                            .vectorResource(R.drawable.location),
+                        contentDescription = "",
+                        tint = CustomColor.primaryColor700
+                    )
+                }
+
+                Sizer(50)
+                Text(
+                    stringResource(R.string.what_is_your_location),
+                    fontFamily = General.satoshiFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = (24 / fontScall).sp,
+                    color = CustomColor.neutralColor950,
+                    textAlign = TextAlign.Center
+
+                )
+                Sizer(8)
+                Text(
+                    stringResource(R.string.we_need_to_know_your_location_in_order_to_suggest_nearby_services),
+                    fontFamily = General.satoshiFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = (16 / fontScall).sp,
+                    color = CustomColor.neutralColor800,
+                    textAlign = TextAlign.Center
+                )
+                Sizer(50)
+                CustomButton(
+                    operation = {
                         requestLocationFun()
                     },
-                    navToUserAddressList = {
+                    buttonTitle = stringResource(R.string.allow_location_access),
+                    color = CustomColor.primaryColor700
+                )
+                Sizer(20)
+                CustomTitleButton(
+                    operation = {
                         userViewModel.getMyInfo()
                         nav?.navigate(Screens.PickCurrentAddress)
                     },
-                    layoutDirection = layoutDirection
-
+                    buttonTitle = stringResource(R.string.enter_location_manually),
+                    color = CustomColor.primaryColor700
                 )
 
-            WindowWidthSizeClass.Medium, WindowWidthSizeClass.Expanded ->
-                ExpandedAddressHomeLayout(
-                    nav = nav!!,
-                    contentPadding = paddingValues,
-                    fontScall = fontScall,
-                    userLocation = currentLocation.value,
-                    bannerViewModel = bannerViewModel,
-                    categoryViewModel = categoryViewModel,
-                    variantViewModel = variantViewModel,
-                    productViewModel = productViewModel,
-                    orderViewModel = orderViewModel,
-                    generalSettingViewModel = generalSettingViewModel,
-                    cartViewModel = cartViewModel,
-                    storeViewModel = storeViewModel,
-                    requestLocationPermission = {
-                        requestLocationFun()
-                    },
-                    userViewModel = userViewModel,
-                    coroutine = coroutine,
-                    layoutDirection = layoutDirection,
-                    context = context
-                )
 
+            }
 
         }
     }
 
 }
 
-@Composable
-fun CompactToMediumAddressHomeLayout(
-    contentPadding: PaddingValues,
-    fontScall: Float,
-    navToMapScreen: () -> Unit,
-    navToUserAddressList: () -> Unit,
-    layoutDirection: LayoutDirection
-) {
-    LazyColumn(
-        modifier = Modifier
-            .background(Color.White)
-            .padding(
-                start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
-                end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
-                top = 5.dp + contentPadding.calculateTopPadding(),
-                bottom = 5.dp + contentPadding.calculateBottomPadding()
-            )
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    )
-    {
-        item {
-
-            Box(
-                modifier = Modifier
-                    .height(80.dp)
-                    .width(80.dp)
-                    .background(
-                        CustomColor.primaryColor50,
-                        RoundedCornerShape(40.dp),
-                    ),
-                contentAlignment = Alignment.Center
-            )
-            {
-                Icon(
-                    imageVector = ImageVector
-                        .vectorResource(R.drawable.location),
-                    contentDescription = "",
-                    tint = CustomColor.primaryColor700
-                )
-            }
-
-            Sizer(50)
-            Text(
-                stringResource(R.string.what_is_your_location),
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (24 / fontScall).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center
-
-            )
-            Sizer(8)
-            Text(
-                stringResource(R.string.we_need_to_know_your_location_in_order_to_suggest_nearby_services),
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = (16 / fontScall).sp,
-                color = CustomColor.neutralColor800,
-                textAlign = TextAlign.Center
-            )
-            Sizer(50)
-            CustomButton(
-                operation = {
-                    navToMapScreen()
-                },
-                buttonTitle = stringResource(R.string.allow_location_access),
-                color = CustomColor.primaryColor700
-            )
-            Sizer(20)
-            CustomTitleButton(
-                operation = {
-                    navToUserAddressList()
-                },
-                buttonTitle = stringResource(R.string.enter_location_manually),
-                color = CustomColor.primaryColor700
-            )
-
-
-        }
-
-    }
-
-}
-
-
-enum class enSideType { MapScreen, ListAddress }
-
-@SuppressLint("ConfigurationScreenWidthHeight")
-@Composable
-fun ExpandedAddressHomeLayout(
-    nav: NavHostController,
-    contentPadding: PaddingValues,
-    fontScall: Float,
-    userLocation: Location? = null,
-    userViewModel: UserViewModel,
-    bannerViewModel: BannerViewModel,
-    categoryViewModel: CategoryViewModel,
-    variantViewModel: VariantViewModel,
-    productViewModel: ProductViewModel,
-    generalSettingViewModel: GeneralSettingViewModel,
-    orderViewModel: OrderViewModel,
-    cartViewModel: CartViewModel,
-    storeViewModel: StoreViewModel,
-    requestLocationPermission: () -> Unit,
-    coroutine: CoroutineScope,
-    layoutDirection: LayoutDirection,
-    context: Context
-) {
-    val config = LocalConfiguration.current
-    val scrollState = rememberScrollState()
-
-    val screenWidth = config.screenWidthDp
-    val activity = context as Activity
-
-    val halfScreenWidth = (screenWidth.dp / 3) - 20.dp
-
-    val enScreenType = retain { mutableStateOf<enSideType?>(null) }
-
-    val isSwitchScreen = retain { mutableStateOf(false) }
-
-
-    fun switchToMapScreen(isMapScreenBotton: Boolean = true) {
-
-        when (isMapScreenBotton) {
-            false -> {
-                isSwitchScreen.value = true
-                enScreenType.value = enSideType.ListAddress
-
-            }
-
-            else -> {
-
-                if ((ActivityCompat.checkSelfPermission(
-                        activity,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED ||
-                            ActivityCompat.checkSelfPermission(
-                                activity,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
-                            ) != PackageManager.PERMISSION_GRANTED) || !General.isLocationServiceEnable(context)
-                ) {
-
-                requestLocationPermission()
-                } else {
-                    enScreenType.value = enSideType.MapScreen
-                }
-
-            }
-        }
-    }
-
-    LaunchedEffect(isSwitchScreen.value) {
-        if (isSwitchScreen.value)
-            coroutine.launch(Dispatchers.Default) {
-                delay(50)
-                isSwitchScreen.value = false
-
-            }
-    }
-
-    Row(
-        modifier = Modifier
-            .background(Color.White)
-            .padding(
-                start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
-                end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
-                top = 5.dp + contentPadding.calculateTopPadding(),
-                bottom = 5.dp + contentPadding.calculateBottomPadding()
-            )
-            .padding(horizontal = 10.dp)
-            .fillMaxSize(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    )
-    {
-
-        Column(
-            modifier = Modifier
-                .width(halfScreenWidth - 14.dp)
-                .fillMaxHeight()
-                .verticalScroll(scrollState),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        )
-        {
-            Box(
-                modifier = Modifier
-                    .height(80.dp)
-                    .width(80.dp)
-                    .background(
-                        CustomColor.primaryColor50,
-                        RoundedCornerShape(40.dp),
-                    ),
-                contentAlignment = Alignment.Center
-            )
-            {
-                Icon(
-                    imageVector = ImageVector
-                        .vectorResource(R.drawable.location),
-                    contentDescription = "",
-                    tint = CustomColor.primaryColor700
-                )
-            }
-
-            Sizer(50)
-            Text(
-                stringResource(R.string.what_is_your_location),
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (24 / fontScall).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center
-
-            )
-            Sizer(8)
-            Text(
-                stringResource(R.string.we_need_to_know_your_location_in_order_to_suggest_nearby_services),
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = (16 / fontScall).sp,
-                color = CustomColor.neutralColor800,
-                textAlign = TextAlign.Center
-            )
-            Sizer(50)
-            CustomButton(
-                operation = {
-                    switchToMapScreen(true)
-                },
-                buttonTitle = stringResource(R.string.allow_location_access),
-                color = CustomColor.primaryColor700
-            )
-            Sizer(20)
-            CustomTitleButton(
-                operation = {
-                    switchToMapScreen(false)
-                },
-                buttonTitle = stringResource(R.string.enter_location_manually),
-                color = CustomColor.primaryColor700
-            )
-
-            Sizer(50)
-
-        }
-
-
-        Sizer(width = 20)
-
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(screenWidth.dp - ((screenWidth.dp / 3) - 10.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            if (isSwitchScreen.value) {
-                CircularProgressIndicator()
-            } else {
-                when (enScreenType.value) {
-                    enSideType.MapScreen -> {
-                        MapHomeScreen(
-                            nav = nav,
-                            userViewModel = userViewModel,
-                            longitude = userLocation?.longitude,
-                            latitude = userLocation?.latitude,
-                            cartViewModel = cartViewModel,
-                            storeViewModel = storeViewModel,
-                            isShowBackNavIcon = false
-                        )
-                    }
-
-                    enSideType.ListAddress -> {
-                        PickCurrentAddressFromAddressScreen(
-                            nav = nav,
-                            bannerViewModel = bannerViewModel,
-                            categoryViewModel = categoryViewModel,
-                            variantViewModel = variantViewModel,
-                            generalSettingViewModel = generalSettingViewModel,
-                            orderViewModel = orderViewModel,
-                            productViewModel = productViewModel,
-                            userViewModel = userViewModel,
-                            isShowBackIcon = false
-                        )
-                    }
-
-                    else -> {
-//                            Text("No Item Selected , or No Permission is Appalled")
-                    }
-                }
-
-            }
-
-
-        }
-
-
-    }
-
-}
 
 

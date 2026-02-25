@@ -6,10 +6,13 @@ import android.location.LocationManager
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.toIntRect
+import androidx.compose.ui.unit.toSize
 import androidx.core.graphics.toColorInt
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
@@ -82,49 +85,62 @@ object General {
     }
 
     @SuppressLint("ServiceCast")
-    fun isLocationServiceEnable(context:Context):Boolean{
+    fun isLocationServiceEnable(context: Context): Boolean {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+            LocationManager.NETWORK_PROVIDER
+        )
 
     }
-    fun convertPriceToAnotherCurrency(price: Int,productSymbol:String,selectedCurrency: Currency?,currencies:List<Currency>?): Int{
-        if(currencies.isNullOrEmpty())return price
-        if(selectedCurrency==null)return price
 
-        val productCurrency = currencies.firstOrNull{it->it.symbol==productSymbol}
+    fun convertPriceToAnotherCurrency(
+        price: Int,
+        productSymbol: String,
+        selectedCurrency: Currency?,
+        currencies: List<Currency>?
+    ): Int {
+        if (currencies.isNullOrEmpty()) return price
+        if (selectedCurrency == null) return price
 
-        return when  {
-         productCurrency!=selectedCurrency ->{
-                  when{
-                      selectedCurrency.isDefault ->{
-                          val changer = (price/productCurrency!!.value)
-                          changer
-                      }
-                      productCurrency!!.isDefault->{
-                          val changer = (price*selectedCurrency.value)
-                          changer
-                      }
-                      else ->{
-                          val defaultCurrency = currencies.firstOrNull{it->it.isDefault}
-                          val changer = (price/(defaultCurrency?.value?:1))*selectedCurrency.value
-                          changer
-                      }
-                  }
-          }
-        else-> price
-    }
-    }
+        val productCurrency = currencies.firstOrNull { it -> it.symbol == productSymbol }
 
-    fun getProperty(key:String):String?{
-        val property = Properties()
-        val propertyFile = Thread.currentThread().contextClassLoader?.getResourceAsStream("local.properties")
-        if(propertyFile != null)
-        {
-            property.load(propertyFile)
-            return  property.getProperty(key)
+        return when {
+            productCurrency != selectedCurrency -> {
+                when {
+                    selectedCurrency.isDefault -> {
+                        val changer = (price / productCurrency!!.value)
+                        changer
+                    }
+
+                    productCurrency!!.isDefault -> {
+                        val changer = (price * selectedCurrency.value)
+                        changer
+                    }
+
+                    else -> {
+                        val defaultCurrency = currencies.firstOrNull { it -> it.isDefault }
+                        val changer =
+                            (price / (defaultCurrency?.value ?: 1)) * selectedCurrency.value
+                        changer
+                    }
+                }
+            }
+
+            else -> price
         }
-        return  null
     }
+
+    fun getProperty(key: String): String? {
+        val property = Properties()
+        val propertyFile =
+            Thread.currentThread().contextClassLoader?.getResourceAsStream("local.properties")
+        if (propertyFile != null) {
+            property.load(propertyFile)
+            return property.getProperty(key)
+        }
+        return null
+    }
+
     fun Uri.toCustomFil(context: Context): File? {
         var file: File? = null
 
@@ -146,6 +162,19 @@ object General {
         }
     }
 
+
+    fun LazyGridState.reachedBottom(): Boolean {
+        val visibleItemsInfo = layoutInfo.visibleItemsInfo // Get the visible items
+        return if (layoutInfo.totalItemsCount == 0) {
+            false // Return false if there are no items
+        } else {
+            val lastVisibleItem = visibleItemsInfo.last() // Get the last visible item
+            val lastItemBotton = lastVisibleItem.offset.y + lastVisibleItem.size.height
+
+            lastVisibleItem.index + 1 == layoutInfo.totalItemsCount &&
+                    layoutInfo.totalItemsCount <= lastItemBotton
+        }
+    }
 
     fun LazyListState.reachedBottom(): Boolean {
         val visibleItemsInfo = layoutInfo.visibleItemsInfo // Get the visible items
@@ -171,7 +200,7 @@ object General {
             }
 
             else -> {
-                if(year==1)return ""
+                if (year == 1) return ""
                 "${day}/${month.number}/${year}"
             }
         }

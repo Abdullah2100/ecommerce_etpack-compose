@@ -1,7 +1,6 @@
 package com.example.eccomerce_app.ui.view.ReseatPassword
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,9 +21,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -35,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -56,7 +51,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun OtpVerificationScreen(
@@ -77,8 +71,6 @@ fun OtpVerificationScreen(
 
 
     val isSendingData = rememberSaveable { mutableStateOf(false) }
-    val activity = context as Activity
-    val windowsSize = calculateWindowSizeClass(activity)
     val scrollState = rememberScrollState()
 
     fun verifyOtp() {
@@ -104,60 +96,20 @@ fun OtpVerificationScreen(
         }
     ) { paddingValues ->
 
-        paddingValues.calculateTopPadding()
-        paddingValues.calculateBottomPadding()
-
-        when (windowsSize.widthSizeClass) {
-            WindowWidthSizeClass.Compact ->
-                CompactOtpVerificationLayout(
-                    contentPadding = paddingValues,
-                    otpValue = otpValue,
-                    isLoading = isSendingData.value,
-                    onVerifyClick = { verifyOtp() },
-                    scrollState =scrollState,
-                    layoutDirection =layoutDirection
-
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(
+                    start = 15.dp + paddingValues.calculateLeftPadding(layoutDirection),
+                    end = 15.dp + paddingValues.calculateRightPadding(layoutDirection),
+                    top = 5.dp + paddingValues.calculateTopPadding(),
+                    bottom = 5.dp + paddingValues.calculateBottomPadding()
                 )
-
-            WindowWidthSizeClass.Medium, WindowWidthSizeClass.Expanded ->
-                ExpandedOtpVerificationLayout(
-                    contentPadding = paddingValues,
-                    otpValue = otpValue,
-                    isLoading = isSendingData.value,
-                    onVerifyClick = { verifyOtp() },
-                    scrollState =scrollState,
-                    layoutDirection =layoutDirection
-                )
-        }
-    }
-
-}
-
-@Composable
-fun CompactOtpVerificationLayout(
-    contentPadding: PaddingValues,
-    otpValue: MutableState<TextFieldValue>,
-    isLoading: Boolean,
-    onVerifyClick: () -> Unit,
-    scrollState: ScrollState,
-    layoutDirection: LayoutDirection
-) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(
-                start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
-                end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
-                top = 5.dp + contentPadding.calculateTopPadding(),
-                bottom = 5.dp + contentPadding.calculateBottomPadding()
-            )
-            .verticalScroll(scrollState)
-        ,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Icon(
                 ImageVector.vectorResource(R.drawable.otp_verification),
                 "",
@@ -174,84 +126,14 @@ fun CompactOtpVerificationLayout(
 
 
             CustomButton(
-                isLoading = isLoading,
-                operation = onVerifyClick,
+                isLoading = isSendingData.value,
+                operation = { verifyOtp() },
                 isEnable = otpValue.value.text.trim().isNotEmpty(),
                 buttonTitle = stringResource(R.string.verifying),
 
                 )
 
         }
-}
-
-@SuppressLint("ConfigurationScreenWidthHeight")
-@Composable
-fun ExpandedOtpVerificationLayout(
-    contentPadding: PaddingValues,
-    otpValue: MutableState<TextFieldValue>,
-    isLoading: Boolean,
-    onVerifyClick: () -> Unit,
-    layoutDirection: LayoutDirection,
-    scrollState: ScrollState,
-
-    ) {
-    val config = LocalConfiguration.current
-    val screenWidth = config.screenWidthDp
-    val screenHeight = config.screenHeightDp
-
-
-
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(
-                start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
-                end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
-                top = 5.dp + contentPadding.calculateTopPadding(),
-                bottom = 5.dp + contentPadding.calculateBottomPadding()
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(((screenWidth / 3) - 20).dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                ImageVector.vectorResource(R.drawable.otp_verification),
-                contentDescription = "",
-                tint = CustomColor.primaryColor700,
-                modifier = Modifier.size(200.dp)
-            )
-        }
-        Sizer(width = 20)
-
-        Column( modifier = Modifier
-            .background(Color.White)
-            .height(screenHeight.dp)
-            .width(screenWidth.dp - (screenWidth.dp / 3) - 10.dp)
-
-            .verticalScroll(scrollState),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Sizer(heigh = 5)
-
-            TextInputWithTitle(
-                otpValue,
-                title = "",
-                placeHolder = stringResource(R.string.enter_your_otp),
-            )
-
-            CustomButton(
-                isLoading = isLoading,
-                operation = onVerifyClick,
-                isEnable = otpValue.value.text.trim().isNotEmpty(),
-                buttonTitle = stringResource(R.string.verifying),
-            )
-        }
     }
+
 }

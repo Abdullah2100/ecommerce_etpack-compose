@@ -32,6 +32,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,9 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.eccomerce_app.util.General
-import com.example.eccomerce_app.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.e_commercompose.ui.component.CustomButton
@@ -64,10 +63,10 @@ import com.example.eccomerce_app.viewModel.OrderViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-//import qrgenerator.QRCodeImage
 import java.util.UUID
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.ui.component.SharedAppBar
+import com.example.eccomerce_app.ui.component.Sizer
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 
@@ -85,7 +84,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
     val state = rememberPullToRefreshState()
 
 
-    val orders = orderViewModel.orders.collectAsStateWithLifecycle()
+    val orders = orderViewModel.orders.collectAsState()
 
     val isSendingData = remember { mutableStateOf(false) }
     val isShowDialog = remember { mutableStateOf(false) }
@@ -421,4 +420,3 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
 
     }
 }
-

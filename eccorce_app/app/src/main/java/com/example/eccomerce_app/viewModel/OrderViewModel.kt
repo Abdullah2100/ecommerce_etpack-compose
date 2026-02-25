@@ -48,52 +48,54 @@ class OrderViewModel(
             scop.launch(Dispatchers.IO + _coroutineException) {
 
                 _orderSocket.emit(webSocket)
-                _orderSocket.value?.start()?.blockingAwait()
-                _orderSocket.value?.on(
-                    "orderStatus",
-                    { response ->
+                try {
+                    _orderSocket.value?.start()?.blockingAwait()
+                    _orderSocket.value?.on(
+                        "orderStatus", { response ->
 
-                        val orderUpdateData = _orders.value?.map { data ->
-                            if (data.id == response.id) {
-                                data.copy(status = response.status)
-                            } else data
-                        }
-
-
-                        scop.launch(Dispatchers.IO + _coroutineException) {
-                            _orders.emit(orderUpdateData)
-                        }
-                    },
-                    OrderUpdateStatusDto::class.java
-                )
-
-                _orderSocket.value?.on(
-                    "orderItemsStatusChange",
-                    { response ->
-
-                        val orderHolder = _orders.value?.firstOrNull { it.id == response.orderId }
-                        if (orderHolder != null) {
-                            val orderItemsHolder = orderHolder.orderItems.map { oi ->
-                                if (oi.id == response.orderItemId) {
-                                    oi.copy(orderItemStatus = response.status)
-                                } else oi
+                            val orderUpdateData = _orders.value?.map { data ->
+                                if (data.id == response.id) {
+                                    data.copy(status = response.status)
+                                } else data
                             }
-                            orderHolder.copy(orderItems = orderItemsHolder)
 
-                        }
-                        val userOrderList = _orders.value?.map {
-                            if (it.id == response.orderId && orderHolder != null)
-                                it.copy(orderItems = orderHolder.orderItems)
-                            else it
-                        }
 
-                        scop.launch(Dispatchers.IO + _coroutineException) {
-                            _orders.emit(userOrderList)
-                        }
-                    },
-                    OrderItemsStatusEvent::class.java
-                )
+                            scop.launch(Dispatchers.IO + _coroutineException) {
+                                _orders.emit(orderUpdateData)
+                            }
+                        }, OrderUpdateStatusDto::class.java
+                    )
 
+                    _orderSocket.value?.on(
+                        "orderItemsStatusChange", { response ->
+
+                            val orderHolder =
+                                _orders.value?.firstOrNull { it.id == response.orderId }
+                            if (orderHolder != null) {
+                                val orderItemsHolder = orderHolder.orderItems.map { oi ->
+                                    if (oi.id == response.orderItemId) {
+                                        oi.copy(orderItemStatus = response.status)
+                                    } else oi
+                                }
+                                orderHolder.copy(orderItems = orderItemsHolder)
+
+                            }
+                            val userOrderList = _orders.value?.map {
+                                if (it.id == response.orderId && orderHolder != null) it.copy(
+                                    orderItems = orderHolder.orderItems
+                                )
+                                else it
+                            }
+
+                            scop.launch(Dispatchers.IO + _coroutineException) {
+                                _orders.emit(userOrderList)
+                            }
+                        }, OrderItemsStatusEvent::class.java
+                    )
+                } catch (ex: Exception) {
+                    Log.d("ErrorMessageIs", ex.message.toString())
+
+                }
             }
 
         }
@@ -106,8 +108,7 @@ class OrderViewModel(
 
     override fun onCleared() {
         scop.launch(_coroutineException) {
-            if (_orderSocket.value != null)
-                _orderSocket.value!!.stop()
+            if (_orderSocket.value != null) _orderSocket.value!!.stop()
         }
         super.onCleared()
     }
@@ -123,10 +124,8 @@ class OrderViewModel(
     ): String? {
         val result = orderRepository.submitOrder(
             CreateOrderDto(
-                Longitude = userAddress?.longitude
-                    ?: 0.0,
-                Latitude = userAddress?.latitude
-                    ?: 0.0,
+                Longitude = userAddress?.longitude ?: 0.0,
+                Latitude = userAddress?.latitude ?: 0.0,
                 Items = cartItems.cartProducts.map { it.toOrderRequestItemDto() },
                 TotalPrice = cartItems.totalPrice,
                 Symbol = symbol,
@@ -164,8 +163,7 @@ class OrderViewModel(
         ) {
         if (isLoading != null) isLoading.value = true
         viewModelScope.launch(_coroutineException) {
-            if (isLoading != null)
-                delay(500)
+            if (isLoading != null) delay(500)
             when (val result = orderRepository.getMyOrders(pageNumber.value)) {
 
                 is NetworkCallHandler.Successful<*> -> {
@@ -179,8 +177,7 @@ class OrderViewModel(
                     _orders.emit(distinctOrder)
 
                     if (isLoading != null) isLoading.value = false
-                    if (data.size == 25)
-                        pageNumber.value++
+                    if (data.size == 25) pageNumber.value++
                 }
 
                 is NetworkCallHandler.Error -> {

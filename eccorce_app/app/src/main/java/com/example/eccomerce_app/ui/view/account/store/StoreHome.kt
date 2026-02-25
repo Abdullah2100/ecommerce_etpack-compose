@@ -29,6 +29,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -83,6 +87,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
+import com.example.e_commercompose.model.ProductModel
 import com.example.e_commercompose.model.SubCategory
 import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.e_commercompose.model.enMapType
@@ -137,6 +142,7 @@ fun StoreScreen(
     userViewModel: UserViewModel,
     isShowArrowBackIcon: Boolean = true
 ) {
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val context = LocalContext.current
@@ -146,7 +152,7 @@ fun StoreScreen(
     val state = rememberPullToRefreshState()
     val sheetState = rememberModalBottomSheetState()
     val dateTimeSheetState = rememberModalBottomSheetState()
-    val lazyState = rememberLazyListState()
+    val lazyState = rememberLazyGridState()
 
 
     val createdStoreInfoHolder = storeViewModel.storeCreateData.collectAsStateWithLifecycle()
@@ -232,19 +238,16 @@ fun StoreScreen(
 
 
         return when {
-            isFromHome == true
-                -> {
+            isFromHome == true -> {
                 LatLng(storeData!!.latitude, storeData.longitude)
 
             }
 
             else -> {
                 if (storeData == null) LatLng(
-                    currentLocation.latitude,
-                    currentLocation.longitude
+                    currentLocation.latitude, currentLocation.longitude
                 )
-                else
-                    LatLng(storeData.latitude, storeData.longitude)
+                else LatLng(storeData.latitude, storeData.longitude)
             }
 
         }
@@ -291,8 +294,7 @@ fun StoreScreen(
                                     )
                                 )
 
-                            } else
-                                snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
+                            } else snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
                         }
                     }
                     addOnFailureListener { fail ->
@@ -350,8 +352,7 @@ fun StoreScreen(
 
     val onImageSelection = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
-    )
-    { uri ->
+    ) { uri ->
         if (uri != null) {
             val fileHolder = uri.toCustomFil(context = context)
             if (fileHolder != null) {
@@ -365,15 +366,13 @@ fun StoreScreen(
                         when (isPigImage.value) {
                             true -> {
                                 storeViewModel.setStoreCreateData(
-                                    wallpaperImage = fileHolder,
-                                    storeId = storeId.value
+                                    wallpaperImage = fileHolder, storeId = storeId.value
                                 )
                             }
 
                             else -> {
                                 storeViewModel.setStoreCreateData(
-                                    smallImage = fileHolder,
-                                    storeId = storeId.value
+                                    smallImage = fileHolder, storeId = storeId.value
                                 )
                             }
                         }
@@ -409,19 +408,18 @@ fun StoreScreen(
 
 
     fun getStoreInfoByStoreId(
-        id: UUID,
-        isLoading: Boolean? = null,
-        updateLoadingState: ((value: Boolean) -> Unit)? = null
+        id: UUID, isLoading: Boolean? = null, updateLoadingState: ((value: Boolean) -> Unit)? = null
     ) {
 
         storeViewModel.getStoreData(storeId = id)
         bannerViewModel.getStoreBanner(id)
         subCategoryViewModel.getStoreSubCategories(id, 1)
         productViewModel.getProducts(
-            1, id, isLoading ?: false,
+            1,
+            id,
+            isLoading ?: false,
             updatePageNumber = { value -> page.intValue = value },
-            updateLoadingState = { value -> updateLoadingState?.invoke(value) }
-        )
+            updateLoadingState = { value -> updateLoadingState?.invoke(value) })
     }
 
 
@@ -518,8 +516,7 @@ fun StoreScreen(
             updateConditionValue(isSendingDataValue = false, isDeletedValue = false)
             if (result.isNullOrEmpty()) {
                 updateConditionValue(
-                    isOpenBottomSheetValue = false,
-                    isExpandedCategoryValue = false
+                    isOpenBottomSheetValue = false, isExpandedCategoryValue = false
                 )
                 selectedSubCategoryIdHolder.value = null
                 categoryName.value = TextFieldValue("")
@@ -540,8 +537,7 @@ fun StoreScreen(
             updateConditionValue(isOpenBottomSheetValue = false, isSendingDataValue = true)
             val result = async {
                 bannerViewModel.createBanner(
-                    bannerEndDateTime.value.toString(),
-                    bannerImage.value!!
+                    bannerEndDateTime.value.toString(), bannerImage.value!!
                 )
             }.await()
             isSendingData.value = false
@@ -561,47 +557,35 @@ fun StoreScreen(
     }
 
     fun updateDateTime(year: Int, month: Int, day: Int) {
-        if (bannerEndDateTime.value != null)
-            bannerEndDateTime.value = LocalDateTime(
-                year = year,
-                month = month + 1,
-                day = day,
-                hour = bannerEndDateTime.value!!.hour,
-                second = bannerEndDateTime.value!!.second,
-                minute = 0
-            )
+        if (bannerEndDateTime.value != null) bannerEndDateTime.value = LocalDateTime(
+            year = year,
+            month = month + 1,
+            day = day,
+            hour = bannerEndDateTime.value!!.hour,
+            second = bannerEndDateTime.value!!.second,
+            minute = 0
+        )
         else {
             bannerEndDateTime.value = LocalDateTime(
-                year = year,
-                month = month + 1,
-                day = day,
-                hour = 0,
-                second = 0,
-                minute = 0
+                year = year, month = month + 1, day = day, hour = 0, second = 0, minute = 0
             )
         }
         updateConditionValue(isDateTimeBottomSheetOpenValue = false)
     }
 
     fun updateDateTime(hour: Int, second: Int) {
-        if (bannerEndDateTime.value != null)
-            bannerEndDateTime.value = LocalDateTime(
-                year = bannerEndDateTime.value!!.year,
-                month = bannerEndDateTime.value!!.month,
-                day = bannerEndDateTime.value!!.day,
-                hour = hour,
-                second = second,
-                minute = 1
-            )
+        if (bannerEndDateTime.value != null) bannerEndDateTime.value = LocalDateTime(
+            year = bannerEndDateTime.value!!.year,
+            month = bannerEndDateTime.value!!.month,
+            day = bannerEndDateTime.value!!.day,
+            hour = hour,
+            second = second,
+            minute = 1
+        )
         else {
             if (hour > 0) {
                 bannerEndDateTime.value = LocalDateTime(
-                    year = 1,
-                    month = 1,
-                    day = 1,
-                    hour = hour,
-                    second = second,
-                    minute = 1
+                    year = 1, month = 1, day = 1, hour = hour, second = second, minute = 1
                 )
             }
         }
@@ -647,8 +631,7 @@ fun StoreScreen(
 
     fun selectCategory(value: String) {
         updateConditionValue(isExpandedCategoryValue = false)
-        categoryName.value =
-            TextFieldValue(value)
+        categoryName.value = TextFieldValue(value)
 
     }
 
@@ -717,9 +700,7 @@ fun StoreScreen(
     fun openSubCategoryBottonSheet(subCategory: SubCategory) {
         if (isFromHome == false) {
 
-            val name =
-                categories.value?.firstOrNull { it.id == subCategory.categoryId }?.name
-                    ?: ""
+            val name = categories.value?.firstOrNull { it.id == subCategory.categoryId }?.name ?: ""
 
             selectedSubCategoryIdHolder.value = subCategory.id
             categoryName.value = TextFieldValue(name)
@@ -735,15 +716,13 @@ fun StoreScreen(
         coroutine.launch {
             isSendingData.value = true
             updateConditionValue(isSendingDataValue = true)
-            val result =
-                productViewModel.deleteProduct(
-                    storeId.value!!, id
-                )
+            val result = productViewModel.deleteProduct(
+                storeId.value!!, id
+            )
 
             updateConditionValue(isSendingDataValue = false)
             var resultMessage = ""
-            resultMessage = result
-                ?: context.getString(R.string.product_is_deleted_successfully)
+            resultMessage = result ?: context.getString(R.string.product_is_deleted_successfully)
 
             snackBarHostState.showSnackbar(
                 resultMessage
@@ -764,8 +743,7 @@ fun StoreScreen(
                         storeId = storeId.value ?: UUID.randomUUID(),
                         isLoadingMore.value,
                         updatePageNumber = { value -> page.intValue = value },
-                        updateLoadingState = { value -> isLoadingMore.value = value }
-                    )
+                        updateLoadingState = { value -> isLoadingMore.value = value })
                 }
 
                 else -> {
@@ -775,8 +753,7 @@ fun StoreScreen(
                         selectedSubCategoryId.value!!,
                         isLoadingMore.value,
                         updatePageNumber = { value -> page.intValue = value },
-                        updateLoadingState = { value -> isLoadingMore.value = value }
-                    )
+                        updateLoadingState = { value -> isLoadingMore.value = value })
                 }
             }
 
@@ -793,329 +770,314 @@ fun StoreScreen(
         },
 
         bottomBar = {
-            if (isDateTimeBottomSheetOpen.value)
-                ModalBottomSheet(
-                    onDismissRequest = { updateConditionValue(isDateTimeBottomSheetOpenValue = false) },
-                    sheetState = dateTimeSheetState, containerColor = Color.White
-                )
-                {
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp)
-                            .fillMaxWidth()
-                    ) {
-                        when (bottomSheetDateTimeType.value) {
-                            EnDateTimeType.DATE -> {
-                                DatePicker(
-                                    onDateSelected = { year, month, day ->
-                                        updateDateTime(year, month, day)
-                                    },
+            if (isDateTimeBottomSheetOpen.value) ModalBottomSheet(
+                onDismissRequest = { updateConditionValue(isDateTimeBottomSheetOpenValue = false) },
+                sheetState = dateTimeSheetState,
+                containerColor = Color.White
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .fillMaxWidth()
+                ) {
+                    when (bottomSheetDateTimeType.value) {
+                        EnDateTimeType.DATE -> {
+                            DatePicker(
+                                onDateSelected = { year, month, day ->
+                                    updateDateTime(year, month, day)
+                                },
 
-                                    months = listOf(
-                                        "يناير",
-                                        "فبراير",
-                                        "مارس",
-                                        "أبريل",
-                                        "مايو",
-                                        "يونيو",
-                                        "يوليو",
-                                        "أغسطس",
-                                        "سبتمبر",
-                                        "أكتوبر",
-                                        "نوفمبر",
-                                        "ديسمبر"
-                                    ),
-                                    days = listOf(
-                                        "الأحد",    // Sunday
-                                        "الاثنين",  // Monday
-                                        "الثلاثاء", // Tuesday
-                                        "الأربعاء", // Wednesday
-                                        "الخميس",   // Thursday
-                                        "الجمعة",    // Friday
-                                        "السبت"    // Saturday
-                                    )
+                                months = listOf(
+                                    "يناير",
+                                    "فبراير",
+                                    "مارس",
+                                    "أبريل",
+                                    "مايو",
+                                    "يونيو",
+                                    "يوليو",
+                                    "أغسطس",
+                                    "سبتمبر",
+                                    "أكتوبر",
+                                    "نوفمبر",
+                                    "ديسمبر"
+                                ), days = listOf(
+                                    "الأحد",    // Sunday
+                                    "الاثنين",  // Monday
+                                    "الثلاثاء", // Tuesday
+                                    "الأربعاء", // Wednesday
+                                    "الخميس",   // Thursday
+                                    "الجمعة",    // Friday
+                                    "السبت"    // Saturday
                                 )
-                            }
+                            )
+                        }
 
-                            else -> {
-                                TimePicker(
-                                    onTimeSelected = { hour, second ->
-                                        updateDateTime(hour, second)
-                                    },
-                                    amPmLocaleList = listOf("صباحا", "مساء")
-                                )
-                            }
+                        else -> {
+                            TimePicker(
+                                onTimeSelected = { hour, second ->
+                                    updateDateTime(hour, second)
+                                }, amPmLocaleList = listOf("صباحا", "مساء")
+                            )
                         }
                     }
-
                 }
 
-            if (isOpenBottomSheet.value)
-                ModalBottomSheet(
-                    onDismissRequest = { dismissBottonSheet() },
-                    sheetState = sheetState,
-                    containerColor = Color.White
-                )
-                {
-                    Column(
-                        modifier = Modifier
-                            .navigationBarsPadding()
-                            .padding(horizontal = 10.dp)
-                            .fillMaxWidth()
-                    ) {
-                        when (bottomSheetType.value) {
-                            EnBottomSheetType.BANNER -> {
-                                Text(
-                                    stringResource(R.string.banner_image),
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = (18).sp,
-                                    color = CustomColor.neutralColor950,
-                                    textAlign = TextAlign.Center,
-                                )
+            }
 
-                                Sizer(20)
+            if (isOpenBottomSheet.value) ModalBottomSheet(
+                onDismissRequest = { dismissBottonSheet() },
+                sheetState = sheetState,
+                containerColor = Color.White
+            ) {
+                Column(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(horizontal = 10.dp)
+                        .fillMaxWidth()
+                ) {
+                    when (bottomSheetType.value) {
+                        EnBottomSheetType.BANNER -> {
+                            Text(
+                                stringResource(R.string.banner_image),
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = (18).sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.Center,
+                            )
 
-                                ConstraintLayout(
-                                    modifier = Modifier
-                                        .height(150.dp)
-                                        .fillMaxWidth()
-                                )
-                                {
-                                    val (imageRef) = createRefs()
-                                    Box(
-                                        modifier = Modifier
-                                            .constrainAs(imageRef) {
-                                                top.linkTo(parent.top)
-                                                bottom.linkTo(parent.bottom)
-                                                start.linkTo(parent.start)
-                                                end.linkTo(parent.end)
-                                            }
-                                            .height(150.dp)
-                                            .fillMaxWidth()
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .border(
-                                                width = 1.dp,
-                                                color = if (isFromHome == true) CustomColor.neutralColor100 else CustomColor.neutralColor500,
-                                                shape = RoundedCornerShape(8.dp)
-                                            )
-                                            .background(
-                                                color = if (isFromHome == true) CustomColor.primaryColor50
-                                                else Color.White,
-                                            ), contentAlignment = Alignment.Center) {
-                                        when (bannerImage.value == null) {
-                                            true -> {
+                            Sizer(20)
 
-                                            }
-
-                                            else -> {
-                                                SubcomposeAsyncImage(
-                                                    contentScale = ContentScale.Fit,
-                                                    modifier = Modifier
-                                                        .fillMaxHeight()
-                                                        .fillMaxWidth()
-                                                        .clip(RoundedCornerShape(8.dp)),
-                                                    model = General.handlingImageForCoil(
-                                                        bannerImage.value!!.path.toString(), context
-                                                    ),
-                                                    contentDescription = "",
-                                                    loading = {
-                                                        Box(
-                                                            modifier = Modifier.fillMaxSize(),
-                                                            contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                                                        ) {
-                                                            CircularProgressIndicator(
-                                                                color = Color.Black,
-                                                                modifier = Modifier.size(54.dp) // Adjust the size here
-                                                            )
-                                                        }
-                                                    },
-                                                )
-                                            }
+                            ConstraintLayout(
+                                modifier = Modifier
+                                    .height(150.dp)
+                                    .fillMaxWidth()
+                            ) {
+                                val (imageRef) = createRefs()
+                                Box(modifier = Modifier
+                                    .constrainAs(imageRef) {
+                                        top.linkTo(parent.top)
+                                        bottom.linkTo(parent.bottom)
+                                        start.linkTo(parent.start)
+                                        end.linkTo(parent.end)
+                                    }
+                                    .height(150.dp)
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (isFromHome == true) CustomColor.neutralColor100 else CustomColor.neutralColor500,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .background(
+                                        color = if (isFromHome == true) CustomColor.primaryColor50
+                                        else Color.White,
+                                    ), contentAlignment = Alignment.Center) {
+                                    when (bannerImage.value == null) {
+                                        true -> {
 
                                         }
 
-
-                                        IconButton(
-                                            onClick = {
-                                                keyboardController?.hide()
-                                                onImageSelection.launch(
-                                                    PickVisualMediaRequest(
-                                                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                                                    )
-                                                )
-                                            },
-                                            modifier = Modifier.size(30.dp),
-                                            colors = IconButtonDefaults.iconButtonColors(
-                                                containerColor = CustomColor.primaryColor500
-                                            )
-                                        ) {
-                                            Icon(
-                                                ImageVector.vectorResource(R.drawable.camera),
-                                                "",
-                                                modifier = Modifier.size(18.dp),
-                                                tint = Color.White
+                                        else -> {
+                                            SubcomposeAsyncImage(
+                                                contentScale = ContentScale.Fit,
+                                                modifier = Modifier
+                                                    .fillMaxHeight()
+                                                    .fillMaxWidth()
+                                                    .clip(RoundedCornerShape(8.dp)),
+                                                model = General.handlingImageForCoil(
+                                                    bannerImage.value!!.path.toString(), context
+                                                ),
+                                                contentDescription = "",
+                                                loading = {
+                                                    Box(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
+                                                    ) {
+                                                        CircularProgressIndicator(
+                                                            color = Color.Black,
+                                                            modifier = Modifier.size(54.dp) // Adjust the size here
+                                                        )
+                                                    }
+                                                },
                                             )
                                         }
 
                                     }
 
-                                }
 
-                                Sizer(20)
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                )
-                                {
-
-                                    Column {
-                                        Text(
-                                            stringResource(R.string.banner_end_date),
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = (18).sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center,
-                                        )
-
-                                        if (bannerEndDateTime.value != null)
-                                            Text(
-                                                bannerEndDateTime.value!!.toCustomString(),
-                                                color = CustomColor.neutralColor500,
-                                                fontFamily = General.satoshiFamily,
-                                                fontWeight = FontWeight.Normal,
-                                                fontSize = (16).sp
-                                            )
-
-                                    }
                                     IconButton(
                                         onClick = {
-                                            updateBottonSheetTimeType(EnDateTimeType.DATE)
-                                        })
-                                    {
-                                        Icon(
-                                            Icons.Default.CalendarToday,
-                                            "",
-                                            modifier = Modifier.size(24.dp),
-                                            tint = CustomColor.primaryColor700
-                                        )
-                                    }
-                                }
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                )
-                                {
-
-                                    Column {
-                                        Text(
-                                            stringResource(R.string.banner_end_time),
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = (18).sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center,
-                                        )
-
-                                        if (bannerEndDateTime.value != null)
-                                            Text(
-                                                bannerEndDateTime.value!!.toCustomString(true),
-                                                color = CustomColor.neutralColor500,
-                                                fontFamily = General.satoshiFamily,
-                                                fontWeight = FontWeight.Normal,
-                                                fontSize = (16).sp
+                                            keyboardController?.hide()
+                                            onImageSelection.launch(
+                                                PickVisualMediaRequest(
+                                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                                )
                                             )
-
-                                    }
-                                    IconButton(
-                                        onClick = {
-                                            updateBottonSheetTimeType(EnDateTimeType.TIME)
-
-                                        })
-                                    {
+                                        },
+                                        modifier = Modifier.size(30.dp),
+                                        colors = IconButtonDefaults.iconButtonColors(
+                                            containerColor = CustomColor.primaryColor500
+                                        )
+                                    ) {
                                         Icon(
-                                            Icons.Default.Timelapse,
+                                            ImageVector.vectorResource(R.drawable.camera),
                                             "",
-                                            modifier = Modifier.size(24.dp),
-                                            tint = CustomColor.primaryColor700
+                                            modifier = Modifier.size(18.dp),
+                                            tint = Color.White
                                         )
                                     }
+
                                 }
-                                Sizer(10)
-                                CustomButton(
-                                    isEnable = bannerImage.value != null &&
-                                            bannerEndDateTime.value != null &&
-                                            bannerEndDateTime.value!!.year != 1 &&
-                                            bannerEndDateTime.value!!.hour != 0,
-                                    operation = { createBanner() },
-                                    buttonTitle = stringResource(R.string.create_banner)
-                                )
+
                             }
 
-                            else -> {
+                            Sizer(20)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
 
-                                Text(
-                                    stringResource(R.string.category),
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = (16).sp,
-                                    color = CustomColor.neutralColor950,
-                                    textAlign = TextAlign.End
+                                Column {
+                                    Text(
+                                        stringResource(R.string.banner_end_date),
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = (18).sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.Center,
+                                    )
 
-                                )
-                                Sizer(10)
+                                    if (bannerEndDateTime.value != null) Text(
+                                        bannerEndDateTime.value!!.toCustomString(),
+                                        color = CustomColor.neutralColor500,
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = (16).sp
+                                    )
 
-                                //this custom drop down menu
-                                CustomDropDownComponent(
-                                    value = categoryName.value.text.ifEmpty { stringResource(R.string.select_category_name) },
-                                    items = categories.value?.map { it.name } ?: emptyList(),
-                                    onSelectValue = { value -> selectCategory(value) }
-                                )
-
-
-                                Sizer(10)
-
-
-                                TextInputWithTitle(
-                                    value = subCategoryName,
-                                    title = stringResource(R.string.name),
-                                    placeHolder = stringResource(R.string.enter_sub_category_name),
-                                )
-
-                                CustomButton(
-                                    operation = {
-                                        createOrUpdateSupCategory()
-                                    },
-                                    buttonTitle = if (isUpdated.value) stringResource(R.string.update) else stringResource(
-                                        R.string.create
-                                    ),
-                                    color = null,
-                                    isEnable = !isDeleted.value &&
-                                            (subCategoryName.value.text.isNotEmpty() &&
-                                                    categoryName.value.text.isNotEmpty())
-                                )
-
-                                if (isUpdated.value) {
-                                    Sizer(10)
-                                    CustomButton(
-                                        isLoading = isDeleted.value && isSendingData.value,
-                                        operation = { deleteSupCategory() },
-                                        buttonTitle = stringResource(R.string.deleted),
-                                        color = CustomColor.alertColor_1_600,
-                                        isEnable = !isSendingData.value
+                                }
+                                IconButton(
+                                    onClick = {
+                                        updateBottonSheetTimeType(EnDateTimeType.DATE)
+                                    }) {
+                                    Icon(
+                                        Icons.Default.CalendarToday,
+                                        "",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = CustomColor.primaryColor700
                                     )
                                 }
-
-
                             }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+
+                                Column {
+                                    Text(
+                                        stringResource(R.string.banner_end_time),
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = (18).sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.Center,
+                                    )
+
+                                    if (bannerEndDateTime.value != null) Text(
+                                        bannerEndDateTime.value!!.toCustomString(true),
+                                        color = CustomColor.neutralColor500,
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = (16).sp
+                                    )
+
+                                }
+                                IconButton(
+                                    onClick = {
+                                        updateBottonSheetTimeType(EnDateTimeType.TIME)
+
+                                    }) {
+                                    Icon(
+                                        Icons.Default.Timelapse,
+                                        "",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = CustomColor.primaryColor700
+                                    )
+                                }
+                            }
+                            Sizer(10)
+                            CustomButton(
+                                isEnable = bannerImage.value != null && bannerEndDateTime.value != null && bannerEndDateTime.value!!.year != 1 && bannerEndDateTime.value!!.hour != 0,
+                                operation = { createBanner() },
+                                buttonTitle = stringResource(R.string.create_banner)
+                            )
+                        }
+
+                        else -> {
+
+                            Text(
+                                stringResource(R.string.category),
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = (16).sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.End
+
+                            )
+                            Sizer(10)
+
+                            //this custom drop down menu
+                            CustomDropDownComponent(
+                                value = categoryName.value.text.ifEmpty {
+                                    stringResource(
+                                        R.string.select_category_name
+                                    )
+                                },
+                                items = categories.value?.map { it.name } ?: emptyList(),
+                                onSelectValue = { value -> selectCategory(value) })
+
+
+                            Sizer(10)
+
+
+                            TextInputWithTitle(
+                                value = subCategoryName,
+                                title = stringResource(R.string.name),
+                                placeHolder = stringResource(R.string.enter_sub_category_name),
+                            )
+
+                            CustomButton(
+                                operation = {
+                                    createOrUpdateSupCategory()
+                                },
+                                buttonTitle = if (isUpdated.value) stringResource(R.string.update) else stringResource(
+                                    R.string.create
+                                ),
+                                color = null,
+                                isEnable = !isDeleted.value && (subCategoryName.value.text.isNotEmpty() && categoryName.value.text.isNotEmpty())
+                            )
+
+                            if (isUpdated.value) {
+                                Sizer(10)
+                                CustomButton(
+                                    isLoading = isDeleted.value && isSendingData.value,
+                                    operation = { deleteSupCategory() },
+                                    buttonTitle = stringResource(R.string.deleted),
+                                    color = CustomColor.alertColor_1_600,
+                                    isEnable = !isSendingData.value
+                                )
+                            }
+
+
                         }
                     }
-
                 }
+
+            }
 
 
         },
@@ -1124,9 +1086,7 @@ fun StoreScreen(
             .background(Color.White),
         topBar = {
             SharedAppBar(
-                title = stringResource(R.string.store),
-                nav = nav,
-                action = {
+                title = stringResource(R.string.store), nav = nav, action = {
                     if (isFromHome == false) {
                         TextButton(
                             enabled = !isSendingData.value,
@@ -1162,9 +1122,7 @@ fun StoreScreen(
                         }
                     }
 
-                },
-                scrollBehavior = scrollBehavior,
-                isShowArrowBackIcon = isShowArrowBackIcon
+                }, scrollBehavior = scrollBehavior, isShowArrowBackIcon = isShowArrowBackIcon
             )
 
         },
@@ -1191,16 +1149,13 @@ fun StoreScreen(
                             nav.navigate(
                                 Screens.CreateProduct(
                                     (storeId.value ?: myInfo.value?.storeId
-                                    ?: UUID.randomUUID()).toString(),
-                                    null
+                                    ?: UUID.randomUUID()).toString(), null
                                 )
                             )
                         }, containerColor = CustomColor.alertColor_2_700
                     ) {
                         Icon(
-                            Icons.Default.Add,
-                            "",
-                            tint = Color.White
+                            Icons.Default.Add, "", tint = Color.White
                         )
                     }
 
@@ -1247,17 +1202,17 @@ fun StoreScreen(
                 )
             },
 
-            )
-        {
+            ) {
 
-            LazyColumn(
+            LazyVerticalGrid(
                 state = lazyState,
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.White)
                     .padding(paddingValue)
                     .padding(horizontal = 15.dp),
-                horizontalAlignment = Alignment.Start,
+//                horizontalAlignment = Alignment.Start,
+                columns = GridCells.FixedSize(250.dp)
             ) {
 
                 item {
@@ -1279,26 +1234,25 @@ fun StoreScreen(
                                     end.linkTo(parent.end)
                                 }) {
                             val (imageRef, cameralRef) = createRefs()
-                            Box(
-                                modifier = Modifier
-                                    .constrainAs(imageRef) {
-                                        top.linkTo(parent.top)
-                                        bottom.linkTo(parent.bottom)
-                                        start.linkTo(parent.start)
-                                        end.linkTo(parent.end)
-                                    }
-                                    .height(150.dp)
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .border(
-                                        width = 1.dp,
-                                        color = if (isFromHome == true) CustomColor.neutralColor100 else CustomColor.neutralColor500,
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
-                                    .background(
-                                        color = if (isFromHome == true) CustomColor.primaryColor50
-                                        else Color.White,
-                                    ), contentAlignment = Alignment.Center) {
+                            Box(modifier = Modifier
+                                .constrainAs(imageRef) {
+                                    top.linkTo(parent.top)
+                                    bottom.linkTo(parent.bottom)
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                }
+                                .height(150.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .border(
+                                    width = 1.dp,
+                                    color = if (isFromHome == true) CustomColor.neutralColor100 else CustomColor.neutralColor500,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .background(
+                                    color = if (isFromHome == true) CustomColor.primaryColor50
+                                    else Color.White,
+                                ), contentAlignment = Alignment.Center) {
                                 when (createdStoreInfoHolder.value?.wallpaperImage == null) {
                                     true -> {
                                         when (storeData?.pigImage.isNullOrEmpty()) {
@@ -1408,28 +1362,26 @@ fun StoreScreen(
                                     end.linkTo(parent.end)
                                 }) {
                             val (imageRef, cameralRef) = createRefs()
-                            Box(
-                                modifier = Modifier
-                                    .constrainAs(imageRef) {
-                                        top.linkTo(parent.top)
-                                        bottom.linkTo(parent.bottom)
-                                        start.linkTo(parent.start)
-                                        end.linkTo(parent.end)
-                                    }
-                                    .height(110.dp)
-                                    .width(110.dp)
-                                    .clip(RoundedCornerShape(60.dp))
-                                    .border(
-                                        width = 1.dp,
-                                        color = if (isFromHome == true) CustomColor.neutralColor100 else CustomColor.neutralColor500,
-                                        shape = RoundedCornerShape(60.dp)
-                                    )
-                                    .clip(RoundedCornerShape(60.dp))
-                                    .background(
-                                        color = if (isFromHome == true && storeData == null) CustomColor.primaryColor50
-                                        else Color.White, shape = RoundedCornerShape(60.dp)
-                                    ),
-                                contentAlignment = Alignment.Center) {
+                            Box(modifier = Modifier
+                                .constrainAs(imageRef) {
+                                    top.linkTo(parent.top)
+                                    bottom.linkTo(parent.bottom)
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                }
+                                .height(110.dp)
+                                .width(110.dp)
+                                .clip(RoundedCornerShape(60.dp))
+                                .border(
+                                    width = 1.dp,
+                                    color = if (isFromHome == true) CustomColor.neutralColor100 else CustomColor.neutralColor500,
+                                    shape = RoundedCornerShape(60.dp)
+                                )
+                                .clip(RoundedCornerShape(60.dp))
+                                .background(
+                                    color = if (isFromHome == true && storeData == null) CustomColor.primaryColor50
+                                    else Color.White, shape = RoundedCornerShape(60.dp)
+                                ), contentAlignment = Alignment.Center) {
                                 when (createdStoreInfoHolder.value?.smallImage == null) {
                                     true -> {
                                         when (storeData?.smallImage.isNullOrEmpty()) {
@@ -1588,8 +1540,7 @@ fun StoreScreen(
                                 isHasError = false,
                                 onChange = { it ->
                                     storeViewModel.setStoreCreateData(
-                                        storeTitle = it,
-                                        storeId = storeId.value
+                                        storeTitle = it, storeId = storeId.value
                                     )
                                 },
                             )
@@ -1600,45 +1551,43 @@ fun StoreScreen(
 
                 }
 
-                if (isFromHome == false && myStoreId != null)
-                    item {
-                        Sizer(10)
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                if (isFromHome == false && myStoreId != null) item {
+                    Sizer(10)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            stringResource(R.string.store_banner),
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = (18).sp,
+                            color = CustomColor.neutralColor950,
+                            textAlign = TextAlign.Center,
                         )
-                        {
-                            Text(
-                                stringResource(R.string.store_banner),
-                                fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = (18).sp,
-                                color = CustomColor.neutralColor950,
-                                textAlign = TextAlign.Center,
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .height(40.dp)
-                                    .width(70.dp)
-                                    .background(
-                                        CustomColor.primaryColor500, RoundedCornerShape(8.dp)
-                                    )
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable { openBottonSheetAndUpdateType(EnBottomSheetType.BANNER) },
-                                contentAlignment = Alignment.Center
-
-                            ) {
-                                Icon(
-                                    Icons.Default.Add,
-                                    "",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
+                        Box(
+                            modifier = Modifier
+                                .height(40.dp)
+                                .width(70.dp)
+                                .background(
+                                    CustomColor.primaryColor500, RoundedCornerShape(8.dp)
                                 )
-                            }
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { openBottonSheetAndUpdateType(EnBottomSheetType.BANNER) },
+                            contentAlignment = Alignment.Center
 
+                        ) {
+                            Icon(
+                                Icons.Default.Add,
+                                "",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
                         }
+
                     }
+                }
 
                 item {
 
@@ -1657,16 +1606,14 @@ fun StoreScreen(
                         }
 
                         else -> {
-                            if (!storeBanners.isNullOrEmpty())
-                                BannerPage(
-                                    storeBanners,
-                                    true,
-                                    deleteBanner = if (isFromHome == true) null else { it ->
-                                        onDeleteBanner(it)
-                                    },
-                                    isShowTitle = false,
-                                    onPressDo = {}
-                                )
+                            if (!storeBanners.isNullOrEmpty()) BannerPage(
+                                storeBanners,
+                                true,
+                                deleteBanner = if (isFromHome == true) null else { it ->
+                                    onDeleteBanner(it)
+                                },
+                                isShowTitle = false,
+                                onPressDo = {})
 
                         }
                     }
@@ -1680,8 +1627,7 @@ fun StoreScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
-                    )
-                    {
+                    ) {
 
                         Text(
                             stringResource(R.string.store_location),
@@ -1694,8 +1640,7 @@ fun StoreScreen(
                         IconButton(
                             onClick = {
                                 requestPermissionLocation()
-                            })
-                        {
+                            }) {
                             Icon(
                                 ImageVector.vectorResource(R.drawable.location_address_list),
                                 "",
@@ -1722,8 +1667,7 @@ fun StoreScreen(
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
-                            )
-                            {
+                            ) {
                                 Text(
                                     stringResource(R.string.sub_category),
                                     fontFamily = General.satoshiFamily,
@@ -1732,30 +1676,28 @@ fun StoreScreen(
                                     color = CustomColor.neutralColor950,
                                     textAlign = TextAlign.Center,
                                 )
-                                if (isFromHome == false && myStoreId != null)
-                                    Box(
-                                        modifier = Modifier
-                                            .height(40.dp)
-                                            .width(70.dp)
-                                            .background(
-                                                CustomColor.primaryColor500,
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .clickable {
-                                                openBottonSheetAndUpdateType(
-                                                    EnBottomSheetType.SUPCATEGORY
-                                                )
-                                            }, contentAlignment = Alignment.Center
-
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Add,
-                                            "",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(24.dp)
+                                if (isFromHome == false && myStoreId != null) Box(
+                                    modifier = Modifier
+                                        .height(40.dp)
+                                        .width(70.dp)
+                                        .background(
+                                            CustomColor.primaryColor500, RoundedCornerShape(8.dp)
                                         )
-                                    }
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .clickable {
+                                            openBottonSheetAndUpdateType(
+                                                EnBottomSheetType.SUPCATEGORY
+                                            )
+                                        }, contentAlignment = Alignment.Center
+
+                                ) {
+                                    Icon(
+                                        Icons.Default.Add,
+                                        "",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
 
                             }
                             Sizer(5)
@@ -1837,17 +1779,15 @@ fun StoreScreen(
 
                                                         )
                                                         .clip(RoundedCornerShape(8.dp))
-                                                        .combinedClickable(
-                                                            onClick = {
-                                                                updateSelectedSubCategory(
-                                                                    subCategory.id
-                                                                )
-                                                            },
-                                                            onLongClick = {
-                                                                openSubCategoryBottonSheet(
-                                                                    subCategory = subCategory
-                                                                )
-                                                            })
+                                                        .combinedClickable(onClick = {
+                                                            updateSelectedSubCategory(
+                                                                subCategory.id
+                                                            )
+                                                        }, onLongClick = {
+                                                            openSubCategoryBottonSheet(
+                                                                subCategory = subCategory
+                                                            )
+                                                        })
                                                         .padding(horizontal = 10.dp),
                                                     contentAlignment = Alignment.Center
 
@@ -1898,49 +1838,48 @@ fun StoreScreen(
                                             CircularProgressIndicator(color = CustomColor.primaryColor700)
                                         }
                                         Sizer(40)
-                                    } else when (products.value == null) {
-                                        true -> {
-                                            ProductLoading()
-                                        }
+                                    } else if (products.value == null) {
 
-                                        else -> {
-                                            if (productFilterBySubCategory.isNotEmpty()) {
-                                                ProductShape(
-                                                    isCanNavigateToStore = false,
-                                                    product = productFilterBySubCategory,
-                                                    onPressDo = { id, isFromHome, isCanNavigateToStore ->
+                                        ProductLoading()
 
-                                                        nav.navigate(
-                                                            Screens.ProductDetails(
-                                                                id.toString(),
-                                                                isFromHome = isFromHome,
-                                                                isCanNavigateToStore = isCanNavigateToStore
-                                                            )
-                                                        )
-                                                    },
-                                                    delFun = if (isFromHome == true) null else { it ->
-                                                        deleteProduct(it)
-                                                    },
-                                                    updFun = if (isFromHome == true) null else { it ->
-                                                        nav.navigate(
-                                                            Screens.CreateProduct(
-                                                                storeId.toString(),
-                                                                it.toString()
-                                                            )
-                                                        )
-                                                    })
-                                            }
-                                        }
+
                                     }
-
 
                                 }
                             }
-
                         }
-
                     }
                 }
+                if (!products.value.isNullOrEmpty() || isLoadingMore.value) items(
+                    products.value!!.toList(),
+                    key = { value -> value }) { product ->
+                    ProductShape(
+                        isCanNavigateToStore = false,
+                        product = product,
+                        onPressDo = { id, isFromHome, isCanNavigateToStore ->
+
+                            nav.navigate(
+                                Screens.ProductDetails(
+                                    id.toString(),
+                                    isFromHome = isFromHome,
+                                    isCanNavigateToStore = isCanNavigateToStore
+                                )
+                            )
+                        },
+                        delFun = if (isFromHome == true) null else { it ->
+                            deleteProduct(it)
+                        },
+                        updFun = if (isFromHome == true) null else { it ->
+                            nav.navigate(
+                                Screens.CreateProduct(
+                                    storeId.toString(), it.toString()
+                                )
+                            )
+                        })
+
+                }
+
+
                 item {
                     Sizer(120)
                 }

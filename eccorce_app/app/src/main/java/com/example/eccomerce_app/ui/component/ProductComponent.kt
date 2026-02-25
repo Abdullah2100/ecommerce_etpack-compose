@@ -1,7 +1,6 @@
 package com.example.eccomerce_app.ui.component
 
 import android.content.Context
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,7 +39,6 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,22 +54,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.ProductModel
-import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.util.General.toCustomFil
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun ProductShape(
-    product: List<ProductModel>,
+    product: ProductModel,
     delFun: ((it: UUID) -> Unit)? = null,
     updFun: ((productId: UUID) -> Unit)? = null,
     onPressDo: (value: UUID, isFromHome:Boolean, isCanNavigateToStore:Boolean) -> Unit,
@@ -81,13 +76,7 @@ fun ProductShape(
     val context = LocalContext.current
 
 
-    FlowRow(
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        repeat(product.size) { index ->
+
 
             ConstraintLayout(
                 modifier = Modifier
@@ -108,7 +97,7 @@ fun ProductShape(
                         .width(160.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .clickable {
-                            onPressDo(product[index].id,isFromHome,isCanNavigateToStore)
+                            onPressDo(product.id, isFromHome, isCanNavigateToStore)
                         }
                         .border(
                             (0.7).dp,
@@ -143,7 +132,7 @@ fun ProductShape(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp)),
                             model = General.handlingImageForCoil(
-                                product[index].thumbnail,
+                                product.thumbnail,
                                 context
                             ),
                             contentDescription = "",
@@ -179,7 +168,7 @@ fun ProductShape(
                     {
                         Sizer(10)
                         Text(
-                            product[index].name,
+                            product.name,
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Medium,
                             fontSize = (16).sp, color = CustomColor.neutralColor950,
@@ -189,13 +178,13 @@ fun ProductShape(
                         Sizer(10)
                         Row {
                             Text(
-                                product[index].symbol,
+                                product.symbol,
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = (16).sp, color = CustomColor.neutralColor950
                             )
                             Text(
-                                "${product[index].price}",
+                                "${product.price}",
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = (16).sp, color = CustomColor.neutralColor950
@@ -217,7 +206,7 @@ fun ProductShape(
                             )
                             .clip(RoundedCornerShape(15.dp))
                             .clickable {
-                                delFun(product[index].id)
+                                delFun(product.id)
                             }
                             .constrainAs(rightRef) {
                                 start.linkTo(parent.start)
@@ -246,7 +235,7 @@ fun ProductShape(
                             )
                             .clip(RoundedCornerShape(15.dp))
                             .clickable {
-                                updFun(product[index].id)
+                                updFun(product.id)
                             }
                             .constrainAs(leftRef) {
                                 end.linkTo(parent.end)
@@ -266,8 +255,6 @@ fun ProductShape(
 
             }
 
-        }
-    }
 
 
 }
@@ -278,40 +265,46 @@ fun ProductShape(
     context: Context,
     selectedImage: String,
     updateSelectIndex: (value: String) -> Unit,
-) {
+    isHasPadding: Boolean =true,
+
+    ) {
     val productImages = remember { mutableStateOf(product.productImages + product.thumbnail) }
 
     Column(
         modifier = Modifier
-            .padding(horizontal = 15.dp)
+            .padding(horizontal = if (isHasPadding) 15.dp else 0.dp)
             .fillMaxWidth(),
         horizontalAlignment = Alignment.Start
 
     )
     {
-        SubcomposeAsyncImage(
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .height(250.dp)
-                .fillMaxWidth(),
-            model = General.handlingImageForCoil(
-                selectedImage,
-                context
-            ),
-            contentDescription = "",
-            loading = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                ) {
-                    CircularProgressIndicator(
-                        color = Color.Black,
-                        modifier = Modifier.size(54.dp) // Adjust the size here
-                    )
-                }
-            },
-        )
+        Box(
+            modifier = Modifier.height(250.dp)
+                .fillMaxWidth()
+            , contentAlignment = Alignment.Center
+        ) {
+            SubcomposeAsyncImage(
+                contentScale = ContentScale.Crop,
+
+                model = General.handlingImageForCoil(
+                    selectedImage,
+                    context
+                ),
+                contentDescription = "",
+                loading = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
+                    ) {
+                        CircularProgressIndicator(
+                            color = Color.Black,
+                            modifier = Modifier.size(54.dp) // Adjust the size here
+                        )
+                    }
+                },
+            )
+        }
 
         if (product.productImages.isNotEmpty()) {
             Sizer(10)

@@ -55,7 +55,7 @@ class UserRepository(val client: HttpClient) {
         }
     }
 
-     suspend fun UpdateMyInfo(data: UpdateMyInfoDto): NetworkCallHandler {
+     suspend fun updateMyInfo(data: UpdateMyInfoDto): NetworkCallHandler {
         return try {
             val result = client.put(
                 Secrets.getUrl() + "/User"
@@ -70,31 +70,31 @@ class UserRepository(val client: HttpClient) {
                     MultiPartFormDataContent(
                         formData {
                             if (!data.name.isNullOrEmpty())
-                                append("name", data.name!!)
+                                append("name", data.name)
 
                             if (!data.oldPassword.isNullOrEmpty())
-                                append("name", data.oldPassword!!)
+                                append("name", data.oldPassword)
 
 
                             if (!data.phone.isNullOrEmpty())
-                                append("phone", data.phone!!)
+                                append("phone", data.phone)
 
 
                             if (!data.newPassword.isNullOrEmpty())
-                                append("name", data.newPassword!!)
+                                append("name", data.newPassword)
 
                             if (data.thumbnail != null)
                                 append(
                                     key = "thumbnail", // Must match backend expectation
-                                    value = data.thumbnail!!.readBytes(),
+                                    value = data.thumbnail.readBytes(),
                                     headers = Headers.Companion.build {
                                         append(
                                             HttpHeaders.ContentType,
-                                            "image/${data.thumbnail!!.extension}"
+                                            "image/${data.thumbnail.extension}"
                                         )
                                         append(
                                             HttpHeaders.ContentDisposition,
-                                            "filename=${data.thumbnail!!.name}"
+                                            "filename=${data.thumbnail.name}"
                                         )
                                     }
                                 )

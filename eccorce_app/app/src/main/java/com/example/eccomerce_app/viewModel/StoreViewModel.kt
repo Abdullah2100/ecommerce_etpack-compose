@@ -25,45 +25,52 @@ import javax.inject.Named
 
 class StoreViewModel(
     val storeRepository: StoreRepository,
-    @Named("storeHub")  val webSocket: HubConnection?,
-    val coroutineSccop : CoroutineScope
+    @Named("storeHub") val webSocket: HubConnection?,
+    val coroutineScop: CoroutineScope
 ) : ViewModel() {
 
-   private val _hub = MutableStateFlow<HubConnection?>(null)
+    private val _hub = MutableStateFlow<HubConnection?>(null)
 
     val storeCreateData = MutableStateFlow<CreateStoreDto?>(null)
 
 
-   private val _stores = MutableStateFlow<List<StoreModel>?>(null)
+    private val _stores = MutableStateFlow<List<StoreModel>?>(null)
     val stores = _stores.asStateFlow()
 
-   private val _isUpdate = MutableStateFlow(false)
+    private val _isUpdate = MutableStateFlow(false)
     val isUpdate = _isUpdate.asStateFlow()
 
-  private  val _coroutineException = CoroutineExceptionHandler { _, message ->
+    private val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 
     fun connection() {
 
         if (webSocket != null) {
-            coroutineSccop.launch(Dispatchers.IO+_coroutineException) {
+            coroutineScop.launch(Dispatchers.IO + _coroutineException) {
 
                 _hub.emit(webSocket)
-                _hub.value?.on(
-                    "storeStatus",
-                    { result ->
+                try {
+                    _hub.value?.start()?.blockingAwait()
+                    _hub.value?.on(
+                        "storeStatus",
+                        { result ->
 
-                        coroutineSccop.launch(Dispatchers.IO+_coroutineException) {
-                            if (result.Status == true) {
-                                val storeWithoutCurrentId =
-                                    _stores.value?.filter { it.id != result.StoreId }
-                                _stores.emit(storeWithoutCurrentId)
+                            coroutineScop.launch(Dispatchers.IO + _coroutineException) {
+                                if (result.Status == true) {
+                                    val storeWithoutCurrentId =
+                                        _stores.value?.filter { it.id != result.StoreId }
+                                    _stores.emit(storeWithoutCurrentId)
+                                }
                             }
-                        }
-                    },
-                    StoreStatusDto::class.java
-                )
+                        },
+                        StoreStatusDto::class.java
+                    )
+
+                } catch (ex: Exception) {
+                    Log.d("ErrorMessageIs", ex.message.toString())
+
+                }
 
             }
 
@@ -123,7 +130,7 @@ class StoreViewModel(
         wallpaperImage: File? = null,
         smallImage: File? = null,
         storeTitle: String? = null,
-        storeId: UUID?=null
+        storeId: UUID? = null
     ) {
         var myStoreData: CreateStoreDto? = null
         if (storeCreateData.value == null)
@@ -156,7 +163,7 @@ class StoreViewModel(
     }
 
 
-  suspend  fun createStore(
+    suspend fun createStore(
         name: String,
         wallpaperImage: File,
         smallImage: File,
@@ -204,9 +211,9 @@ class StoreViewModel(
     }
 
     suspend fun updateStore(
-        name: String?=null,
-        wallpaperImage: File?=null,
-        smallImage: File?=null,
+        name: String? = null,
+        wallpaperImage: File? = null,
+        smallImage: File? = null,
         longitude: Double?,
         latitude: Double?,
     ): String? {
@@ -225,14 +232,15 @@ class StoreViewModel(
                 val data = storeDto.toStore()
 
 
-                val storeHolder = _stores.value?.map {value->
-                    if(value.id==data.id)
+                val storeHolder = _stores.value?.map { value ->
+                    if (value.id == data.id)
                         value.copy(
                             name = data.name,
                             latitude = data.latitude,
                             longitude = data.longitude,
                             smallImage = data.smallImage,
-                            pigImage = data.pigImage)
+                            pigImage = data.pigImage
+                        )
                     else value
                 }?.toList()
 

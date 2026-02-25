@@ -1,7 +1,6 @@
 package com.example.eccomerce_app.ui.view.ReseatPassword
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,9 +21,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -35,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -56,7 +51,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun ReseatPasswordScreen(
@@ -68,11 +62,7 @@ fun ReseatPasswordScreen(
 
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    val context = LocalContext.current
     val layoutDirection = LocalLayoutDirection.current
-
-    val activity = context as Activity
-    val windowsSize = calculateWindowSizeClass(activity)
 
     val coroutine = rememberCoroutineScope()
     val scrollState = rememberScrollState()
@@ -115,147 +105,27 @@ fun ReseatPasswordScreen(
     Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) })
     { paddingValues ->
 
-        paddingValues.calculateTopPadding()
-        paddingValues.calculateBottomPadding()
-
-        when (windowsSize.widthSizeClass) {
-            WindowWidthSizeClass.Compact  ->
-                CompactToMediumReseatPasswordLayout(
-                    contentPadding = paddingValues,
-                    newPassword = newPassword,
-                    isLoading = isSendingData.value,
-                    onResetClick = { doReset() },
-                    layoutDirection = layoutDirection,
-                    scrollState = scrollState
-                )
-
-            WindowWidthSizeClass.Medium, WindowWidthSizeClass.Expanded ->
-                ExpandedReseatPasswordLayout(
-                    contentPadding = paddingValues,
-                    newPassword = newPassword,
-                    isLoading = isSendingData.value,
-                    onResetClick = { doReset() },
-                    layoutDirection = layoutDirection,
-                    scrollState = scrollState
-                )
-        }
-    }
-
-}
-
-@Composable
-fun CompactToMediumReseatPasswordLayout(
-    contentPadding: PaddingValues,
-    newPassword: MutableState<TextFieldValue>,
-    isLoading: Boolean,
-    onResetClick: () -> Unit,
-    scrollState: ScrollState,
-    layoutDirection: LayoutDirection,
-
-    ) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(
-                start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
-                end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
-                top = 5.dp + contentPadding.calculateTopPadding(),
-                bottom = 5.dp + contentPadding.calculateBottomPadding()
-            )
-            .verticalScroll(scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-
-        Icon(
-            ImageVector.vectorResource(R.drawable.password_icon),
-            "",
-            tint = CustomColor.primaryColor700,
-            modifier = Modifier.size(200.dp)
-        )
-        Sizer(heigh = 5)
-
-        TextInputWithTitle(
-            newPassword,
-            title = "",
-            placeHolder = stringResource(R.string.enter_your_new_password),
-        )
-
-
-
-        CustomButton(
-            isLoading = isLoading,
-            operation = onResetClick,
-            isEnable = newPassword.value.text.trim().isNotEmpty(),
-            buttonTitle = stringResource(R.string.update),
-
-            )
-
-    }
-
-
-}
-
-@SuppressLint("ConfigurationScreenWidthHeight")
-@Composable
-fun ExpandedReseatPasswordLayout(
-    contentPadding: PaddingValues,
-    newPassword: MutableState<TextFieldValue>,
-    isLoading: Boolean,
-    onResetClick: () -> Unit,
-    scrollState: ScrollState,
-    layoutDirection: LayoutDirection,
-
-    ) {
-    val config = LocalConfiguration.current
-    val screenWidth = config.screenWidthDp
-    val screenHeight = config.screenHeightDp
-
-
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(
-                start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
-                end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
-                top = 5.dp + contentPadding.calculateTopPadding(),
-                bottom = 5.dp + contentPadding.calculateBottomPadding()
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(((screenWidth / 3) - 20).dp)
-                .padding(
-                    top = contentPadding.calculateTopPadding(),
-                    bottom = contentPadding.calculateBottomPadding()
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                ImageVector.vectorResource(R.drawable.password_icon),
-                contentDescription = "",
-                tint = CustomColor.primaryColor700,
-                modifier = Modifier.size(200.dp)
-            )
-        }
-        Sizer(width = 20)
-
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .background(Color.White)
-                .height(screenHeight.dp)
-                .width(screenWidth.dp - (screenWidth.dp / 3) - 10.dp)
-
+                .padding(
+                    start = 15.dp + paddingValues.calculateLeftPadding(layoutDirection),
+                    end = 15.dp + paddingValues.calculateRightPadding(layoutDirection),
+                    top = 5.dp + paddingValues.calculateTopPadding(),
+                    bottom = 5.dp + paddingValues.calculateBottomPadding()
+                )
                 .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+
+            Icon(
+                ImageVector.vectorResource(R.drawable.password_icon),
+                "",
+                tint = CustomColor.primaryColor700,
+                modifier = Modifier.size(200.dp)
+            )
             Sizer(heigh = 5)
 
             TextInputWithTitle(
@@ -264,12 +134,17 @@ fun ExpandedReseatPasswordLayout(
                 placeHolder = stringResource(R.string.enter_your_new_password),
             )
 
+
+
             CustomButton(
-                isLoading = isLoading,
-                operation = onResetClick,
+                isLoading = isSendingData.value,
+                operation = { doReset() },
                 isEnable = newPassword.value.text.trim().isNotEmpty(),
                 buttonTitle = stringResource(R.string.update),
-            )
+
+                )
+
         }
     }
+
 }

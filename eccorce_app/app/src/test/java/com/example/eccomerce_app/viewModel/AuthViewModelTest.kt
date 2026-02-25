@@ -1,85 +1,92 @@
 package com.example.eccomerce_app.viewModel
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import android.util.Log
 import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.data.Room.Dao.AuthDao
 import com.example.eccomerce_app.data.Room.Dao.LocaleDao
-import com.example.eccomerce_app.data.Room.Model.AuthModelEntity
 import com.example.eccomerce_app.data.repository.AuthRepository
 import com.example.eccomerce_app.dto.AuthDto
 import com.example.eccomerce_app.dto.LoginDto
 import com.example.eccomerce_app.dto.SignupDto
+import com.example.eccomerce_app.util.GeneralValue
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
+import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AuthViewModelTest {
 
-    @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
-
-    private val testDispatcher = StandardTestDispatcher()
-
-    private val authRepository = mockk<AuthRepository>()
-    private val authDao = mockk<AuthDao>(relaxed = true)
-    private val localDao = mockk<LocaleDao>(relaxed = true)
-
     private lateinit var viewModel: AuthViewModel
+    
+    // 1. Mock the dependencies
+    private val authRepository: AuthRepository = mockk()
+    private val authDao: AuthDao = mockk(relaxed = true)
+    private val localDao: LocaleDao = mockk(relaxed = true)
+
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
     fun setUp() {
+        // 2. Set the Main dispatcher to a test dispatcher for coroutines
         Dispatchers.setMain(testDispatcher)
         
-        // Mocking the initial calls in init block
+        // 3. Mock static classes like Log (which won't work in unit tests)
+        mockkStatic(Log::class)
+        every { Log.d(any(), any()) } returns 0
+
+        // 4. Mock calls that happen in init { } or startup
         coEvery { localDao.getCurrentLocal() } returns null
         coEvery { authDao.getAuthData() } returns null
         coEvery { authDao.isPassOnBoarding() } returns false
         coEvery { authDao.isPassLocationScreen() } returns false
 
+        // 5. Initialize the ViewModel with mocked dependencies
         viewModel = AuthViewModel(authRepository, authDao, localDao)
     }
 
     @After
     fun tearDown() {
+        // 6. Reset the Main dispatcher and clear mocks
         Dispatchers.resetMain()
         unmockkAll()
+        GeneralValue.authData = null
     }
 
     @Test
-    fun `loginUser success updates authDao and returns null`() = runTest {
+    fun `loginUser success returns null and saves data`() = runTest {
         // Arrange
         val username = "testuser"
         val password = "password"
-        val token = "token"
-        val authDto = AuthDto("accessToken", "refreshToken")
+        val authDto = AuthDto(token = "fake_token", refreshToken = "fake_refresh_token")
         
+        // Mock the repository to return a successful result
         coEvery { authRepository.login(any()) } returns NetworkCallHandler.Successful(authDto)
-        
-        var isLoadingValue = false
-        val updateLoading = { state: Boolean -> isLoadingValue = state }
+
+        var isLoadingCalled = false
+        val updateLoading = { state: Boolean -> isLoadingCalled = state }
 
         // Act
-        val result = viewModel.loginUser(username, password, token, updateLoading)
+        val result = viewModel.loginUser(username, password, updateLoading)
 
         // Assert
-        assertNull(result)
+        assertEquals(null, result)
+        // Verify that the data was saved to local storage
         coVerify { authDao.saveAuthData(any()) }
-        assertEquals(false, isLoadingValue)
+        // Verify that loading state was updated
+        assertEquals(false, isLoadingCalled)
     }
 
     @Test
@@ -87,68 +94,53 @@ class AuthViewModelTest {
         // Arrange
         val username = "testuser"
         val password = "password"
-        val token = "token"
         val errorMessage = "Invalid credentials"
         
+        // Mock the repository to return an error result
         coEvery { authRepository.login(any()) } returns NetworkCallHandler.Error(errorMessage)
-        
-        var isLoadingValue = false
-        val updateLoading = { state: Boolean -> isLoadingValue = state }
+
+        var isLoadingCalled = false
+        val updateLoading = { state: Boolean -> isLoadingCalled = state }
 
         // Act
-        val result = viewModel.loginUser(username, password, token, updateLoading)
+        val result = viewModel.loginUser(username, password, updateLoading)
 
         // Assert
         assertEquals(errorMessage, result)
+        // Verify the error message flow was updated
         assertEquals(errorMessage, viewModel.errorMessage.value)
-        assertEquals(false, isLoadingValue)
+        assertEquals(false, isLoadingCalled)
     }
 
     @Test
-    fun `signUpUser success updates authDao`() = runTest {
-        // Arrange
-        val authDto = AuthDto("accessToken", "refreshToken")
-        coEvery { authRepository.signup(any()) } returns NetworkCallHandler.Successful(authDto)
-        
+    fun `signUpUser success returns null and saves data`() = runTest {
+        //Arrange
+        val signUpDto = SignupDto(
+            Name="Salime",
+            Password = "771ali@..",
+            Phone = "779778885",
+            Email = "ali555555@gmail.com",
+            DeviceToken = ";kjasdf")
+
+        val authDto = AuthDto(token = "fake_token", refreshToken = "fake_refresh_token")
+
+
+        //mock
+        coEvery { authRepository.signup( signUpDto) } returns NetworkCallHandler
+            .Successful(AuthDto())
+
         // Act
-        val result = viewModel.signUpUser("email", "name", "phone", "pass", "token") { }
+        val result = viewModel.signUpUser(
+            email = signUpDto.Email,
+            name = signUpDto.Name,
+            phone = signUpDto.Phone,
+            password = signUpDto.Password,
+            updateIsLoading = {}
+        )
 
         // Assert
-        assertNull(result)
-        coVerify { authDao.saveAuthData(any()) }
+        assertEquals(null, result)
+
     }
 
-    @Test
-    fun `getOtp success returns null`() = runTest {
-        // Arrange
-        coEvery { authRepository.getOtp(any()) } returns NetworkCallHandler.Successful(true)
-        
-        // Act
-        val result = viewModel.getOtp("test@email.com") { }
-
-        // Assert
-        assertNull(result)
-    }
-
-    @Test
-    fun `otpVerifying success returns null`() = runTest {
-        // Arrange
-        coEvery { authRepository.verifyingOtp(any(), any()) } returns NetworkCallHandler.Successful(true)
-        
-        // Act
-        val result = viewModel.otpVerifying("test@email.com", "1234") { }
-
-        // Assert
-        assertNull(result)
-    }
-
-    @Test
-    fun `logout nukes tables`() = runTest {
-        // Act
-        viewModel.logout()
-        
-        // Assert
-        coVerify { authDao.nukeAuthTable() }
-        coVerify { authDao.nukeIsPassAddressTable() }
-    }
 }

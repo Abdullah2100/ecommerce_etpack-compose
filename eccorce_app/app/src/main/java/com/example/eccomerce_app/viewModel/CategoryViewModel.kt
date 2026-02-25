@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class CategoryViewModel(val categoryRepository: CategoryRepository) : ViewModel() {
       private  val _categories = MutableStateFlow<MutableList<Category>?>(null)
@@ -39,12 +40,18 @@ class CategoryViewModel(val categoryRepository: CategoryRepository) : ViewModel(
                         )
 
                     if (mutableCategories.isNotEmpty()) {
-                        _categories.emit(
-                            mutableCategories
-                        )
+//                        _categories.emit(
+//                            mutableCategories
+//                        )
+                        //this to doublicate the category  from api
+                        _categories.emit(List(8){ Category(
+                            id = UUID.randomUUID(),
+                            image =mutableCategories.get(0).image,
+                            name =mutableCategories.get(0).name
+                        )}.toMutableList())
                     }
                     if(_categories.value.isNullOrEmpty())
-                        _categories.emit(mutableListOf<Category>())
+                        _categories.emit(mutableListOf())
 
                 }
 

@@ -14,6 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,7 +76,7 @@ fun OrderForMyStoreScreen(
     val orderData = orderItemsViewModel.orderItemForMyStore.collectAsStateWithLifecycle()
 
 
-    val lazyState = rememberLazyListState()
+    val lazyState = rememberLazyGridState()
     val coroutine = rememberCoroutineScope()
     val state = rememberPullToRefreshState()
 
@@ -190,13 +194,14 @@ fun OrderForMyStoreScreen(
             },
         )
         {
-            LazyColumn(
+            LazyVerticalGrid(
                 state = lazyState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValue)
                     .background(Color.White),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                columns = GridCells.FixedSize(250.dp)
             ) {
                 if (orderData.value != null)
                     items(

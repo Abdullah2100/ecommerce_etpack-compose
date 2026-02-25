@@ -167,16 +167,6 @@ fun NavController(
                 AddressHomeScreen(
                     nav = nav,
                     userViewModel = userViewModel,
-                    //this for expanded screen
-                    cartViewModel = cartViewModel,
-                    storeViewModel = storeViewModel,
-                    orderViewModel = orderViewModel,
-                    productViewModel = productViewModel,
-                    bannerViewModel = bannerViewModel,
-                    variantViewModel = variantViewModel,
-                    categoryViewModel = categoryViewModel,
-                    generalSettingViewModel = generalSettingViewModel
-
                 )
             }
 
@@ -329,9 +319,6 @@ fun NavController(
                     currencyViewModel = currencyViewModel,
                     homeViewModel = homeViewModel,
                     paymentTypeViewModel = paymentTypeViewModel ,
-                    cartViewModel = cartViewModel,
-                    subCategoryViewModel = subCategoryViewModel,
-                    storeViewModel = storeViewModel
                 )
             }
 
@@ -365,7 +352,7 @@ fun NavController(
                     nav = nav,
                     categoryId = data.categoryId,
                     categoryViewModel = categoryViewModel,
-                    productViewModel = productViewModel
+                    productViewModel = productViewModel,
                 )
             }
 
@@ -498,7 +485,8 @@ fun NavController(
                     productViewModel = productViewModel,
                     isCanNavigateToStore = store.isCanNavigateToStore,
                     userViewModel = userViewModel,
-                    currencyViewModel = currencyViewModel
+                    currencyViewModel = currencyViewModel,
+                    categoryViewModel = categoryViewModel,
                 )
 
             }

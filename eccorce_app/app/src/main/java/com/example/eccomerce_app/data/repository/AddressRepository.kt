@@ -43,7 +43,7 @@ class AddressRepository(val client: HttpClient) {
             }
 
             when (result.status) {
-                HttpStatusCode.Companion.Created -> {
+                HttpStatusCode.Created -> {
                     NetworkCallHandler.Successful(result.body<AddressDto?>())
                 }
 

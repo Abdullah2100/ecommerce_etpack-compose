@@ -1,7 +1,6 @@
 package com.example.eccomerce_app.ui.view.Auth
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
@@ -28,9 +27,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -43,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -75,7 +70,7 @@ import com.example.eccomerce_app.ui.component.SharedAppBar
 import com.example.eccomerce_app.ui.component.Sizer
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun SignUpPage(
@@ -93,8 +88,6 @@ fun SignUpPage(
     val context = LocalContext.current
     val layoutDirection = LocalLayoutDirection.current
 
-    val activity = context as Activity
-    val windowsSize = calculateWindowSizeClass(activity)
     val scrollState = rememberScrollState()
     val fontScall = LocalDensity.current.fontScale
 
@@ -321,228 +314,21 @@ fun SignUpPage(
         },
     ) { contentPadding ->
 
-        contentPadding.calculateTopPadding()
-        contentPadding.calculateBottomPadding()
-
-        when (windowsSize.widthSizeClass) {
-            WindowWidthSizeClass.Compact, WindowWidthSizeClass.Medium ->
-                CompactToMediumSignupLayout(
-                    contentPadding,
-                    dataHolder,
-                    scrollState,
-                    fontScall,
-                    layoutDirection,
-                    validateInput = { validateSignupInput() },
-                    updateClickPolicesAndTerm = { value -> updateConditionValue(isCheckBoxValue = value) },
-                    signupFun = { signUp() }
-                )
-
-            WindowWidthSizeClass.Expanded ->
-                ExpandedSignupLayout(
-                    contentPadding,
-                    dataHolder,
-                    scrollState,
-                    fontScall,
-                    layoutDirection,
-                    validateInput = { validateSignupInput() },
-                    updateClickPolicesAndTerm = { value -> updateConditionValue(isCheckBoxValue = value) },
-                    signupFun = { signUp() }
-                )
-        }
-
-
-    }
-}
-
-@SuppressLint("LocalContextGetResourceValueCall")
-@Composable
-fun CompactToMediumSignupLayout(
-    contentPadding: PaddingValues,
-    dataHolder: SignupScreenDataHolder,
-    scrollState: ScrollState,
-    fontScall: Float,
-    layoutDirection: LayoutDirection,
-    validateInput: () -> Boolean,
-    updateClickPolicesAndTerm: (state: Boolean) -> Unit,
-    signupFun: () -> Unit
-) {
-
-
-    Column(
-        modifier = Modifier
-            .background(Color.White)
-            .fillMaxSize()
-            .padding(
-                start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
-                end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
-                top = 5.dp+contentPadding.calculateTopPadding(),
-                bottom = 5.dp+contentPadding.calculateBottomPadding()
-
-            )
-
-            .verticalScroll(scrollState),
-        horizontalAlignment = Alignment.Start,
-    )
-    {
-
-        TextInputWithTitle(
-            dataHolder.name,
-            title = stringResource(R.string.name),
-            placeHolder = stringResource(R.string.enter_your_name),
-            errorMessage = dataHolder.errorMessageValidation.value,
-            isHasError = dataHolder.isNameError.value,
-        )
-
-        TextInputWithTitle(
-            dataHolder.email,
-            title = stringResource(R.string.email),
-            placeHolder = stringResource(R.string.enter_your_email),
-            errorMessage = dataHolder.errorMessageValidation.value,
-            isHasError = dataHolder.isEmailError.value,
-        )
-        TextInputWithTitle(
-            dataHolder.phone,
-            title = stringResource(R.string.phone),
-            placeHolder = stringResource(R.string.enter_phone),
-            errorMessage = dataHolder.errorMessageValidation.value,
-            isHasError = dataHolder.isPhoneError.value,
-        )
-        TextSecureInputWithTitle(
-            dataHolder.password,
-            stringResource(R.string.password),
-            dataHolder.isPasswordError.value,
-            dataHolder.errorMessageValidation.value,
-        )
-        TextSecureInputWithTitle(
-            dataHolder.confirmPassword,
-            stringResource(R.string.confirm_password),
-            dataHolder.isPasswordConfirm.value,
-            dataHolder.errorMessageValidation.value,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset(y = (-10).dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        )
-        {
-            Checkbox(
-                checked = dataHolder.isCheckBox.value,
-                onCheckedChange = { updateClickPolicesAndTerm(!dataHolder.isCheckBox.value) },
-                colors = CheckboxDefaults.colors(
-                    checkedColor = CustomColor.primaryColor700
-                ),
-                modifier = Modifier.padding()
-            )
-            Text(
-                stringResource(R.string.agree_with),
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Normal,
-                color = if (dataHolder.isTermAndServicesError.value) CustomColor.alertColor_1_400 else CustomColor.neutralColor950,
-                fontSize = (16 / fontScall).sp,
-            )
-            Text(
-                stringResource(R.string.term_condition),
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Medium,
-                color = if (dataHolder.isTermAndServicesError.value) CustomColor.alertColor_1_400 else CustomColor.primaryColor700,
-                fontSize = (16 / fontScall).sp,
-                modifier = Modifier
-                    .padding(start = 3.dp),
-                textDecoration = TextDecoration.Underline
-            )
-        }
-        if (dataHolder.isTermAndServicesError.value)
-            Text(
-                dataHolder.errorMessageValidation.value,
-                color = CustomColor.alertColor_1_400,
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = (14 / fontScall).sp,
-                modifier = Modifier
-                    .offset(x = (13).dp, y = (-12).dp)
-            )
-
-        CustomAuthBottom(
-            isLoading = dataHolder.isLoading.value,
-            validationFun = {
-                validateInput()
-            },
-            buttonTitle = stringResource(R.string.signup),
-            operation = { signupFun() }
-        )
-    }
-
-}
-
-
-@SuppressLint("ConfigurationScreenWidthHeight")
-@Composable
-fun ExpandedSignupLayout(
-    contentPadding: PaddingValues,
-    dataHolder: SignupScreenDataHolder,
-    scrollState: ScrollState,
-    fontScall: Float,
-    layoutDirection: LayoutDirection,
-    validateInput: () -> Boolean,
-    updateClickPolicesAndTerm: (state: Boolean) -> Unit,
-    signupFun: () -> Unit
-) {
-
-    val config = LocalConfiguration.current
-    val screenWidth = config.screenWidthDp
-
-
-
-
-
-    Row(
-        modifier = Modifier
-            .padding(
-                start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
-                end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
-                top = 5.dp+contentPadding.calculateTopPadding(),
-                bottom = 5.dp+contentPadding.calculateBottomPadding()
-
-            )
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        Box(
-            modifier = Modifier
-                .width(((screenWidth / 2) - 20).dp)
-                .padding(
-                    top = contentPadding.calculateTopPadding(),
-                    bottom = contentPadding.calculateBottomPadding()
-                )
-        ) {
-            Image(
-                painter = painterResource(R.drawable.login_icon),
-                contentDescription = "",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxHeight()
-            )
-        }
-        Sizer(width = 20)
-
         Column(
             modifier = Modifier
                 .background(Color.White)
-                .fillMaxHeight(1f)
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(
-                    top = contentPadding.calculateTopPadding(),
-                    bottom = contentPadding.calculateBottomPadding()
+                    start = 15.dp + contentPadding.calculateLeftPadding(layoutDirection),
+                    end = 15.dp + contentPadding.calculateRightPadding(layoutDirection),
+                    top = 5.dp + contentPadding.calculateTopPadding(),
+                    bottom = 5.dp + contentPadding.calculateBottomPadding()
+
                 )
-                .padding(horizontal = 15.dp)
                 .verticalScroll(scrollState),
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Center
         )
         {
-
 
             TextInputWithTitle(
                 dataHolder.name,
@@ -589,7 +375,7 @@ fun ExpandedSignupLayout(
             {
                 Checkbox(
                     checked = dataHolder.isCheckBox.value,
-                    onCheckedChange = { updateClickPolicesAndTerm(!dataHolder.isCheckBox.value) },
+                    onCheckedChange = { updateConditionValue(isCheckBoxValue = !dataHolder.isCheckBox.value) },
                     colors = CheckboxDefaults.colors(
                         checkedColor = CustomColor.primaryColor700
                     ),
@@ -626,11 +412,14 @@ fun ExpandedSignupLayout(
 
             CustomAuthBottom(
                 isLoading = dataHolder.isLoading.value,
-                validationFun = { validateInput() },
+                validationFun = {
+                    validateSignupInput()
+                },
                 buttonTitle = stringResource(R.string.signup),
-                operation = { signupFun() }
+                operation = { signUp() }
             )
         }
+
 
     }
 }

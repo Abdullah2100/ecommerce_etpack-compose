@@ -21,21 +21,21 @@ import java.util.UUID
 import javax.inject.Named
 
 class BannerViewModel(
-    @Named("bannerHub")   val bannerRepository: BannerRepository,
+    @Named("bannerHub") val bannerRepository: BannerRepository,
     val webSocket: HubConnection?,
     val coroutineScop: CoroutineScope
 
 ) : ViewModel() {
-    private    val _hub = MutableStateFlow<HubConnection?>(null)
+    private val _hub = MutableStateFlow<HubConnection?>(null)
 
-    private   val _banners = MutableStateFlow<List<BannerModel>?>(null)
+    private val _banners = MutableStateFlow<List<BannerModel>?>(null)
     val banners = _banners.asStateFlow()
 
-    private    val _bannersRadom = MutableStateFlow<List<BannerModel>?>(null)
+    private val _bannersRadom = MutableStateFlow<List<BannerModel>?>(null)
     val bannersRadom = _bannersRadom.asStateFlow()
 
 
-    private    val _coroutineException = CoroutineExceptionHandler { _, message ->
+    private val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 
@@ -43,28 +43,37 @@ class BannerViewModel(
     fun connection() {
 
         if (webSocket != null) {
-            coroutineScop.launch(Dispatchers.IO) {
+            coroutineScop.launch(Dispatchers.IO + _coroutineException) {
 
                 _hub.emit(webSocket)
-                _hub.value?.start()?.blockingAwait()
-                _hub.value?.on(
-                    "createdBanner",
-                    { result ->
-                        val banners = mutableListOf<BannerModel>()
-                        if (_banners.value == null) {
-                            banners.add(result.toBanner())
-                        } else {
-                            banners.add(result.toBanner())
-                            banners.addAll(_banners.value!!)
-                        }
-                        CoroutineScope(Dispatchers.IO).launch(_coroutineException) {
-                            Log.d("bannerCreationData", banners.toString())
+                try {
+                    _hub.value?.start()?.blockingAwait()
+                    _hub.value?.on(
+                        "createdBanner",
+                        { result ->
+                            val banners = mutableListOf<BannerModel>()
+                            if (_banners.value == null) {
+                                banners.add(result.toBanner())
+                            } else {
+                                banners.add(result.toBanner())
+                                banners.addAll(_banners.value!!)
+                            }
+                            CoroutineScope(Dispatchers.IO + _coroutineException).launch(
+                                _coroutineException
+                            ) {
+                                Log.d("bannerCreationData", banners.toString())
 
-                            _banners.emit(banners)
-                        }
-                    },
-                    BannerDto::class.java
-                )
+                                _banners.emit(banners)
+                            }
+                        },
+                        BannerDto::class.java
+                    )
+
+                } catch (ex: Exception) {
+                    Log.d("ErrorMessageIs", ex.message.toString())
+
+                }
+
 
             }
 

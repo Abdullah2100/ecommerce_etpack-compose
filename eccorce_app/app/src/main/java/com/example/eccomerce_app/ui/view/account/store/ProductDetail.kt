@@ -1,8 +1,11 @@
 package com.example.eccomerce_app.ui.view.account.store
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,6 +25,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.retain.retain
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -50,6 +55,7 @@ import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.SubCategoryViewModel
 import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.eccomerce_app.viewModel.BannerViewModel
+import com.example.eccomerce_app.viewModel.CategoryViewModel
 import com.example.eccomerce_app.viewModel.CurrencyViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
 import kotlinx.coroutines.delay
@@ -57,8 +63,12 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 
+
+
+@OptIn(
+    ExperimentalMaterial3Api::class
+)
 @SuppressLint("LocalContextGetResourceValueCall")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetail(
     nav: NavHostController? = null,
@@ -74,8 +84,9 @@ fun ProductDetail(
     userViewModel: UserViewModel,
     currencyViewModel: CurrencyViewModel,
     isShowArrowBackIcon: Boolean = true,
+    // Additional viewModels needed for expanded layout sub-screens
+    categoryViewModel: CategoryViewModel? = null,
 ) {
-
     val context = LocalContext.current
 
     val coroutine = rememberCoroutineScope()
@@ -208,7 +219,8 @@ fun ProductDetail(
             BottomAppBar(
                 containerColor = Color.White,
                 modifier = Modifier.padding(horizontal = 15.dp)
-            ) {
+            )
+            {
                 Button(
                     modifier = Modifier
                         .height(50.dp)

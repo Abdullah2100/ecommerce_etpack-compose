@@ -1,11 +1,15 @@
 package com.example.eccomerce_app.ui.view.home
 
+import android.annotation.SuppressLint
+import android.app.Activity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,15 +22,18 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -43,19 +50,34 @@ import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.ui.component.SharedAppBar
+import com.example.eccomerce_app.viewModel.CartViewModel
+import com.example.eccomerce_app.viewModel.BannerViewModel
+import com.example.eccomerce_app.viewModel.CurrencyViewModel
+import com.example.eccomerce_app.viewModel.StoreViewModel
+import com.example.eccomerce_app.viewModel.SubCategoryViewModel
+import com.example.eccomerce_app.viewModel.UserViewModel
+import com.example.eccomerce_app.viewModel.VariantViewModel
+import com.example.eccomerce_app.ui.view.account.store.ProductDetail
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
+
+
+
+@OptIn(
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun CategoryScreen(
     nav: NavHostController,
     categoryViewModel: CategoryViewModel,
     productViewModel: ProductViewModel,
-    isShowArrowBackNavIcon : Boolean = true
+    isShowArrowBackNavIcon: Boolean = true,
 ) {
-    val category = categoryViewModel.categories.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+
+    val category = categoryViewModel.categories.collectAsStateWithLifecycle()
     val coroutine = rememberCoroutineScope()
 
     fun getProductCategoryAndNavigate(id: UUID) {
@@ -83,13 +105,13 @@ fun CategoryScreen(
 
         }
 
-    ) { scaffoldState ->
+    )
+    { scaffoldState ->
         scaffoldState.calculateTopPadding()
         scaffoldState.calculateBottomPadding()
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(scaffoldState)
                 .background(Color.White),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -162,3 +184,4 @@ fun CategoryScreen(
     }
 
 }
+

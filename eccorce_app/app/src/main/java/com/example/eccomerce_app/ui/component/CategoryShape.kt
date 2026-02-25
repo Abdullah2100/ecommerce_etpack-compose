@@ -72,7 +72,7 @@ fun CategoryShape(
             textAlign = TextAlign.Center
         )
 
-        if (categories.size > 4)
+//        if (categories.size > 4)
             Text(
             stringResource(R.string.view_all),
             fontFamily = General.satoshiFamily,

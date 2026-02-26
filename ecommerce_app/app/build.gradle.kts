@@ -1,0 +1,209 @@
+import org.gradle.kotlin.dsl.implementation
+import java.util.Properties
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp.android)
+    alias(libs.plugins.google.gms)
+    alias(libs.plugins.kotlin.serialize.plugin)
+}
+
+android {
+    namespace = "com.example.e_commercompose"
+    compileSdk = 36
+    ndkVersion = "28.2.13676358"
+
+    defaultConfig {
+        applicationId = "com.example.e_commercompose"
+        minSdk = 26
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
+        multiDexEnabled = true
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments += "-DREBUILD_DUMMY=1"
+            }
+        }
+
+        val mapboxToken = localProperties.getProperty("GOOGLE_MAP_KEY") ?: ""
+        resValue("string", "google_map_token", mapboxToken)
+    }
+
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
+
+    }
+
+    kotlin {
+        sourceSets.all {
+            //   languageSettings.enableLanguageFeature("XXLanguage:+ExplicitBackingFields")
+            languageSettings.enableLanguageFeature("PropertyParamAnnotationDefaultTargetMode")
+        }
+    }
+
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
+    buildToolsVersion = "36.0.0"
+}
+
+dependencies {
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    implementation(libs.ui.graphics)
+    implementation(libs.ui)
+    implementation(libs.androidx.junit.ktx)
+    implementation(libs.androidx.compose.adaptive.navigation)
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.core.testing)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
+    //material icon
+    implementation(libs.androidx.material.icons.extended)
+
+
+    //koin
+    implementation(libs.koin.android)
+    implementation(libs.koin.core)
+    implementation(libs.koin.nav)
+    implementation(libs.koin.compose)
+    testImplementation(libs.koin.test.junit4)
+    testImplementation(libs.koin.test)
+
+
+    // Kotlin Coroutines
+    implementation(libs.kotlinx.coroutines.android)
+
+
+    //navigation
+    implementation(libs.compose.navigation)
+
+    //constrain
+    implementation(libs.compose.constrin)
+
+
+    //splashScreen
+    implementation(libs.androidx.core.splashscreen)
+
+    //desugar
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+
+    //location
+    implementation(libs.play.services.location)
+
+    //coroutine task
+    implementation(libs.kotlinx.coroutines.play.services)
+
+
+    //coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
+
+    //signalR
+    implementation(libs.signalr)
+
+    //firebase
+    implementation(platform(libs.firebase.bom))
+//    implementation(libs.firebase.messaging.ktx)
+    implementation(libs.firebase.messaging.directboot)
+
+
+    // ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.compose.runntime)
+
+
+    // implementation(libs.qr.kit)
+    implementation(libs.zxing.android.embedded)
+    implementation(libs.core)
+
+    //live time
+    implementation(libs.androidx.runtime.livedata)
+
+    //google map
+    implementation(libs.maps.utils.ktx)
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.maps)
+
+    //local datetime kotlin
+    implementation(libs.kotlinx.datetime)
+
+    //serialization
+    implementation(libs.kotlinx.serialization.json)
+
+    //payment strip
+    implementation(libs.stripeterminal)
+    implementation(libs.stripeterminal.ktx)
+    implementation(libs.stripe.android)
+
+    //adapted ui lib
+    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.compose.material3.window.size.class1)
+
+
+    //modular
+    implementation(project(":core"))
+    implementation(project(":common"))
+
+    //this for testing
+    testImplementation(project(":core"))
+    testImplementation(project(":common"))
+
+}
+
+configurations.all {
+    resolutionStrategy.force(libs.androidx.junit)
+    resolutionStrategy.force(libs.androidx.espresso.core)
+}

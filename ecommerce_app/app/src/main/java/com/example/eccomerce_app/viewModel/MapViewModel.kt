@@ -1,0 +1,40 @@
+package com.example.eccomerce_app.viewModel
+
+import androidx.lifecycle.ViewModel
+import com.example.core.network.NetworkCallHandler
+import com.example.core.network.repository.MapRepository
+import com.example.core.network.dto.GooglePlacesInfo
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.PolyUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withContext
+
+class MapViewModel(private val mapRepository: MapRepository) : ViewModel() {
+
+    private val _googlePlaceInfo = MutableStateFlow<List<LatLng>?>(null)
+    val googlePlaceInfo = _googlePlaceInfo.asStateFlow()
+    suspend fun findPointBetweenTwoDestination(origin: LatLng, destination: LatLng, key: String) =
+        withContext(Dispatchers.IO) {
+            when (val result = mapRepository.getDistanceBetweenTwoPoint(
+                Pair(origin.latitude, origin.longitude),
+                Pair(destination.latitude, destination.longitude), key
+            )) {
+                is NetworkCallHandler.Successful<*> -> {
+                    val info = result.data as? GooglePlacesInfo
+                    info?.routes?.firstOrNull()?.overview_polyline?.points?.let { encodedPath ->
+                        val decodedPoints = PolyUtil.decode(encodedPath)
+                        _googlePlaceInfo.emit(decodedPoints)
+                    }
+
+                }
+
+                is NetworkCallHandler.Error -> {
+
+                }
+            }
+
+        }
+}
+

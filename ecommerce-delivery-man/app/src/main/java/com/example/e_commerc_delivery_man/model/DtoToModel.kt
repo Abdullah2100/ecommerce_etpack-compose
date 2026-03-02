@@ -1,17 +1,16 @@
-package com.example.e_commerc_delivery_man.model
+package com.example.e_commerce_delivery_man.model
 
-import com.example.e_commerc_delivery_man.dto.AddressDto
-import com.example.e_commerc_delivery_man.dto.AddressWithTitleDto
-import com.example.e_commerc_delivery_man.dto.DeliveryAnalyseDto
-import com.example.e_commerc_delivery_man.dto.DeliveryDto
-import com.example.e_commerc_delivery_man.dto.UserDto
-import com.example.e_commercompose.dto.response.VariantDto
-import com.example.e_commercompose.model.VariantModel
-import com.example.eccomerce_app.dto.response.OrderItemDto
+import com.example.e_commerce_delivery_man.dto.AddressDto
+import com.example.e_commerce_delivery_man.dto.AddressWithTitleDto
+import com.example.e_commerce_delivery_man.dto.DeliveryAnalyseDto
+import com.example.e_commerce_delivery_man.dto.DeliveryDto
+import com.example.e_commerce_delivery_man.dto.UserDto
+import com.example.e_commerce_delivery_man.dto.response.VariantDto
+import com.example.e_commerc_delivery_man.dto.OrderItemDto
 import com.example.eccomerce_app.dto.response.OrderProductDto
 import com.example.eccomerce_app.dto.response.OrderDto
 import com.example.eccomerce_app.dto.response.OrderVariantDto
-import com.example.eccomerce_app.model.Order
+import com.example.e_commerc_delivery_man.model.Order
 import com.example.eccomerce_app.model.OrderItem
 import com.example.eccomerce_app.model.OrderProduct
 import com.example.eccomerce_app.model.OrderVarient
@@ -112,14 +111,15 @@ object DtoToModel {
             id = this.id,
             latitude = this.latitude,
             longitude = this.longitude,
-            user_phone = this.userPhone,
+            userPhone = this.userPhone,
             name = this.name,
             deliveryFee = this.deliveryFee,
             totalPrice = this.totalPrice,
 
             orderItems = this.orderItems.map { it.toOrderItem() },
             status = this.status,
-            userPhone = this.userPhone,
+            isAlreadyPayed = this.isAlreadyPayed,
+            symbol = this.symbol
         )
     }
 

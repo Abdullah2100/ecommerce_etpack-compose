@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui.view.Address
+package com.example.e_commerce_delivery_man.ui.view.Address
 
 
 import android.Manifest
@@ -45,14 +45,14 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.model.Address
-import com.example.e_commerc_delivery_man.model.enMapType
-import com.example.e_commerc_delivery_man.ui.Screens
-import com.example.e_commerc_delivery_man.ui.component.CustomBotton
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
-import com.example.e_commerc_delivery_man.viewModel.UserViewModel
+import com.example.e_commerce_delivery_man.R
+import com.example.e_commerce_delivery_man.model.Address
+import com.example.e_commerce_delivery_man.model.enMapType
+import com.example.e_commerce_delivery_man.ui.Screens
+import com.example.e_commerce_delivery_man.ui.component.CustomBotton
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.viewModel.OrderViewModel
+import com.example.e_commerce_delivery_man.viewModel.UserViewModel
 import com.example.eccomerce_app.viewModel.MapViewModel
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -141,7 +141,7 @@ fun MapHomeScreen(
         Log.d("currentPressLocation", point.toString())
         when (mapType) {
             enMapType.My -> {
-                marker.position = CameraPosition.fromLatLngZoom(point, 15f)
+              //  marker.position = CameraPosition.fromLatLngZoom(point, 15f)
                 mainLocation.position = point
 
 

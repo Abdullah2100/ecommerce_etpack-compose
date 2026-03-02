@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui
+package com.example.e_commerce_delivery_man.ui
 
 import android.util.Log
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -8,21 +8,21 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavHostController
-import com.example.e_commerc_delivery_man.viewModel.AuthViewModel
+import com.example.e_commerce_delivery_man.viewModel.AuthViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.example.e_commerc_delivery_man.ui.view.Address.MapHomeScreen
-import com.example.e_commerc_delivery_man.ui.view.Auth.LoginScreen
-import com.example.e_commerc_delivery_man.ui.view.account.AccountPage
-import com.example.e_commerc_delivery_man.ui.view.account.ProfileScreen
-import com.example.e_commerc_delivery_man.ui.view.home.MyOrdersScreen
-import com.example.e_commerc_delivery_man.ui.view.home.HomePage
-import com.example.e_commerc_delivery_man.ui.view.home.OrdersScreen
-import com.example.e_commerc_delivery_man.ui.view.home.QrScannerPage
-import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
-import com.example.e_commerc_delivery_man.viewModel.UserViewModel
+import com.example.e_commerce_delivery_man.ui.view.Address.MapHomeScreen
+import com.example.e_commerce_delivery_man.ui.view.Auth.LoginScreen
+import com.example.e_commerce_delivery_man.ui.view.account.AccountPage
+import com.example.e_commerce_delivery_man.ui.view.account.ProfileScreen
+import com.example.e_commerce_delivery_man.ui.view.home.MyOrdersScreen
+import com.example.e_commerce_delivery_man.ui.view.home.HomePage
+import com.example.e_commerce_delivery_man.ui.view.home.OrdersScreen
+import com.example.e_commerce_delivery_man.ui.view.home.QrScannerPage
+import com.example.e_commerce_delivery_man.viewModel.OrderViewModel
+import com.example.e_commerce_delivery_man.viewModel.UserViewModel
 import com.example.eccomerce_app.ui.view.address.AddressHomeScreen
 import com.example.eccomerce_app.viewModel.MapViewModel
 

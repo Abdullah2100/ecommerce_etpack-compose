@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui.view.home
+package com.example.e_commerce_delivery_man.ui.view.home
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -49,14 +49,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.navigation.NavHostController
-import com.example.e_commerc_delivery_man.ui.component.Sizer
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.ui.component.MonayAnalys
-import com.example.e_commerc_delivery_man.ui.component.OrdersAnalys
-import com.example.e_commerc_delivery_man.ui.component.VerticalLine
-import com.example.e_commerc_delivery_man.viewModel.UserViewModel
+import com.example.e_commerce_delivery_man.ui.component.Sizer
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.R
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.ui.component.MonayAnalys
+import com.example.e_commerce_delivery_man.ui.component.OrdersAnalys
+import com.example.e_commerce_delivery_man.ui.component.VerticalLine
+import com.example.e_commerce_delivery_man.viewModel.UserViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -162,9 +162,9 @@ fun HomePage(
                 )
             )
         }
-    ) {
-        it.calculateTopPadding()
-        it.calculateBottomPadding()
+    ) { paddingValues ->
+        paddingValues.calculateTopPadding()
+        paddingValues.calculateBottomPadding()
 
 
         PullToRefreshBox(
@@ -187,7 +187,7 @@ fun HomePage(
             indicator = {
                 Indicator(
                     modifier = Modifier
-                        .padding(top = 50.dp)
+                        .padding(top = paddingValues.calculateTopPadding()+5.dp)
                         .align(Alignment.TopCenter),
                     isRefreshing = isRefresh.value,
                     containerColor = Color.White,
@@ -273,15 +273,15 @@ fun HomePage(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             MonayAnalys(
-                                myInfo.value?.analyse?.dayFee ?: 50000.0, "Today"
+                                myInfo.value?.analyse?.dayFee ?: 0.0, "Today"
                             )
                             VerticalLine(width = 1, color = Color.White)
                             MonayAnalys(
-                                myInfo.value?.analyse?.weekFee ?: 53333333333.0, "Week"
+                                myInfo.value?.analyse?.weekFee ?: 0.0, "Week"
                             )
                             VerticalLine(width = 1, color = Color.White)
                             MonayAnalys(
-                                myInfo.value?.analyse?.monthFee ?: 12355456789.0, "Month"
+                                myInfo.value?.analyse?.monthFee ?: 0.0, "Month"
                             )
 
 

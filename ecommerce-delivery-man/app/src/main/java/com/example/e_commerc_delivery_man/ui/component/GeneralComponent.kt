@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui.component
+package com.example.e_commerce_delivery_man.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

@@ -1,6 +1,6 @@
 package com.example.eccomerce_app.model
 
-import com.example.e_commerc_delivery_man.model.AddressWithTitle
+import com.example.e_commerce_delivery_man.model.AddressWithTitle
 import java.util.UUID
 
 data class OrderItem(

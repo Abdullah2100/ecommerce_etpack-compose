@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui.view.account
+package com.example.e_commerce_delivery_man.ui.view.account
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -51,14 +51,14 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
-import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.util.General.toCustomFil
-import com.example.e_commerc_delivery_man.ui.component.TextInputWithTitle
-import com.example.e_commerc_delivery_man.ui.component.TextNumberInputWithTitle
-import com.example.e_commerc_delivery_man.ui.component.TextSecureInputWithTitle
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.viewModel.UserViewModel
+import com.example.e_commerce_delivery_man.R
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.util.General.toCustomFil
+import com.example.e_commerce_delivery_man.ui.component.TextInputWithTitle
+import com.example.e_commerce_delivery_man.ui.component.TextNumberInputWithTitle
+import com.example.e_commerce_delivery_man.ui.component.TextSecureInputWithTitle
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.viewModel.UserViewModel
 import com.example.hotel_mobile.Util.Validation
 import kotlinx.coroutines.launch
 import java.io.File

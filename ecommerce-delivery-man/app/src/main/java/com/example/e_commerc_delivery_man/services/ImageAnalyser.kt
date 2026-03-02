@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.services.kSerializeChanger
+package com.example.e_commerce_delivery_man.services.kSerializeChanger
 
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage

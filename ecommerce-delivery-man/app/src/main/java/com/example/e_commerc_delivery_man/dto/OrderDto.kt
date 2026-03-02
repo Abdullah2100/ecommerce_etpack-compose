@@ -1,7 +1,7 @@
 package com.example.eccomerce_app.dto.response
 
+import com.example.e_commerc_delivery_man.dto.OrderItemDto
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
@@ -14,8 +14,10 @@ data class OrderDto(
     val userPhone: String,
     var name: String,
     val status:String,
+    val symbol:String,
     val totalPrice: Double,
     val deliveryFee: Double,
+    val isAlreadyPayed: Boolean,
     val orderItems:List<OrderItemDto>
 )
 

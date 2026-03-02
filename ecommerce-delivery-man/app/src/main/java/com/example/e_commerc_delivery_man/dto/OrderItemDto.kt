@@ -1,6 +1,8 @@
-package com.example.eccomerce_app.dto.response
+package com.example.e_commerc_delivery_man.dto
 
-import com.example.e_commerc_delivery_man.dto.AddressWithTitleDto
+import com.example.e_commerce_delivery_man.dto.AddressWithTitleDto
+import com.example.eccomerce_app.dto.response.OrderProductDto
+import com.example.eccomerce_app.dto.response.OrderVariantDto
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
 import kotlinx.serialization.Serializable
 import java.util.UUID
@@ -10,7 +12,7 @@ data class OrderItemDto(
     @Serializable(with = UUIDKserialize::class)
     val id: UUID,
     val price: Double?=null,
-    val Quantity:Int?=null,
+    val quantity:Int?=null,
     val address: List<AddressWithTitleDto>?=null,
     val product: OrderProductDto?=null,
     val productVariant:List<OrderVariantDto>?=null,

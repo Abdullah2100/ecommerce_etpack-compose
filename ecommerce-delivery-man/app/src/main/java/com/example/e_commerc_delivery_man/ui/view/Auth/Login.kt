@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui.view.Auth
+package com.example.e_commerce_delivery_man.ui.view.Auth
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.NavHostController
-import com.example.e_commerc_delivery_man.viewModel.AuthViewModel
+import com.example.e_commerce_delivery_man.viewModel.AuthViewModel
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,14 +26,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.ui.Screens
-import com.example.e_commerc_delivery_man.ui.component.CustomAuthBotton
-import com.example.e_commerc_delivery_man.ui.component.Sizer
-import com.example.e_commerc_delivery_man.ui.component.TextInputWithTitle
-import com.example.e_commerc_delivery_man.ui.component.TextSecureInputWithTitle
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.viewModel.UserViewModel
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.ui.Screens
+import com.example.e_commerce_delivery_man.ui.component.CustomAuthBotton
+import com.example.e_commerce_delivery_man.ui.component.Sizer
+import com.example.e_commerce_delivery_man.ui.component.TextInputWithTitle
+import com.example.e_commerce_delivery_man.ui.component.TextSecureInputWithTitle
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.viewModel.UserViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
@@ -50,7 +50,7 @@ fun LoginScreen(
     val coroutine = rememberCoroutineScope()
 
 
-    val userNameOrEmail = remember { mutableStateOf(TextFieldValue("salime@gmail.com")) }
+    val userNameOrEmail = remember { mutableStateOf(TextFieldValue("ali535@gmail.com")) }
     val password = remember { mutableStateOf(TextFieldValue("12AS@#fs")) }
 
     val isEmailError = remember { mutableStateOf<Boolean>(false) }

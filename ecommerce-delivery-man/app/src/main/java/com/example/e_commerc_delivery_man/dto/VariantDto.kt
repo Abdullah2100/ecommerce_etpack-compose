@@ -1,4 +1,4 @@
-package com.example.e_commercompose.dto.response
+package com.example.e_commerce_delivery_man.dto.response
 
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
 import kotlinx.serialization.Serializable

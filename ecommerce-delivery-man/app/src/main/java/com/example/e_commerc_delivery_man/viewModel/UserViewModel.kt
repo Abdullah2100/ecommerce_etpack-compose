@@ -1,17 +1,17 @@
-package com.example.e_commerc_delivery_man.viewModel
+package com.example.e_commerce_delivery_man.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.data.Room.ILocationDao
-import com.example.e_commerc_delivery_man.data.Room.IsSetLocation
-import com.example.e_commerc_delivery_man.data.repository.UserRepository
-import com.example.e_commerc_delivery_man.dto.DeliveryDto
-import com.example.e_commerc_delivery_man.model.Address
-import com.example.e_commerc_delivery_man.model.Delivery
-import com.example.e_commerc_delivery_man.model.DtoToModel.toDeliveryInfo
-import com.example.e_commerc_delivery_man.model.UpdateMyInfo
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.data.Room.ILocationDao
+import com.example.e_commerce_delivery_man.data.Room.IsSetLocation
+import com.example.e_commerce_delivery_man.data.repository.UserRepository
+import com.example.e_commerce_delivery_man.dto.DeliveryDto
+import com.example.e_commerce_delivery_man.model.Address
+import com.example.e_commerce_delivery_man.model.Delivery
+import com.example.e_commerce_delivery_man.model.DtoToModel.toDeliveryInfo
+import com.example.e_commerce_delivery_man.model.UpdateMyInfo
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers

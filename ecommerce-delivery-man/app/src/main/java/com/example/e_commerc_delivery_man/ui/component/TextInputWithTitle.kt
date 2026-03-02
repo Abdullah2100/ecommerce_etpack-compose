@@ -1,7 +1,7 @@
-package com.example.e_commerc_delivery_man.ui.component
+package com.example.e_commerce_delivery_man.ui.component
 
 import androidx.compose.foundation.Image
-import com.example.e_commerc_delivery_man.R
+import com.example.e_commerce_delivery_man.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -32,8 +32,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
 
 
 @Composable

@@ -1,13 +1,13 @@
-package com.example.e_commerc_delivery_man.viewModel
+package com.example.e_commerce_delivery_man.viewModel
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.e_commerc_delivery_man.data.repository.OrderRepository
-import com.example.e_commerc_delivery_man.model.DtoToModel.toOrder
+import com.example.e_commerce_delivery_man.data.repository.OrderRepository
+import com.example.e_commerce_delivery_man.model.DtoToModel.toOrder
 import com.example.eccomerce_app.dto.response.OrderDto
-import com.example.eccomerce_app.model.Order
+import com.example.e_commerc_delivery_man.model.Order
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -19,9 +19,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 import android.util.Log
-import com.example.e_commerc_delivery_man.data.repository.OrderItemRepository
-import com.example.eccomerce_app.dto.response.OrderItemStatusChangeDto
-import com.example.eccomerce_app.dto.response.OrderItemsStatusEvent
+import com.example.e_commerce_delivery_man.data.repository.OrderItemRepository
+import com.example.e_commerc_delivery_man.dto.OrderItemStatusChangeDto
+import com.example.e_commerc_delivery_man.dto.OrderItemsStatusEvent
 import com.example.eccomerce_app.dto.response.OrderUpdateEvent
 import com.example.eccomerce_app.dto.response.OrderUpdateStatusDto
 import com.example.eccomerce_app.dto.response.UpdateOrderStatus
@@ -346,15 +346,14 @@ class OrderViewModel(
 
 
     //this function to handle if delivery collect the order from store or giving the order to user
-    suspend fun updateStatus(id: String): String? {
+    suspend fun updateStatus(id: UUID): String? {
 
-        val idUUID = UUID.fromString(id)
-        val isInOrder = _myOrders.value?.firstOrNull { it.id == idUUID }
+        val isInOrder = _myOrders.value?.firstOrNull { it.id == id }
 
         when {
             isInOrder != null -> {
                 val reqest =
-                    orderRepository.updateOrderStatus(UpdateOrderStatus(Id = idUUID, Status = 5))
+                    orderRepository.updateOrderStatus(UpdateOrderStatus(Id = id, Status = 5))
                 return when (reqest) {
                     is NetworkCallHandler.Successful<*> -> {
                         null;
@@ -371,7 +370,7 @@ class OrderViewModel(
                 val reqest =
                     orderItemRepository.updateOrderItemStatus(
                         UpdateOrderStatus(
-                            Id = idUUID,
+                            Id = id,
                             Status = 2
                         )
                     )
@@ -387,7 +386,7 @@ class OrderViewModel(
                 }
             }
         }
-        return null;
+        ;
 
     }
 }

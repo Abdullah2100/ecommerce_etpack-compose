@@ -1,6 +1,6 @@
 package com.example.eccomerce_app.di
 
-import com.example.e_commerc_delivery_man.util.Secrets
+import com.example.e_commerce_delivery_man.util.Secrets
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 import com.microsoft.signalr.TransportEnum

@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.dto
+package com.example.e_commerce_delivery_man.dto
 
 import kotlinx.serialization.Serializable
 

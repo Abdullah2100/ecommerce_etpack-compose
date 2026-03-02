@@ -1,7 +1,7 @@
-package com.example.e_commerc_delivery_man.data.repository
+package com.example.e_commerce_delivery_man.data.repository
 
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.util.Secrets
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.util.Secrets
 import com.example.eccomerce_app.dto.response.OrderDto
 import com.example.eccomerce_app.dto.response.UpdateOrderStatus
 import com.example.hotel_mobile.Modle.NetworkCallHandler

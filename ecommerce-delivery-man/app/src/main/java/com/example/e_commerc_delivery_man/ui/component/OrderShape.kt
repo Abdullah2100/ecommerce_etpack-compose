@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui.component
+package com.example.e_commerce_delivery_man.ui.component
 
 import android.Manifest
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -31,6 +31,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,11 +51,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
-import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
-import com.example.eccomerce_app.model.Order
+import com.example.e_commerce_delivery_man.R
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.viewModel.OrderViewModel
+import com.example.e_commerc_delivery_man.model.Order
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -69,6 +70,8 @@ fun OrderComponent(
     screenWidth: Int,
     snackBarHostState: SnackbarHostState,
     orderViewModel: OrderViewModel,
+    isFromMyOrder: Boolean = false,
+    doWhenCollectOrderFromUser: ((id: UUID) -> Unit)? = null,
     requestPermission: ManagedActivityResultLauncher<Array<String>, Map<String, @JvmSuppressWildcards Boolean>>
 ) {
     val context = LocalContext.current
@@ -101,7 +104,8 @@ fun OrderComponent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
-        ) {
+        )
+        {
             Column {
                 Text(
                     order.name,
@@ -211,6 +215,27 @@ fun OrderComponent(
                     )
                 }
 
+                Row {
+                    Text(
+                        "Payment Type : ",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        color = CustomColor.neutralColor950,
+                        textAlign = TextAlign.Center
+
+                    )
+
+                    Text(
+                        if (order.isAlreadyPayed) "Stipe" else "Cash",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        color = CustomColor.neutralColor950,
+                        textAlign = TextAlign.Center
+
+                    )
+                }
 
             }
 
@@ -413,37 +438,59 @@ fun OrderComponent(
                     modifier = Modifier.rotate(rotation.value)
                 )
             }
-        Box(
-            Modifier
-                .padding(top = 10.dp)
-                .width(((screenWidth) - 20).dp)
-        ) {
-            CustomBotton(
 
-                buttonTitle = if (isCancel) "Cancel Order" else "Accept Order",
-                operation = {
-                    coroutine.launch {
-                        isSendingData.value = true;
-                        val result = async {
-                            when (isCancel) {
-                                true -> orderViewModel.cancelOrder(order.id)
-                                else -> orderViewModel.takeOrder(order.id)
-                            }
-                        }.await()
-                        isSendingData.value = false
-                        if (!result.isNullOrEmpty()) {
-                            snackBarHostState
-                                .showSnackbar(result)
-                        }
-                        orderViewModel.getMyOrders(mutableStateOf(1))
-                    }
+        if (isFromMyOrder && order.status != "Completed")
+            Box(
+                Modifier
+                    .padding(top = 10.dp)
+                    .width(((screenWidth) - 20).dp)
+            ) {
+                CustomBotton(
 
-                },
-                color = if (!isCancel) CustomColor.alertColor_2_700
-                else CustomColor.alertColor_1_600,
-//                                        isLoading = isSendingData.value && deletedId.value == order.id
+                    buttonTitle = "User Receive Order",
+                    operation = {
+                        if (doWhenCollectOrderFromUser != null)
+                            doWhenCollectOrderFromUser(order.id)
+                    },
+                    color = CustomColor.alertColor_3_500,
+                )
+            }
+
+        if (order.status != "Completed")
+            Box(
+                Modifier
+                    .padding(top = 10.dp)
+                    .width(((screenWidth) - 20).dp)
             )
-        }
+            {
+                CustomBotton(
+
+                    buttonTitle = if (isCancel) "Cancel Order" else "Accept Order",
+                    operation = {
+                        coroutine.launch {
+                            isSendingData.value = true;
+                            val result = async {
+                                when (isCancel) {
+                                    true -> orderViewModel.cancelOrder(order.id)
+                                    else -> orderViewModel.takeOrder(order.id)
+                                }
+                            }.await()
+                            isSendingData.value = false
+                            if (!result.isNullOrEmpty()) {
+                                snackBarHostState
+                                    .showSnackbar(result)
+                            }
+                            //  orderViewModel.getMyOrders(mutableIntStateOf(1))
+                        }
+
+                    },
+                    color = if (!isCancel) CustomColor.alertColor_2_700
+                    else CustomColor.alertColor_1_600,
+//                                        isLoading = isSendingData.value && deletedId.value == order.id
+                )
+            }
+
+
     }
 
 }

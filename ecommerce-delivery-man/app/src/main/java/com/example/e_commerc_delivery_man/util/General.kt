@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.util
+package com.example.e_commerce_delivery_man.util
 
 import android.content.Context
 import android.net.Uri
@@ -11,8 +11,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.core.graphics.toColorInt
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
-import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.data.Room.AuthModleEntity
+import com.example.e_commerce_delivery_man.R
+import com.example.e_commerce_delivery_man.data.Room.AuthModleEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import net.sqlcipher.database.SQLiteDatabase
 import java.io.File

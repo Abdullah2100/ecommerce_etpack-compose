@@ -1,9 +1,10 @@
-package com.example.e_commerc_delivery_man.ui.component
+package com.example.e_commerce_delivery_man.ui.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -18,8 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
 
 
 @Composable
@@ -87,7 +88,7 @@ fun CustomBotton(
 ) {
 
     val modifer = if (modifier == null) Modifier
-        .height(50.dp)
+        .wrapContentHeight()
         .fillMaxWidth() else modifier
     Button(
         enabled = isEnable!!,

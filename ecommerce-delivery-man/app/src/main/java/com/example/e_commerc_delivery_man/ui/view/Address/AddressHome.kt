@@ -41,14 +41,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
-import com.example.e_commerc_delivery_man.ui.Screens
-import com.example.e_commerc_delivery_man.viewModel.UserViewModel
-import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.model.enMapType
-import com.example.e_commerc_delivery_man.ui.component.CustomBotton
-import com.example.e_commerc_delivery_man.ui.component.Sizer
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.ui.Screens
+import com.example.e_commerce_delivery_man.viewModel.UserViewModel
+import com.example.e_commerce_delivery_man.R
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.model.enMapType
+import com.example.e_commerce_delivery_man.ui.component.CustomBotton
+import com.example.e_commerce_delivery_man.ui.component.Sizer
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
 

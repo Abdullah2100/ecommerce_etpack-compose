@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui.component
+package com.example.e_commerce_delivery_man.ui.component
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
@@ -16,8 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
 
 
 @SuppressLint("ConfigurationScreenWidthHeight")

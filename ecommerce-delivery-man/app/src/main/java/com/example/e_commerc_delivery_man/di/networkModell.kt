@@ -1,7 +1,7 @@
-package com.example.e_commerc_delivery_man.di
+package com.example.e_commerce_delivery_man.di
 
 import android.util.Log
-import com.example.e_commerc_delivery_man.data.Room.IAuthDao
+import com.example.e_commerce_delivery_man.data.Room.IAuthDao
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 import io.ktor.client.HttpClient

@@ -7,6 +7,7 @@ val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
     localPropertiesFile.inputStream().use { localProperties.load(it) }
 }
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -16,12 +17,12 @@ plugins {
     alias(libs.plugins.google.gms)
 }
 android {
-    namespace = "com.example.e_commerc_delivery_man"
+    namespace = "com.example.e_commerce_delivery_man"
     compileSdk = 36
     ndkVersion = "28.0.13004108"
 
     defaultConfig {
-        applicationId = "com.example.e_commerc_delivery_man"
+        applicationId = "com.example.e_commerce_delivery_man"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -51,16 +52,22 @@ android {
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+
+    kotlin {
+        jvmToolchain(17)
+        sourceSets.all {
+            //   languageSettings.enableLanguageFeature("XXLanguage:+ExplicitBackingFields")
+            languageSettings.enableLanguageFeature("PropertyParamAnnotationDefaultTargetMode")
+        }
     }
+
+
     buildFeatures {
         compose = true
-
+        buildConfig = true
     }
 }
 
@@ -108,6 +115,7 @@ dependencies {
     // Kotlin Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
+
     //navigation
     implementation(libs.compose.navigation)
 
@@ -118,6 +126,7 @@ dependencies {
     //room
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
+
     annotationProcessor(libs.room.compiler)
     implementation(libs.room.ktx)
 
@@ -158,17 +167,17 @@ dependencies {
     implementation(libs.androidx.lifecycle.compose.runntime)
 
     //scanner qr
-    implementation("androidx.camera:camera-core:1.5.1")
-    implementation("androidx.camera:camera-camera2:1.5.1")
-    implementation("androidx.camera:camera-lifecycle:1.5.1")
-    implementation("androidx.camera:camera-view:1.5.1")
-    implementation("com.google.mlkit:barcode-scanning:17.3.0")
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.barcode.scanning)
 
 
     //googleMap
     implementation(libs.maps.utils.ktx)
     implementation(libs.maps.compose)
-    implementation("com.google.android.gms:play-services-maps:19.2.0")
+    implementation(libs.play.services.maps)
 
     implementation(libs.maps.navigation) {
         exclude(group = "com.google.android.gms", module = "play-services-maps")

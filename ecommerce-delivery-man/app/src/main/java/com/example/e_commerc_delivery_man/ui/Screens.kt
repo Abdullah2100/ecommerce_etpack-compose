@@ -1,6 +1,6 @@
-package com.example.e_commerc_delivery_man.ui
+package com.example.e_commerce_delivery_man.ui
 
-import com.example.e_commerc_delivery_man.model.enMapType
+import com.example.e_commerce_delivery_man.model.enMapType
 import kotlinx.serialization.Serializable
 
 object Screens {

@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui.view.home
+package com.example.e_commerce_delivery_man.ui.view.home
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -46,15 +46,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.ui.component.Sizer
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
-import com.example.e_commerc_delivery_man.util.General.reachedBottom
-import com.example.e_commerc_delivery_man.model.enMapType
-import com.example.e_commerc_delivery_man.ui.Screens
-import com.example.e_commerc_delivery_man.ui.component.OrderComponent
-import com.example.eccomerce_app.model.Order
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.ui.component.Sizer
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.viewModel.OrderViewModel
+import com.example.e_commerce_delivery_man.util.General.reachedBottom
+import com.example.e_commerce_delivery_man.model.enMapType
+import com.example.e_commerce_delivery_man.ui.Screens
+import com.example.e_commerce_delivery_man.ui.component.OrderComponent
+import com.example.e_commerc_delivery_man.model.Order
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

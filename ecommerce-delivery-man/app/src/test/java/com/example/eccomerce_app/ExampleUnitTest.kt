@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man
+package com.example.e_commerce_delivery_man
 
 import org.junit.Test
 

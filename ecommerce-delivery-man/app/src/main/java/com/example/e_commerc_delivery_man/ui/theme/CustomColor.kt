@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui.theme
+package com.example.e_commerce_delivery_man.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
@@ -11,10 +11,10 @@ object CustomColor {
     val primaryColor400 = Color(0xFF6A70FF)
     val primaryColor500 = Color(0xFF6A70FF)
     val primaryColor600 = Color(0xFF4F48FF)
-    val primaryColor700 = Color(0xFF523BEA)
+    val primaryColor700 = Color(0xFF522FD3)
     val primaryColor800 = Color(0xFF2C1AB9)
     val primaryColor900 = Color(0xFFEBEFFF)
-    val primaryColor950 = Color(0xFFF9F9FA)
+    val primaryColor950 = Color(0xFF1A1254)
 
     val searchBarColor =Color(0xFFF9F9FA)
 
@@ -43,5 +43,4 @@ object CustomColor {
     val alertColor_3_200 = Color(0xFFFAE38D)
     val alertColor_3_300 = Color(0xFFF8CF51)
     val alertColor_3_500 = Color(0xFFF6BC2F)
-
 }

@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man
+package com.example.e_commerce_delivery_man
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

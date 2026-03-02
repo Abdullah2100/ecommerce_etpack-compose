@@ -1,10 +1,10 @@
-package com.example.e_commerc_delivery_man.View.component
+package com.example.e_commerce_delivery_man.View.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.example.e_commerc_delivery_man.viewModel.AuthViewModel
+import com.example.e_commerce_delivery_man.viewModel.AuthViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch

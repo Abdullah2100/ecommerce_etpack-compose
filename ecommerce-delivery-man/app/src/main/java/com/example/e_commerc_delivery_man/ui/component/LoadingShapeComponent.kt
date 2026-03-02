@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui.component
+package com.example.e_commerce_delivery_man.ui.component
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
 
 
 @Composable

@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui.OnBoarding
+package com.example.e_commerce_delivery_man.ui.OnBoarding
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -25,11 +25,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.ui.Screens
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.viewModel.AuthViewModel
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.R
+import com.example.e_commerce_delivery_man.ui.Screens
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.viewModel.AuthViewModel
 
 
 @Composable

@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.ui.view.home
+package com.example.e_commerce_delivery_man.ui.view.home
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -8,6 +8,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -56,18 +59,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
-import com.example.e_commerc_delivery_man.util.General
-import com.example.e_commerc_delivery_man.ui.component.Sizer
-import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.util.General.reachedBottom
-import com.example.e_commerc_delivery_man.model.enMapType
-import com.example.e_commerc_delivery_man.ui.Screens
-import com.example.e_commerc_delivery_man.ui.component.OrderComponent
-import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
-import com.example.eccomerce_app.model.Order
+import com.example.e_commerce_delivery_man.util.General
+import com.example.e_commerce_delivery_man.ui.component.Sizer
+import com.example.e_commerce_delivery_man.ui.theme.CustomColor
+import com.example.e_commerce_delivery_man.R
+import com.example.e_commerce_delivery_man.util.General.reachedBottom
+import com.example.e_commerce_delivery_man.model.enMapType
+import com.example.e_commerce_delivery_man.ui.Screens
+import com.example.e_commerce_delivery_man.ui.component.OrderComponent
+import com.example.e_commerce_delivery_man.viewModel.OrderViewModel
+import com.example.e_commerc_delivery_man.model.Order
+import com.example.e_commerce_delivery_man.ui.component.CustomBotton
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -87,6 +92,7 @@ fun MyOrdersScreen(
 
     val orders = orderViewModel.myOrders.collectAsState()
 
+
     val coroutine = rememberCoroutineScope()
     val lazyState = rememberLazyListState()
     val state = rememberPullToRefreshState()
@@ -94,9 +100,14 @@ fun MyOrdersScreen(
 
     val selectedId = remember { mutableStateOf(UUID.randomUUID()) }
 
+
+    val collectedOrder = remember { mutableStateOf<Order?>(null) }
+
     val isSendingData = remember { mutableStateOf(false) }
     val isRefresh = remember { mutableStateOf(false) }
     val isLoadingMore = remember { mutableStateOf(false) }
+    val isOpenDialog = remember { mutableStateOf(false) }
+
     val reachedBottom = remember {
         derivedStateOf {
             lazyState.reachedBottom() // Custom extension function to check if the user has reached the bottom
@@ -155,10 +166,37 @@ fun MyOrdersScreen(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { permission ->
             if (permission) {
-               nav.navigate(Screens.QrScanner)
+                nav.navigate(Screens.QrScanner)
             }
         }
     )
+
+    fun updateStatus(id: UUID) {
+        coroutine.launch {
+            isSendingData.value = true
+            isOpenDialog.value = false
+            delay(100)
+            val result = async {
+                orderViewModel.updateStatus(id)
+            }.await()
+            isOpenDialog.value = false
+            collectedOrder.value = null
+            isSendingData.value = false
+            if (!result.isNullOrEmpty()) {
+                isOpenDialog.value = false
+                snackBarHostState.showSnackbar(result)
+
+                return@launch;
+            } else {
+                snackBarHostState.showSnackbar("Order Received Successfully")
+            }
+
+        }
+
+    }
+
+
+
 
 
 
@@ -212,7 +250,7 @@ fun MyOrdersScreen(
                     requestCameraPermission.launch(Manifest.permission.CAMERA)
                 },
                 modifier = Modifier
-//                    .padding(bottom = 20.dp)
+                    .padding(bottom = 20.dp)
                     .navigationBarsPadding()
             ) {
                 Image(
@@ -231,6 +269,8 @@ fun MyOrdersScreen(
         paddingValue.calculateTopPadding()
         paddingValue.calculateBottomPadding()
 
+
+
         if (isSendingData.value) Dialog(
             onDismissRequest = {})
         {
@@ -248,13 +288,47 @@ fun MyOrdersScreen(
             }
         }
 
+        if (isOpenDialog.value)
+            Dialog(
+                onDismissRequest = { TODO() }
+            )
+            {
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight(0.5f)
+                        .fillMaxWidth()
+                        .background(Color.White, RoundedCornerShape(20.dp))
+                        .padding(horizontal = 20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+
+                ) {
+
+                    Text("Collect Money From User ")
+                    Sizer(20)
+                    Text("$${collectedOrder.value!!.symbol}${collectedOrder.value!!.totalPrice + collectedOrder.value!!.deliveryFee}")
+                    Sizer(20)
+                    CustomBotton(
+
+                        buttonTitle = "collected money",
+                        operation = {
+                            updateStatus(collectedOrder.value!!.id)
+                        },
+                        color = CustomColor.alertColor_3_500,
+//                                        isLoading = isSendingData.value && deletedId.value == order.id
+                    )
+
+                }
+            }
+
+
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
             onRefresh = {
                 coroutine.launch {
                     if (!isRefresh.value) isRefresh.value = true
-                    page.value = 1;
-                    orderViewModel.getMyOrders(page,isRefresh)
+                    page.intValue = 1;
+                    orderViewModel.getMyOrders(page, isRefresh)
                     if (isRefresh.value) {
                         delay(2000)
                     }
@@ -268,7 +342,7 @@ fun MyOrdersScreen(
             indicator = {
                 Indicator(
                     modifier = Modifier
-                        .padding(top = paddingValue.calculateTopPadding()+5.dp)
+                        .padding(top = paddingValue.calculateTopPadding() + 5.dp)
                         .align(Alignment.TopCenter),
                     isRefreshing = isRefresh.value,
                     containerColor = Color.White,
@@ -277,11 +351,16 @@ fun MyOrdersScreen(
                 )
             },
         ) {
+
+
             LazyColumn(
                 state = lazyState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = paddingValue.calculateTopPadding(), bottom = paddingValue.calculateBottomPadding())
+                    .padding(
+                        top = paddingValue.calculateTopPadding(),
+                        bottom = paddingValue.calculateBottomPadding()
+                    )
                     .background(Color.Gray.copy(alpha = 0.01f)),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -295,7 +374,19 @@ fun MyOrdersScreen(
                             requestPermission = requestPermission,
                             snackBarHostState = snackBarHostState,
                             orderViewModel = orderViewModel,
-                            selectedId = selectedId
+                            selectedId = selectedId,
+                            isFromMyOrder = true,
+                            doWhenCollectOrderFromUser = { value ->
+                                orderViewModel.myOrders.value?.firstOrNull { it.id == value }
+                                    .let { orderHolder ->
+                                        if (orderHolder!!.isAlreadyPayed) {
+                                            updateStatus(value)
+                                        } else {
+                                            isOpenDialog.value = true
+                                            collectedOrder.value = orderHolder
+                                        }
+                                    }
+                            }
                         )
                     }
 

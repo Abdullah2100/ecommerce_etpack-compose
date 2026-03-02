@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.model
+package com.example.e_commerce_delivery_man.model
 
 data class PaymentMethodModel(
     val name:String,

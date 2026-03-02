@@ -1,6 +1,7 @@
 package com.example.e_commerc_delivery_man.dto
 
-import com.example.e_commerc_delivery_man.model.Address
+import com.example.e_commerce_delivery_man.dto.AddressDto
+import com.example.e_commerce_delivery_man.model.Address
 
 object ModelToDto {
     fun Address.toAddressDto(): AddressDto {
